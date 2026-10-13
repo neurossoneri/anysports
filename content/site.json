@@ -1,0 +1,18 @@
+{
+  "name_ru": "Имя Фамилия",
+  "name_en": "First Last",
+  "name_fr": "Prénom Nom",
+  "role_ru": "Консультант по работе со спортсменами",
+  "role_en": "Athlete support consultant",
+  "role_fr": "Consultante en accompagnement des sportifs",
+  "email": "",
+  "whatsapp": "",
+  "telegram": "",
+  "booking_url": "",
+  "public_url": "",
+  "portrait": "",
+  "consultation_photo": "",
+  "sport_photo": "",
+  "event_photo": "",
+  "publish_ready": false
+}
