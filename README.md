@@ -109,3 +109,7 @@ python scripts/test_build.py
 - После публикации проверьте фактический сайт на мобильном устройстве, корректность ссылок, доступность контента и юридические требования вашей страны.
 
 Официальная документация: [Pages CMS](https://pagescms.org/docs/quick-start/), [GitHub Pages custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+
+## 9. Дизайн-слой premium-2026
+
+Дизайн-слой лежит в `templates/index.html` между маркерами `premium-2026:start/end` (CSS) и `premium-2026:js:start/end` (JS). Токены (`--ease`, `--space-section`, шрифты) заданы в начале блока. Анимации отключаются при `prefers-reduced-motion`. Повторный запуск `apply_premium_redesign.py` обновляет блоки, а не дублирует их.

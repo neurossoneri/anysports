@@ -25,6 +25,9 @@ EMPTY_LABEL = {'ru': 'Здесь появятся новые материалы.
 BACK_LABEL = {'ru': 'На главную', 'en': 'Back to home', 'fr': "Retour à l’accueil"}
 READ_LABEL = {'ru': 'Читать статью', 'en': 'Read article', 'fr': "Lire l’article"}
 REVIEWS_EMPTY = {'ru': 'Отзывы появятся здесь после получения разрешения на их публикацию.', 'en': 'Testimonials will appear here once publication permission is granted.', 'fr': 'Les témoignages apparaîtront ici après obtention des autorisations de publication.'}
+SKIP_LABEL = {'ru': 'Перейти к содержанию', 'en': 'Skip to content', 'fr': 'Aller au contenu'}
+FONT_LINKS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=Source+Serif+4:opsz,wght@8..60,400..700&display=swap" rel="stylesheet">'
+PROGRESS_JS = "<script>(function(){if(window.CSS&&CSS.supports&&CSS.supports('animation-timeline','scroll()'))return;var b=document.querySelector('.scroll-progress');function u(){var m=document.documentElement.scrollHeight-innerHeight;b.style.setProperty('--p',m>0?Math.min(1,scrollY/m).toFixed(4):0)}addEventListener('scroll',u,{passive:true});u()})()</script>"
 VALID_SLUG = re.compile(r'^[a-z0-9]+(?:-[a-z0-9]+)*$')
 SAFE_IMAGE = re.compile(r'^(?:media/|images/)[\w\-/%.]+\.(?:jpe?g|png|gif|webp|avif)$', re.I)
 ALLOWED_TAGS = ['p','br','strong','em','b','i','a','ul','ol','li','blockquote','h2','h3','h4','hr','img','code','pre','table','thead','tbody','tr','th','td']
@@ -130,6 +133,24 @@ def replace_required(text, old, new, name):
     if old not in text:
         raise RuntimeError(f'Template marker not found: {name}')
     return text.replace(old, new, 1)
+
+
+def seo_head(site, public_url):
+    """Canonical, Open Graph and JSON-LD for the home page."""
+    name = str(site.get('name_ru') or '').strip()
+    out = (f'  <link rel="canonical" href="{esc(public_url)}">\n'
+           f'  <meta property="og:url" content="{esc(public_url)}">\n'
+           f'  <meta property="og:site_name" content="{esc(name)}">\n')
+    portrait = photo_path(site.get('portrait'))
+    if portrait:
+        out += f'  <meta property="og:image" content="{esc(public_url + portrait)}">\n'
+    if name:
+        person = {'@context': 'https://schema.org', '@type': 'Person', 'name': name,
+                  'jobTitle': str(site.get('role_ru') or ''), 'url': public_url}
+        if portrait:
+            person['image'] = public_url + portrait
+        out += '  <script type="application/ld+json">' + js_json(person) + '</script>\n'
+    return out
 
 
 def build_home(site, posts, public_url, ready):
@@ -249,7 +270,7 @@ def build_home(site, posts, public_url, ready):
     template = re.sub(r'(<meta name="description" content=")[^"]*',lambda m:m.group(1)+esc(overrides['ru']['metaDescription']),template,count=1)
     template = re.sub(r'(<meta property="og:title" content=")[^"]*',lambda m:m.group(1)+esc(doc_title),template,count=1)
     if public_url:
-        template = replace_required(template, '</head>', f'  <link rel="canonical" href="{esc(public_url)}">\n</head>', 'head')
+        template = replace_required(template, '</head>', seo_head(site, public_url) + '</head>', 'head')
     (OUT/'index.html').write_text(template,encoding='utf-8')
     css = re.search(r'<style>(.*?)</style>', template,re.S).group(1)
     (OUT/'assets').mkdir(parents=True, exist_ok=True)
@@ -275,12 +296,12 @@ def article_shell(*, title, description, lang, css_prefix, body, public_url, rea
     article_header = f'<p class="post-meta">{esc(date)} · {esc(LANG_LABEL[lang])}</p>' if date else ''
     return f'''<!DOCTYPE html>
 <html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light dark"><meta name="robots" content="{'index,follow' if ready else 'noindex,nofollow'}">
+<meta name="color-scheme" content="light dark"><meta name="theme-color" content="#f8fbfd">{FONT_LINKS}<meta name="robots" content="{'index,follow' if ready else 'noindex,nofollow'}">
 <meta name="description" content="{desc}"><meta property="og:type" content="{'article' if kind=='article' else 'website'}"><meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{desc}"><title>{esc(title)} — {name}</title>
 <base href="{route}"><link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/articles.css">
 {canonical_html}{json_ld}<script>(function(){{try{{var t=localStorage.getItem('sport-site-theme');document.documentElement.dataset.theme=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}}catch(e){{}}}})()</script></head>
-<body><a class="skip" href="#content">{esc(title)}</a><header class="site-header"><div class="container header-inner">
+<body><div class="scroll-progress" aria-hidden="true"></div><a class="skip" href="#content">{esc(SKIP_LABEL[lang])}</a><header class="site-header"><div class="container header-inner">
 <a class="brand" href="./"><span class="brand-mark">S</span><span>{name}</span></a>
 <nav class="article-nav"><a href="./">{esc(BACK_LABEL[lang])}</a><a href="{lang}/articles/">{esc(BLOG_LABEL[lang])}</a><a href="./#contact">{esc({'ru':'Контакты','en':'Contact','fr':'Contact'}[lang])}</a></nav>
 <button class="icon-button" type="button" id="article-theme" aria-label="Theme" aria-pressed="false">◐</button></div></header>
@@ -288,7 +309,7 @@ def article_shell(*, title, description, lang, css_prefix, body, public_url, rea
 <p class="article-intro">{desc}</p>{bg_img}<div class="article-body">{body}</div>
 <div class="article-end"><a class="button button-outline" href="{lang}/articles/">← {esc(BLOG_LABEL[lang])}</a></div></div></main>
 <footer class="site-footer"><div class="container footer-inner"><p>© {dt.date.today().year} {name}</p><a href="./">{esc(BACK_LABEL[lang])}</a></div></footer>
-<script>(function(){{var b=document.getElementById('article-theme');function s(){{b.setAttribute('aria-pressed',String(document.documentElement.dataset.theme==='dark'))}}b.addEventListener('click',function(){{var t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;try{{localStorage.setItem('sport-site-theme',t)}}catch(e){{}}s()}});s()}})()</script></body></html>'''
+<script>(function(){{var b=document.getElementById('article-theme');function s(){{b.setAttribute('aria-pressed',String(document.documentElement.dataset.theme==='dark'))}}b.addEventListener('click',function(){{var t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;try{{localStorage.setItem('sport-site-theme',t)}}catch(e){{}}s()}});s()}})()</script>{PROGRESS_JS}</body></html>'''
 
 
 def build_articles(site, posts, public_url, ready):
@@ -314,6 +335,20 @@ def build_articles(site, posts, public_url, ready):
 .article-end { margin-top:54px; padding-top:24px; border-top:1px solid var(--border); }
 .archive-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; }
 .archive-grid .blog-cover { height:180px; }
+.article-layout { padding-top:clamp(72px,9vw,128px); }
+.article-wrap { max-width:760px; }
+.article-wrap h1 { font-size:clamp(2.6rem,6vw,4.4rem); line-height:1.06; letter-spacing:-.04em; text-wrap:balance; }
+.article-intro { font-size:clamp(1.12rem,2.4vw,1.38rem); line-height:1.6; margin-bottom:48px; text-wrap:pretty; }
+.article-body { font-size:1.14rem; line-height:1.9; }
+.article-body p { margin:0 0 1.4em; }
+.post-hero-image { border-radius:28px; margin-bottom:52px; box-shadow:var(--shadow-strong); }
+.article-wrap > * { animation:riseIn .9s var(--ease) both; }
+.article-wrap > :nth-child(2) { animation-delay:.07s; }
+.article-wrap > :nth-child(3) { animation-delay:.14s; }
+.article-wrap > :nth-child(n+4) { animation-delay:.21s; }
+.article-end { margin-top:72px; }
+.archive-grid { gap:clamp(18px,2.4vw,30px); }
+@media(prefers-reduced-motion:reduce) { .article-wrap > * { animation:none!important; } }
 @media(max-width:760px){.article-nav{gap:12px;font-size:.8rem}.article-nav a:nth-child(2){display:none}.archive-grid{grid-template-columns:1fr}}
 '''
     (OUT/'assets/articles.css').write_text(css,encoding='utf-8')
