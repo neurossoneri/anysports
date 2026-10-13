@@ -1,0 +1,531 @@
+media:
+  input: media
+  output: media
+  rename: safe
+  extensions:
+  - jpg
+  - jpeg
+  - png
+  - webp
+  - gif
+  - avif
+content:
+- name: posts
+  label: Статьи / Articles
+  type: collection
+  path: content/posts
+  format: yaml-frontmatter
+  filename: '{lang}-{slug}.md'
+  view:
+    fields:
+    - title
+    - lang
+    - published
+    - date
+    primary: title
+    sort:
+    - date
+    - title
+    default:
+      sort: date
+      order: desc
+  fields:
+  - name: title
+    label: Заголовок / Title
+    type: string
+    required: true
+  - name: slug
+    label: URL slug (latin letters / digits / hyphens)
+    type: string
+    required: true
+    pattern: ^[a-z0-9]+(?:-[a-z0-9]+)*$
+  - name: lang
+    label: Язык / Language
+    type: select
+    required: true
+    options:
+      values:
+      - name: ru
+        label: Русский
+      - name: en
+        label: English
+      - name: fr
+        label: Français
+  - name: published
+    label: Опубликовано / Published
+    type: boolean
+  - name: date
+    label: Дата / Date
+    type: date
+    required: true
+  - name: category
+    label: Категория / Category
+    type: string
+  - name: summary
+    label: Анонс / Summary
+    type: text
+    required: true
+  - name: cover
+    label: Обложка / Cover
+    type: image
+  - name: body
+    label: Текст статьи / Article body
+    type: rich-text
+    required: true
+    options:
+      format: markdown
+      switcher: true
+- name: site
+  label: Контакты, фото, имя / Site settings
+  type: file
+  path: content/site.json
+  format: json
+  operations:
+    delete: false
+  fields:
+  - name: name_ru
+    label: Имя (RU)
+    type: string
+  - name: name_en
+    label: Name (EN)
+    type: string
+  - name: name_fr
+    label: Nom (FR)
+    type: string
+  - name: role_ru
+    label: Специализация (RU)
+    type: string
+  - name: role_en
+    label: Professional role (EN)
+    type: string
+  - name: role_fr
+    label: Spécialité (FR)
+    type: string
+  - name: email
+    label: Email
+    type: string
+  - name: whatsapp
+    label: WhatsApp (digits, international prefix)
+    type: string
+  - name: telegram
+    label: Telegram (@ without symbol)
+    type: string
+  - name: booking_url
+    label: Booking URL (https://...)
+    type: string
+  - name: public_url
+    label: Public site URL (optional, https://...)
+    type: string
+  - name: portrait
+    label: Главное фото / Portrait
+    type: image
+  - name: consultation_photo
+    label: Фото консультации / Consultation
+    type: image
+  - name: sport_photo
+    label: Фото со спорта / Sports
+    type: image
+  - name: event_photo
+    label: Фото мероприятия / Event
+    type: image
+  - name: publish_ready
+    label: Готов к индексации / Allow search indexing
+    description: Activate only after replacing all placeholders with verified details and obtaining permissions for reviews
+      and photos.
+    type: boolean
+- name: reviews
+  label: Отзывы / Testimonials
+  type: file
+  path: content/reviews.json
+  format: json
+  list: true
+  operations:
+    delete: false
+  fields:
+  - name: visible
+    label: Опубликовать / Show
+    type: boolean
+  - name: quote_ru
+    label: Текст (RU)
+    type: text
+  - name: quote_en
+    label: Text (EN)
+    type: text
+  - name: quote_fr
+    label: Texte (FR)
+    type: text
+  - name: author_ru
+    label: Подпись (RU)
+    type: string
+  - name: author_en
+    label: Attribution (EN)
+    type: string
+  - name: author_fr
+    label: Attribution (FR)
+    type: string
+- name: home_ru
+  label: Тексты главной (RU)
+  type: file
+  path: content/home_ru.json
+  format: json
+  operations:
+    delete: false
+  fields:
+  - name: heroEyebrow
+    label: Подпись над заголовком
+    type: string
+  - name: heroLine1
+    label: Hero — строка 1
+    type: string
+  - name: heroLine2
+    label: Hero — выделенная строка
+    type: string
+  - name: heroLead
+    label: Hero — вводный текст
+    type: text
+  - name: heroNote
+    label: Hero — стеклянная плашка
+    type: text
+  - name: areasTitle
+    label: Направления — заголовок
+    type: string
+  - name: areasLead
+    label: Направления — описание
+    type: text
+  - name: area1Title
+    label: Направление 1 — название
+    type: string
+  - name: area1Desc
+    label: Направление 1 — описание
+    type: text
+  - name: area2Title
+    label: Направление 2 — название
+    type: string
+  - name: area2Desc
+    label: Направление 2 — описание
+    type: text
+  - name: area3Title
+    label: Направление 3 — название
+    type: string
+  - name: area3Desc
+    label: Направление 3 — описание
+    type: text
+  - name: area4Title
+    label: Направление 4 — название
+    type: string
+  - name: area4Desc
+    label: Направление 4 — описание
+    type: text
+  - name: aboutTitle
+    label: Обо мне — заголовок
+    type: string
+  - name: aboutP1
+    label: Обо мне — абзац 1
+    type: text
+  - name: aboutP2
+    label: Обо мне — абзац 2
+    type: text
+  - name: credential1
+    label: Квалификация — название 1
+    type: string
+  - name: credential1Desc
+    label: Квалификация — описание 1
+    type: text
+  - name: credential2
+    label: Квалификация — название 2
+    type: string
+  - name: credential2Desc
+    label: Квалификация — описание 2
+    type: text
+  - name: processTitle
+    label: Процесс — заголовок
+    type: string
+  - name: processLead
+    label: Процесс — описание
+    type: text
+  - name: blogTitle
+    label: Блог — заголовок
+    type: string
+  - name: blogLead
+    label: Блог — описание
+    type: text
+  - name: reviewsTitle
+    label: Отзывы — заголовок
+    type: string
+  - name: reviewsLead
+    label: Отзывы — описание
+    type: text
+  - name: contactTitle
+    label: Контакты — заголовок
+    type: string
+  - name: contactLead
+    label: Контакты — описание
+    type: text
+  - name: faq1Q
+    label: FAQ 1 — вопрос
+    type: string
+  - name: faq1A
+    label: FAQ 1 — ответ
+    type: text
+  - name: faq2Q
+    label: FAQ 2 — вопрос
+    type: string
+  - name: faq2A
+    label: FAQ 2 — ответ
+    type: text
+  - name: faq3Q
+    label: FAQ 3 — вопрос
+    type: string
+  - name: faq3A
+    label: FAQ 3 — ответ
+    type: text
+  - name: faq4Q
+    label: FAQ 4 — вопрос
+    type: string
+  - name: faq4A
+    label: FAQ 4 — ответ
+    type: text
+- name: home_en
+  label: Homepage text (EN)
+  type: file
+  path: content/home_en.json
+  format: json
+  operations:
+    delete: false
+  fields:
+  - name: heroEyebrow
+    label: Подпись над заголовком
+    type: string
+  - name: heroLine1
+    label: Hero — строка 1
+    type: string
+  - name: heroLine2
+    label: Hero — выделенная строка
+    type: string
+  - name: heroLead
+    label: Hero — вводный текст
+    type: text
+  - name: heroNote
+    label: Hero — стеклянная плашка
+    type: text
+  - name: areasTitle
+    label: Направления — заголовок
+    type: string
+  - name: areasLead
+    label: Направления — описание
+    type: text
+  - name: area1Title
+    label: Направление 1 — название
+    type: string
+  - name: area1Desc
+    label: Направление 1 — описание
+    type: text
+  - name: area2Title
+    label: Направление 2 — название
+    type: string
+  - name: area2Desc
+    label: Направление 2 — описание
+    type: text
+  - name: area3Title
+    label: Направление 3 — название
+    type: string
+  - name: area3Desc
+    label: Направление 3 — описание
+    type: text
+  - name: area4Title
+    label: Направление 4 — название
+    type: string
+  - name: area4Desc
+    label: Направление 4 — описание
+    type: text
+  - name: aboutTitle
+    label: Обо мне — заголовок
+    type: string
+  - name: aboutP1
+    label: Обо мне — абзац 1
+    type: text
+  - name: aboutP2
+    label: Обо мне — абзац 2
+    type: text
+  - name: credential1
+    label: Квалификация — название 1
+    type: string
+  - name: credential1Desc
+    label: Квалификация — описание 1
+    type: text
+  - name: credential2
+    label: Квалификация — название 2
+    type: string
+  - name: credential2Desc
+    label: Квалификация — описание 2
+    type: text
+  - name: processTitle
+    label: Процесс — заголовок
+    type: string
+  - name: processLead
+    label: Процесс — описание
+    type: text
+  - name: blogTitle
+    label: Блог — заголовок
+    type: string
+  - name: blogLead
+    label: Блог — описание
+    type: text
+  - name: reviewsTitle
+    label: Отзывы — заголовок
+    type: string
+  - name: reviewsLead
+    label: Отзывы — описание
+    type: text
+  - name: contactTitle
+    label: Контакты — заголовок
+    type: string
+  - name: contactLead
+    label: Контакты — описание
+    type: text
+  - name: faq1Q
+    label: FAQ 1 — вопрос
+    type: string
+  - name: faq1A
+    label: FAQ 1 — ответ
+    type: text
+  - name: faq2Q
+    label: FAQ 2 — вопрос
+    type: string
+  - name: faq2A
+    label: FAQ 2 — ответ
+    type: text
+  - name: faq3Q
+    label: FAQ 3 — вопрос
+    type: string
+  - name: faq3A
+    label: FAQ 3 — ответ
+    type: text
+  - name: faq4Q
+    label: FAQ 4 — вопрос
+    type: string
+  - name: faq4A
+    label: FAQ 4 — ответ
+    type: text
+- name: home_fr
+  label: Textes d'accueil (FR)
+  type: file
+  path: content/home_fr.json
+  format: json
+  operations:
+    delete: false
+  fields:
+  - name: heroEyebrow
+    label: Подпись над заголовком
+    type: string
+  - name: heroLine1
+    label: Hero — строка 1
+    type: string
+  - name: heroLine2
+    label: Hero — выделенная строка
+    type: string
+  - name: heroLead
+    label: Hero — вводный текст
+    type: text
+  - name: heroNote
+    label: Hero — стеклянная плашка
+    type: text
+  - name: areasTitle
+    label: Направления — заголовок
+    type: string
+  - name: areasLead
+    label: Направления — описание
+    type: text
+  - name: area1Title
+    label: Направление 1 — название
+    type: string
+  - name: area1Desc
+    label: Направление 1 — описание
+    type: text
+  - name: area2Title
+    label: Направление 2 — название
+    type: string
+  - name: area2Desc
+    label: Направление 2 — описание
+    type: text
+  - name: area3Title
+    label: Направление 3 — название
+    type: string
+  - name: area3Desc
+    label: Направление 3 — описание
+    type: text
+  - name: area4Title
+    label: Направление 4 — название
+    type: string
+  - name: area4Desc
+    label: Направление 4 — описание
+    type: text
+  - name: aboutTitle
+    label: Обо мне — заголовок
+    type: string
+  - name: aboutP1
+    label: Обо мне — абзац 1
+    type: text
+  - name: aboutP2
+    label: Обо мне — абзац 2
+    type: text
+  - name: credential1
+    label: Квалификация — название 1
+    type: string
+  - name: credential1Desc
+    label: Квалификация — описание 1
+    type: text
+  - name: credential2
+    label: Квалификация — название 2
+    type: string
+  - name: credential2Desc
+    label: Квалификация — описание 2
+    type: text
+  - name: processTitle
+    label: Процесс — заголовок
+    type: string
+  - name: processLead
+    label: Процесс — описание
+    type: text
+  - name: blogTitle
+    label: Блог — заголовок
+    type: string
+  - name: blogLead
+    label: Блог — описание
+    type: text
+  - name: reviewsTitle
+    label: Отзывы — заголовок
+    type: string
+  - name: reviewsLead
+    label: Отзывы — описание
+    type: text
+  - name: contactTitle
+    label: Контакты — заголовок
+    type: string
+  - name: contactLead
+    label: Контакты — описание
+    type: text
+  - name: faq1Q
+    label: FAQ 1 — вопрос
+    type: string
+  - name: faq1A
+    label: FAQ 1 — ответ
+    type: text
+  - name: faq2Q
+    label: FAQ 2 — вопрос
+    type: string
+  - name: faq2A
+    label: FAQ 2 — ответ
+    type: text
+  - name: faq3Q
+    label: FAQ 3 — вопрос
+    type: string
+  - name: faq3A
+    label: FAQ 3 — ответ
+    type: text
+  - name: faq4Q
+    label: FAQ 4 — вопрос
+    type: string
+  - name: faq4A
+    label: FAQ 4 — ответ
+    type: text
