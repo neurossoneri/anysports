@@ -277,7 +277,15 @@ def build_home(site, posts, public_url, ready):
     (OUT/'assets/site.css').write_text(css+'\n',encoding='utf-8')
 
 
-def article_shell(*, title, description, lang, css_prefix, body, public_url, ready, author, image='', date='', kind='article'):
+def site_chrome():
+    """Логотип и favicon берём из шаблона главной: единый источник для главной и статей."""
+    tpl = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
+    brand = re.search(r'<span class="brand-mark"[^>]*>(.*?)</span>\s*<span data-i18n="brand"', tpl, re.S)
+    icon = re.search(r'<link rel="icon"[^>]*>', tpl)
+    return {'brand_html': brand.group(1) if brand else 'S', 'favicon_html': icon.group(0) if icon else ''}
+
+
+def article_shell(*, title, description, lang, css_prefix, body, public_url, ready, author, image='', date='', kind='article', brand_html='S', favicon_html=''):
     canonical = (public_url + css_prefix + '/') if public_url else ''
     canonical_html = f'<link rel="canonical" href="{esc(canonical)}">' if canonical else ''
     desc = esc(description)
@@ -296,13 +304,13 @@ def article_shell(*, title, description, lang, css_prefix, body, public_url, rea
     article_header = f'<p class="post-meta">{esc(date)} · {esc(LANG_LABEL[lang])}</p>' if date else ''
     return f'''<!DOCTYPE html>
 <html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light dark"><meta name="theme-color" content="#f8fbfd">{FONT_LINKS}<meta name="robots" content="{'index,follow' if ready else 'noindex,nofollow'}">
+<meta name="color-scheme" content="light dark"><meta name="theme-color" content="#f5f9fc">{favicon_html}{FONT_LINKS}<meta name="robots" content="{'index,follow' if ready else 'noindex,nofollow'}">
 <meta name="description" content="{desc}"><meta property="og:type" content="{'article' if kind=='article' else 'website'}"><meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{desc}"><title>{esc(title)} — {name}</title>
 <base href="{route}"><link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/articles.css">
 {canonical_html}{json_ld}<script>(function(){{try{{var t=localStorage.getItem('sport-site-theme');document.documentElement.dataset.theme=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}}catch(e){{}}}})()</script></head>
 <body><div class="scroll-progress" aria-hidden="true"></div><a class="skip" href="#content">{esc(SKIP_LABEL[lang])}</a><header class="site-header"><div class="container header-inner">
-<a class="brand" href="./"><span class="brand-mark">S</span><span>{name}</span></a>
+<a class="brand" href="./"><span class="brand-mark" aria-hidden="true">{brand_html}</span><span>{name}</span></a>
 <nav class="article-nav"><a href="./">{esc(BACK_LABEL[lang])}</a><a href="{lang}/articles/">{esc(BLOG_LABEL[lang])}</a><a href="./#contact">{esc({'ru':'Контакты','en':'Contact','fr':'Contact'}[lang])}</a></nav>
 <button class="icon-button" type="button" id="article-theme" aria-label="Theme" aria-pressed="false">◐</button></div></header>
 <main id="content" class="section article-layout"><div class="container article-wrap">{article_header}<h1>{esc(title)}</h1>
@@ -313,6 +321,7 @@ def article_shell(*, title, description, lang, css_prefix, body, public_url, rea
 
 
 def build_articles(site, posts, public_url, ready):
+    chrome = site_chrome()
     css = '''
 .article-nav { display:flex; align-items:center; gap:22px; margin-left:auto; font-weight:650; color:var(--text-muted); font-size:.91rem; }
 .article-layout { min-height:65vh; }
@@ -356,7 +365,7 @@ def build_articles(site, posts, public_url, ready):
         body = render_markdown(post['body'])
         path = OUT/post['url']/'index.html'
         path.parent.mkdir(parents=True,exist_ok=True)
-        path.write_text(article_shell(title=post['title'], description=post['summary'],lang=post['lang'],
+        path.write_text(article_shell(**chrome, title=post['title'], description=post['summary'],lang=post['lang'],
                  css_prefix=post['url'].rstrip('/'),body=body,public_url=public_url,ready=ready,
                  author=site.get('name_'+post['lang'],'') or '',image=post['cover'],date=post['date']),encoding='utf-8')
     for lang in LANGS:
@@ -364,7 +373,7 @@ def build_articles(site, posts, public_url, ready):
         body = '<div class="archive-grid">'+''.join(card(p) for p in current)+'</div>' if current else f'<p>{esc(EMPTY_LABEL[lang])}</p>'
         path = OUT/lang/'articles/index.html'
         path.parent.mkdir(parents=True,exist_ok=True)
-        path.write_text(article_shell(title=BLOG_LABEL[lang],description=BLOG_LABEL[lang],lang=lang,
+        path.write_text(article_shell(**chrome, title=BLOG_LABEL[lang],description=BLOG_LABEL[lang],lang=lang,
             css_prefix=f'{lang}/articles', body=body,public_url=public_url,ready=ready,
             author=site.get('name_'+lang,'') or '',kind='archive'),encoding='utf-8')
 

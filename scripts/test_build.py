@@ -25,6 +25,8 @@ def check_static(destination):
     assert (destination/'.nojekyll').exists()
     assert 'premium-2026:start' in home and 'scroll-progress' in home and 'mobile-cta' in home
     assert '@view-transition' in (destination/'assets/site.css').read_text(encoding='utf-8')
+    assert 'watercolor-2026:start' in home and 'rel="icon"' in home
+    assert 'class="brand-mark"' in home and 'viewBox="0 0 48 48"' in home
 
 
 def main():
@@ -67,6 +69,7 @@ def main():
         assert 'https://demo.github.io/athlete-support/' in home
         assert 'index,follow' in home
         assert 'Testing heading' in ru
+        assert 'viewBox="0 0 48 48"' in ru and 'rel="icon"' in ru
         assert 'class="skip" href="#content">Example' not in ru and 'scroll-progress' in ru
         assert 'application/ld+json' in home and 'og:image' in home
         assert '<script>alert(1)</script>' not in ru
