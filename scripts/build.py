@@ -167,7 +167,6 @@ def build_home(site, posts, public_url, ready):
             'cmsReadArticle': READ_LABEL[lang],
             'cmsAllPosts': BLOG_LABEL[lang],
             'cmsEmptyPosts': EMPTY_LABEL[lang],
-            'reviewsNote': '',
             'contactUnset': {
                 'ru':'Контакты пока не настроены.',
                 'en':'Contact details are not configured yet.',
@@ -182,8 +181,6 @@ def build_home(site, posts, public_url, ready):
         overrides[lang]['title'] = f'{translations_title[lang]} — {name}' if name else translations_title[lang]
         overrides[lang]['ogDescription'] = overrides[lang].get('heroLead','')
         overrides[lang]['metaDescription'] = overrides[lang].get('heroLead','')
-        # The CMS owns the blog introduction. Never overwrite an editor's text.
-        overrides[lang]['blogNote'] = ''
         overrides[lang]['contactBoxLead'] = {
             'ru':'Выберите удобный способ связи.',
             'en':'Choose the contact method that works for you.',
@@ -208,18 +205,12 @@ def build_home(site, posts, public_url, ready):
                 f'<blockquote>{esc(quote)}</blockquote><footer>{esc(author)}</footer></article>')
     for lang in LANGS:
         review_html.append(f'<p class="reviews-empty" data-review-empty="{lang}">{esc(REVIEWS_EMPTY[lang])}</p>')
-    # Target exact structural boundaries, without reformatting previous CSS / HTML.
-    review_pattern = re.compile(r'(<div class="review-grid">)(.*?)(</div>\s*<p class="review-disclaimer"[^>]*>.*?</p>)', re.S)
-    template, n = review_pattern.subn(lambda m:m.group(1)+'\n'+''.join(review_html)+'\n</div>',template,count=1)
-    if n != 1: raise RuntimeError('Reviews section not found')
-
-    blog_pattern = re.compile(r'(<div class="blog-grid">)(.*?)(</div>\s*<p class="blog-footnote"[^>]*>.*?</p>)',re.S)
     blog_parts = [card(post) for post in posts[:1000]]
     for lang in LANGS:
         blog_parts.append(f'<p class="blog-empty" data-post-empty="{lang}" data-i18n="cmsEmptyPosts">{esc(EMPTY_LABEL[lang])}</p>')
     blog_parts.append('<p class="blog-all-wrap"><a class="button button-outline" id="blog-all-link" href="ru/articles/" data-i18n="cmsAllPosts">Все статьи →</a></p>')
-    template,n = blog_pattern.subn(lambda m:m.group(1)+'\n'+''.join(blog_parts)+'\n</div>',template,count=1)
-    if n != 1: raise RuntimeError('Blog section not found')
+    template = replace_required(template, '<div class="blog-grid"></div>', '<div class="blog-grid">\n'+''.join(blog_parts)+'\n</div>', 'blog grid')
+    template = replace_required(template, '<div class="review-grid"></div>', '<div class="review-grid">\n'+''.join(review_html)+'\n</div>', 'reviews grid')
     # Add builder-managed image src attributes. Missing photos retain the original placeholders.
     for old, field in [('portrait.webp','portrait'),('consultation.webp','consultation_photo'),('sport.webp','sport_photo'),('event.webp','event_photo')]:
         path = photo_path(site.get(field))
@@ -247,14 +238,6 @@ def build_home(site, posts, public_url, ready):
       document.querySelector('#blog-all-link').href = lang + '/articles/';
 """
     template = replace_required(template, lang_line, language_logic+lang_line, 'language switching')
-    template = replace_required(template, '  </style>', '''    [hidden] { display:none !important; }
-    .blog-grid { align-items:stretch; }
-    .blog-cover img { width:100%; height:100%; object-fit:cover; }
-    .blog-illustration { font:400 4rem/1 var(--serif); color:var(--blue-deep); opacity:.6; }
-    .blog-card .article-link { display:inline-block; margin-top:14px; color:var(--blue-deep); font-weight:750; }
-    .blog-all-wrap { grid-column:1/-1; margin:10px 0 0; }
-    .blog-empty,.reviews-empty { grid-column:1/-1; padding:32px; background:var(--paper); border:1px solid var(--border); border-radius:14px; color:var(--text-muted); }
-  </style>''','CSS')
     template = replace_required(template, '<meta name="color-scheme"',
         ('<meta name="robots" content="index,follow">' if ready else '<meta name="robots" content="noindex,nofollow">')+'\n  <meta name="color-scheme"', 'robots')
     # Materialize the Russian-language fallback into static HTML for SEO, no-JS
@@ -325,24 +308,24 @@ def build_articles(site, posts, public_url, ready):
     css = '''
 .article-nav { display:flex; align-items:center; gap:22px; margin-left:auto; font-weight:650; color:var(--text-muted); font-size:.91rem; }
 .article-layout { min-height:65vh; }
-.article-wrap { max-width:810px; }
-.article-wrap h1 { font:600 clamp(2.7rem,6vw,4.6rem)/1.11 var(--serif); letter-spacing:-.04em; margin:10px 0 23px; }
-.article-intro { font-size:clamp(1.05rem,2.5vw,1.32rem); color:var(--text-muted); margin:0 0 35px; }
+.article-wrap h1 { font:600 clamp(2.7rem,6vw,4.6rem)/1.11 var(--serif); margin:10px 0 23px; }
+.article-intro { color:var(--text-muted); margin:0 0 35px; }
 .post-meta { color:var(--mint-strong); letter-spacing:.07em; font-size:.84rem; font-weight:700; }
-.post-hero-image { max-height:490px; border-radius:24px; margin-bottom:36px; border:1px solid var(--border); object-fit:cover; }
-.article-body { font-size:1.09rem; line-height:1.85; overflow-wrap:anywhere; }
+.post-hero-image { max-height:490px; border:1px solid var(--border); object-fit:cover; }
+.article-body { overflow-wrap:anywhere; }
 .article-body > * { max-width:100%; }
-.article-body h2,.article-body h3 { font:600 1.9rem/1.25 var(--serif); letter-spacing:-.015em; margin:38px 0 14px; }
-.article-body h3 { font-size:1.5rem; }
+.article-body h2 { font:600 1.9rem/1.25 var(--serif); letter-spacing:-.015em; margin:38px 0 14px; }
+.article-body h3 { font:600 1.9rem/1.25 var(--serif); letter-spacing:-.015em; margin:38px 0 14px; font-size:1.5rem; }
 .article-body a { color:var(--blue-deep); text-decoration:underline; text-underline-offset:3px; }
 .article-body img { height:auto; border-radius:16px; margin:25px 0; }
 .article-body blockquote { border-left:3px solid var(--mint); margin:25px 0; padding:12px 22px; color:var(--text-muted); background:var(--paper); }
 .article-body li { margin-bottom:10px; }
 .article-body pre { overflow-x:auto; max-width:100%; padding:18px; background:var(--paper); border:1px solid var(--border); border-radius:12px; }
 .article-body table { border-collapse:collapse; max-width:100%; display:block; overflow:auto; }
-.article-body th,.article-body td { padding:10px 14px; border:1px solid var(--border); }
-.article-end { margin-top:54px; padding-top:24px; border-top:1px solid var(--border); }
-.archive-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; }
+.article-body th { padding:10px 14px; border:1px solid var(--border); }
+.article-body td { padding:10px 14px; border:1px solid var(--border); }
+.article-end { padding-top:24px; border-top:1px solid var(--border); }
+.archive-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:clamp(18px,2.4vw,30px); }
 .archive-grid .blog-cover { height:180px; }
 .article-layout { padding-top:clamp(72px,9vw,128px); }
 .article-wrap { max-width:760px; }
@@ -356,9 +339,14 @@ def build_articles(site, posts, public_url, ready):
 .article-wrap > :nth-child(3) { animation-delay:.14s; }
 .article-wrap > :nth-child(n+4) { animation-delay:.21s; }
 .article-end { margin-top:72px; }
-.archive-grid { gap:clamp(18px,2.4vw,30px); }
-@media(prefers-reduced-motion:reduce) { .article-wrap > * { animation:none!important; } }
-@media(max-width:760px){.article-nav{gap:12px;font-size:.8rem}.article-nav a:nth-child(2){display:none}.archive-grid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce) {
+  .article-wrap > * { animation:none!important; }
+}
+@media (max-width:760px) {
+  .article-nav { gap:12px; font-size:.8rem; }
+  .article-nav a:nth-child(2) { display:none; }
+  .archive-grid { grid-template-columns:1fr; }
+}
 '''
     (OUT/'assets/articles.css').write_text(css,encoding='utf-8')
     for post in posts:

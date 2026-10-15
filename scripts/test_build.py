@@ -16,17 +16,18 @@ def check_static(destination):
     home = (destination/'index.html').read_text(encoding='utf-8')
     assert '<html lang="ru">' in home
     assert 'const CMS_OVERRIDES' in home
-    assert 'site-header' in home and 'hero-glass' in home or 'hero-floating' in home
+    assert 'site-header' in home and 'hero-floating' in home
     assert 'mediaTheme' in home and 'language-select' in home
-    assert '[hidden] { display:none !important; }' in home
+    assert '[hidden] { display:none!important; }' in home
     assert (destination/'ru/articles/index.html').exists()
     assert (destination/'en/articles/index.html').exists()
     assert (destination/'fr/articles/index.html').exists()
     assert (destination/'.nojekyll').exists()
-    assert 'premium-2026:start' in home and 'scroll-progress' in home and 'mobile-cta' in home
+    assert 'scroll-progress' in home and 'mobile-cta' in home
     assert '@view-transition' in (destination/'assets/site.css').read_text(encoding='utf-8')
-    assert 'watercolor-2026:start' in home and 'rel="icon"' in home
+    assert 'rel="icon"' in home
     assert 'class="brand-mark"' in home and 'viewBox="0 0 48 48"' in home
+    assert '-2026' not in home and 'premium' not in home and 'watercolor' not in home
 
 
 def main():
