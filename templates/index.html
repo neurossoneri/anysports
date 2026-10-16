@@ -73,7 +73,8 @@
 
     /* ---------- Base ---------- */
     * { box-sizing:border-box; }
-    html { scroll-behavior:smooth; scroll-padding-top:96px; }
+    html { scroll-behavior:smooth; scroll-padding-top:96px; scrollbar-gutter:stable; }
+    html.farewell-open { overflow:hidden; }
     body { margin:0; min-width:320px; color:var(--text); background:var(--bg); font-family:var(--sans); line-height:1.65; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; overflow-x:hidden; }
     body::before { content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
       background:radial-gradient(ellipse 80% 60% at 0% 104%, var(--wash-indigo), transparent 68%),
@@ -324,6 +325,16 @@
     .footer-inner p { margin:0; color:var(--text-muted); font-size:.86rem; }
     .footer-inner a { color:var(--blue-deep); font-weight:700; font-size:.88rem; }
 
+    /* ---------- Going up ---------- */
+    #top:focus, section[tabindex="-1"]:focus, .form-sent:focus { outline:none; }
+    .to-top { position:fixed; right:calc(16px + env(safe-area-inset-right,0px)); bottom:calc(18px + env(safe-area-inset-bottom,0px)); z-index:80; display:grid; place-items:center; width:52px; height:52px; padding:0; border-radius:50%; border:1px solid var(--glass-stroke); background:var(--glass-bright); color:var(--blue-deep); box-shadow:var(--glass-inner),var(--glass-shadow); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); opacity:0; visibility:hidden; transform:translateY(14px) scale(.92); transition:opacity .5s var(--ease),transform .6s var(--ease),visibility 0s linear .5s; }
+    .to-top.is-visible { opacity:1; visibility:visible; transform:none; transition-delay:0s; }
+    .to-top.is-visible:hover { transform:translateY(-3px); }
+    .to-top.is-visible:active { transform:scale(.95); transition-duration:.12s; }
+    .to-top svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    /* Endless loops rest while their section is off screen (battery and heat on phones). */
+    .is-idle, .is-idle * { animation-play-state:paused!important; }
+
     /* ---------- Farewell (when "not yet" is chosen) ---------- */
     .farewell { position:fixed; inset:0; z-index:200; display:grid; place-items:center; padding:24px; background:var(--bg); background:color-mix(in srgb,var(--bg) 80%,transparent); backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px); animation:fadeIn .9s ease both; }
     .farewell-card { max-width:540px; padding:clamp(32px,6vw,60px); text-align:center; border-radius:56px; }
@@ -398,9 +409,11 @@
   </style>
 </head>
 <body>
+  <div id="top" tabindex="-1"></div>
+  <div class="scroll-progress" aria-hidden="true"></div>
   <div class="aura" aria-hidden="true"></div>
   <a class="skip" href="#main" data-i18n="skip"></a>
-  <header class="site-header" id="top">
+  <header class="site-header">
     <div class="header-inner">
       <a class="brand" href="#top" data-i18n-aria="brandAria"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" width="35" height="35" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><rect width="48" height="14" fill="#cfe0f5"/><rect y="14" width="48" height="10" fill="#dce8f8"/><rect y="24" width="48" height="8" fill="#e8ecf9"/><circle cx="37" cy="11" r="4.6" fill="#fff" opacity=".85"/><path d="M-2 31 13 12l8 9 8-12 21 22z" fill="#aab9e4"/><path d="M9.7 16 13 12l3.6 4-1.8-1.1-1.6 1.7-1.6-1.7zM25.9 13.6 29 9l4.6 4.6-2.3-1.2-2.1 2-1.6-1.9z" fill="#fff" opacity=".93"/><path d="M-2 31v-4l8-5 9 9zM19 31l11-9 10 6 10-4v7z" fill="#7f9fd3"/><rect y="31" width="48" height="17" fill="#86c4bc"/><rect y="31" width="48" height="6" fill="#c3e2e0" opacity=".55"/><path d="M12 34.5h9M27 37.5h11M8 40h7" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".6"/><path d="M-2 48v-8c8-4 15-1 22 3 8 4 18 3 30-2v7z" fill="#8ec99b"/><path d="M14 48c10-3 22-2 36-7v7z" fill="#64aa8b"/><path d="M36 46.5l-.6-4.2M39 46.5l.3-5M42 46.5l1.3-4" stroke="#4f9a7a" stroke-width="1" stroke-linecap="round" fill="none"/></svg></span><span data-i18n="brand"></span></a>
       <div class="header-actions">
@@ -665,7 +678,7 @@
               <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
               <p class="form-note" data-i18n="contact.formNote"></p>
             </form>
-            <p class="form-sent" id="form-sent" role="status" hidden data-i18n="contact.formSent"></p>
+            <p class="form-sent" id="form-sent" role="status" tabindex="-1" hidden data-i18n="contact.formSent"></p>
           </div>
         </div>
       </div>
@@ -699,6 +712,8 @@
   </main>
 
   <footer class="site-footer"><div class="container footer-inner"><p>© <span id="year">2026</span> <span data-i18n="footerName"></span> · <span data-i18n="footer.line"></span></p><a href="#top" data-i18n="backToTop"></a></div></footer>
+
+  <button class="to-top" id="to-top" type="button" data-i18n-aria="backToTop"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg></button>
 
   <div class="farewell" id="farewell" role="dialog" aria-modal="true" aria-labelledby="farewell-title" tabindex="-1" hidden>
     <div class="farewell-card glass">
@@ -851,20 +866,77 @@
       }, { passive: true });
     }
 
+    /* ---------- Going up and jumping between sections ---------- */
+    const toTop = $('#to-top');
+    const topAnchor = $('#top');
+    const progressLine = $('.scroll-progress');
+    const nativeProgress = !reduceMotion && window.CSS && CSS.supports && CSS.supports('animation-timeline', 'scroll()');
+    function goTo(hash) {
+      const id = decodeURIComponent(hash.slice(1));
+      const target = id === 'top' ? topAnchor : document.getElementById(id);
+      if (!target) return false;
+      const behavior = reduceMotion ? 'auto' : 'smooth';
+      if (id === 'top') scrollTo({ top: 0, behavior }); else target.scrollIntoView({ behavior, block: 'start' });
+      if (!target.hasAttribute('tabindex') && !/^(A|BUTTON|INPUT|SELECT|TEXTAREA|SUMMARY)$/.test(target.tagName)) target.tabIndex = -1;
+      target.focus({ preventScroll: true });             // keyboard and screen-reader users continue from here
+      try { history.replaceState(history.state, '', id === 'top' ? location.pathname + location.search : hash); } catch (_) {}   // no extra Back steps
+      return true;
+    }
+    document.addEventListener('click', event => {
+      const link = event.target.closest('a[href^="#"]');
+      if (!link || link.classList.contains('skip') || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const hash = link.getAttribute('href');
+      if (hash.length > 1 && goTo(hash)) event.preventDefault();
+    });
+    toTop.addEventListener('click', () => goTo('#top'));
+    let scrollQueued = false;
+    function onScroll() {
+      scrollQueued = false;
+      toTop.classList.toggle('is-visible', scrollY > innerHeight * 1.2);
+      if (!nativeProgress) {
+        const max = root.scrollHeight - innerHeight;
+        progressLine.style.setProperty('--p', max > 0 ? Math.min(1, scrollY / max).toFixed(4) : '0');
+      }
+    }
+    addEventListener('scroll', () => { if (!scrollQueued) { scrollQueued = true; requestAnimationFrame(onScroll); } }, { passive: true });
+    addEventListener('resize', onScroll);
+    onScroll();
+    if (hasObserver && !reduceMotion) {                  // endless loops rest while their section is off screen
+      const rest = new IntersectionObserver(entries => entries.forEach(entry => entry.target.classList.toggle('is-idle', !entry.isIntersecting)), { rootMargin: '160px 0px' });
+      $$('main > section').forEach(section => rest.observe(section));
+    }
+
     /* ---------- The fork: "not yet" closes the page gently ---------- */
     const farewell = $('#farewell');
-    const frozen = ['header', 'main', 'footer'].map(selector => $(selector));
-    function setFarewell(open) {
+    const frozen = ['header', 'main', 'footer', '#to-top'].map(selector => $(selector));
+    let farewellEntry = false;                           // true while the farewell owns a history entry
+    let ignoreNextPop = false;
+    function showFarewell(open) {
       farewell.hidden = !open;
+      root.classList.toggle('farewell-open', open);
       frozen.forEach(node => { if (node) node.inert = open; });
       if (open) farewell.focus(); else $('#close-page').focus({ preventScroll: true });
     }
+    function openFarewell() {
+      if (!farewell.hidden) return;
+      try { history.pushState({ farewell: true }, ''); farewellEntry = true; } catch (_) { farewellEntry = false; }
+      showFarewell(true);
+    }
+    function closeFarewell() {
+      if (farewell.hidden) return;
+      showFarewell(false);
+      if (farewellEntry) { farewellEntry = false; ignoreNextPop = true; history.back(); }
+    }
+    addEventListener('popstate', () => {                 // the system Back button closes the farewell, not the site
+      if (ignoreNextPop) { ignoreNextPop = false; return; }
+      if (!farewell.hidden) { farewellEntry = false; showFarewell(false); }
+    });
     $('#close-page').addEventListener('click', () => {
       window.close();                                    // works only for tabs opened by a script
-      setTimeout(() => { if (!window.closed) setFarewell(true); }, 250);
+      setTimeout(() => { if (!window.closed) openFarewell(); }, 250);
     });
-    $('#farewell-back').addEventListener('click', () => setFarewell(false));
-    addEventListener('keydown', event => { if (event.key === 'Escape' && !farewell.hidden) setFarewell(false); });
+    $('#farewell-back').addEventListener('click', closeFarewell);
+    addEventListener('keydown', event => { if (event.key === 'Escape') closeFarewell(); });
 
     /* ---------- Contact links: only genuinely configured channels are shown ---------- */
     const links = {
@@ -913,7 +985,9 @@
         if (!response.ok) throw new Error('HTTP ' + response.status);
         form.reset();
         form.hidden = true;
-        $('#form-sent').hidden = false;
+        const sent = $('#form-sent');
+        sent.hidden = false;
+        sent.focus({ preventScroll: true });             // screen readers announce the confirmation
       } catch (_) {
         say('formError', true);
         sendButton.disabled = false;

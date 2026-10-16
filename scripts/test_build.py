@@ -65,6 +65,8 @@ def check_static(destination):
     assert home.count('<blockquote class="quote-text" data-write ') == 4, 'expected four handwritten quote blocks'
     assert 'id="contact-form"' in home and 'name="_gotcha"' in home
     assert 'id="close-page"' in home and 'id="farewell"' in home
+    assert 'id="to-top"' in home and 'class="scroll-progress"' in home, 'back-to-top button or progress line is missing'
+    assert re.search(r'<div id="top"', home) and not re.search(r'<header[^>]*\bid="top"', home), '#top must be a plain anchor at the very top, not the sticky header'
     assert 'Этот сайт устроен иначе' in home and 'Ты можешь контролировать только себя' in home
     assert 'id="notes"' not in home, 'notes must stay hidden until an article is published'
     for gone in ('review-grid', 'quiz', 'credential', 'mobile-cta', 'hero-floating'):
@@ -142,6 +144,7 @@ def main():
         assert 'Testing heading' in article and '<script>alert(1)</script>' not in article
         assert '<base href="../../../">' in article and 'rel="icon"' in article and 'scroll-progress' in article
         assert 'https://demo.github.io/athlete-support/ru/articles/sample/' in article
+        assert 'href="ru/articles/sample/#content"' in article, 'with <base>, the skip link must point back at the article itself'
         for lang in ('en', 'fr'):
             assert (work / f'_site/{lang}/articles/sample/index.html').exists()
         assert (work / '_site/media/test-cover.webp').exists() and (work / '_site/sitemap.xml').exists()

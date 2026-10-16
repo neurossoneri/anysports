@@ -37,14 +37,14 @@ First person, calm, warm, short sentences. Questions are asked gently and never 
 | 9 | **The fork** | Resonated → go deeper; not yet → close the page. "If you are here, something brought you. Look me in the eyes." | Round close-up photo, two glass paths of unequal size |
 | 10 | **Change** | People who have done one thing for years begin to change inside; we resist; resistance rarely helps | Morphing blob + text |
 | 11 | **Caterpillar → butterfly** | Change is not always pleasant; it transforms | Looping SVG: caterpillar, chrysalis, butterfly |
-| 12 | **Quote C** | The same idea in one line | Lavender-apricot card, left-aligned |
+| 12 | **Quote C** | You do not have to work it out alone (leads into Support) | Lavender-apricot card, left-aligned |
 | 13 | **Support** | People will not understand; find support outside | Orb held by two arcs |
 | 14 | **Invitation** | "I can help you walk this path. If you wish, get in touch." | One soft button |
 | 15 | **Thirty minutes** | First meeting free, no obligation; each listens to their intuition, then we see | Round glass "coin" with 30 / minutes / free |
 | 16 | **Contacts and form** | Direct links and a short form delivered to her inbox | Large soft glass card |
 | 17 | **Questions and answers** | Kept and editable | Soft accordion, six slots, blank question hides a slot |
 | 18 | **Notes** | Only appears if an article is published | Soft cards |
-| 19 | **Closing phrase** | *Intuition is the highest intelligence; it knows more about you than artificial intelligence.* | Deep dusk card, handwritten reveal |
+| 19 | **Closing phrase** | *Intuition is a different kind of intelligence. There are things you can only learn about yourself by listening inward.* | Deep dusk card, handwritten reveal |
 
 ## 5. Visual language
 
@@ -56,7 +56,7 @@ First person, calm, warm, short sentences. Questions are asked gently and never 
 
 ## 6. Interaction details
 
-- **Fork:** "It resonated" scrolls on to the change section. "Not yet" asks the browser to close the tab; if the browser refuses (the usual case), a calm farewell appears with a way back. The rest of the page is inert while the farewell is open.
+- **Fork:** "It resonated" scrolls on to the change section. "Not yet" asks the browser to close the tab; if the browser refuses (the usual case), a calm farewell appears with a way back. The rest of the page is inert while the farewell is open, and the browser Back button closes it instead of leaving the site.
 - **Form:** name, how to reach you, optional message. Sent to a form service (see README) that forwards to the owner's inbox. Hidden honeypot against bots. Without a service the form falls back to the visitor's mail app. A note asks visitors not to share sensitive information.
 - **Languages:** RU / EN / FR with the language switcher; Russian is baked into the static HTML.
 
@@ -74,6 +74,9 @@ First person, calm, warm, short sentences. Questions are asked gently and never 
 - The wording of the FAQ answers (price, formats, minors, confidentiality) is a calm placeholder that promises nothing specific. Confirm or replace.
 - Reviews, the quiz-style finder, the credentials block and the four-step process of the previous version were removed on purpose (see principles 1 and 2).
 - Articles are kept as quiet "Notes", shown only once something is published.
+- The caterpillar image is used once (the animated moment). Quote C no longer repeats it, and the text no longer promises that every hard change leads somewhere good.
+- The closing quote no longer claims that intuition "knows more than artificial intelligence"; it says intuition is a different kind of intelligence.
+- The resistance paragraph explains why we hold on to the familiar instead of judging resistance.
 
 ## 9. Open items
 

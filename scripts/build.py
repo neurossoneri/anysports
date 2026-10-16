@@ -74,7 +74,7 @@ UI = {
 }
 
 FONT_LINKS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=Source+Serif+4:opsz,wght@8..60,400..700&display=swap" rel="stylesheet">'
-PROGRESS_JS = "<script>(function(){if(window.CSS&&CSS.supports&&CSS.supports('animation-timeline','scroll()'))return;var b=document.querySelector('.scroll-progress');function u(){var m=document.documentElement.scrollHeight-innerHeight;b.style.setProperty('--p',m>0?Math.min(1,scrollY/m).toFixed(4):0)}addEventListener('scroll',u,{passive:true});u()})()</script>"
+PROGRESS_JS = "<script>(function(){if(window.CSS&&CSS.supports&&CSS.supports('animation-timeline','scroll()')&&!matchMedia('(prefers-reduced-motion: reduce)').matches)return;var b=document.querySelector('.scroll-progress');function u(){var m=document.documentElement.scrollHeight-innerHeight;b.style.setProperty('--p',m>0?Math.min(1,scrollY/m).toFixed(4):0)}addEventListener('scroll',u,{passive:true});u()})()</script>"
 VALID_SLUG = re.compile(r'^[a-z0-9]+(?:-[a-z0-9]+)*$')
 SAFE_IMAGE = re.compile(r'^(?:media/|images/)[\w\-/%.]+\.(?:jpe?g|png|gif|webp|avif)$', re.I)
 ALLOWED_TAGS = ['p', 'br', 'strong', 'em', 'b', 'i', 'a', 'ul', 'ol', 'li', 'blockquote', 'h2', 'h3', 'h4', 'hr', 'img', 'code', 'pre', 'table', 'thead', 'tbody', 'tr', 'th', 'td']
@@ -346,7 +346,7 @@ def article_shell(*, title, description, lang, css_prefix, body, public_url, rea
 <meta property="og:description" content="{desc}"><title>{esc(title)} — {name}</title>
 <base href="{route}"><link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/articles.css">
 {canonical_html}{json_ld}<script>(function(){{try{{var t=localStorage.getItem('sport-site-theme');document.documentElement.dataset.theme=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}}catch(e){{}}}})()</script></head>
-<body><div class="scroll-progress" aria-hidden="true"></div><a class="skip" href="#content">{esc(SKIP_LABEL[lang])}</a><header class="site-header"><div class="container header-inner">
+<body><div class="scroll-progress" aria-hidden="true"></div><a class="skip" href="{css_prefix}/#content">{esc(SKIP_LABEL[lang])}</a><header class="site-header"><div class="container header-inner">
 <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">{brand_html}</span><span>{name}</span></a>
 <nav class="article-nav"><a href="./">{esc(BACK_LABEL[lang])}</a><a href="{lang}/articles/">{esc(BLOG_LABEL[lang])}</a><a href="./#contact">{esc(CONTACT_LABEL[lang])}</a></nav>
 <button class="icon-button" type="button" id="article-theme" aria-label="Theme" aria-pressed="false">◐</button></div></header>
@@ -428,6 +428,9 @@ def main():
     build_articles(site, posts, public_url, ready)
     if (ROOT / 'media').exists():
         shutil.copytree(ROOT / 'media', OUT / 'media', dirs_exist_ok=True, ignore=shutil.ignore_patterns('.gitkeep'))
+        for photo in sorted((OUT / 'media').rglob('*')):
+            if photo.is_file() and photo.stat().st_size > 600_000:
+                print(f'WARNING: {photo.relative_to(OUT)} is {photo.stat().st_size // 1024} KB. Compress it to about 300-400 KB so the page opens quickly on a phone.', file=sys.stderr)
     (OUT / '.nojekyll').write_text('', encoding='utf-8')
     sitemap = []
     if public_url and ready:

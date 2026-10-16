@@ -10,8 +10,8 @@
   "quotes": {
     "a": "Tu ne peux contrôler que toi-même.\nLe reste ne dépend pas de toi.",
     "b": "Dans le sport, le corps sait souvent avant que l’esprit puisse l’expliquer.",
-    "c": "Le changement n’est pas toujours agréable. Mais c’est ainsi que la chenille devient papillon.",
-    "d": "L’intuition est la plus haute des intelligences.\nElle en sait plus sur toi que l’intelligence artificielle."
+    "c": "Tu n’as pas à tout comprendre en solitaire.",
+    "d": "L’intuition est une autre forme d’intelligence.\nIl y a des choses que l’on ne découvre de soi qu’en s’écoutant."
   },
   "story": {
     "title": "Ce site est conçu autrement. Comme mon travail.",
@@ -67,9 +67,9 @@
   },
   "change": {
     "title1": "Quand quelque chose commence à changer en vous",
-    "text1": "Quand on pratique longtemps la même activité, il vient un moment où tout commence à bouger à l’intérieur. Nous résistons : nous voulons que ce soit confortable, comme avant.\nMais cette résistance mène rarement à quelque chose de bon.",
+    "text1": "Quand on pratique longtemps la même activité, il vient un moment où tout commence à bouger à l’intérieur. Et on ne comprend pas toujours pourquoi.\nNous nous accrochons à ce qui est familier : cela semble sûr, même quand cela ne nous convient plus. Résister au changement est naturel : nous ne savons pas ce qui se trouve de l’autre côté.",
     "title2": "De la chenille au papillon",
-    "text2": "Le chemin du changement n’est pas toujours agréable. Mais c’est justement lui qui, un jour, transforme la chenille en papillon.",
+    "text2": "Le chemin du changement n’est pas toujours agréable. Parfois, il faut lâcher ce qui nous définissait, et il faut du temps pour que la nouvelle forme devienne lisible.",
     "title3": "Trouver un appui",
     "text3": "Votre entourage peut ne pas vous comprendre. À ces moments-là, il est particulièrement important de trouver un appui à l’extérieur : quelqu’un qui sait écouter."
   },
