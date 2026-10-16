@@ -1,40 +1,122 @@
 {
-  "heroEyebrow": "Écoute et progression dans le sport",
-  "heroLine1": "Dans le sport, il n’y a pas que",
-  "heroLine2": "le résultat.",
-  "heroLead": "J’accompagne les sportifs, les parents et les entraîneurs face à la pression, aux questions de motivation, de confiance et aux moments difficiles du parcours sportif.",
-  "heroNote": "Un premier échange pour faire connaissance et préciser vos attentes.",
-  "areasTitle": "Quand « prends sur toi » ne suffit plus",
-  "areasLead": "Certaines difficultés dans le sport ne se résolvent pas avec une séance d’entraînement supplémentaire. Ici, vous pouvez parler sereinement de ce qui vous freine.",
-  "area1Title": "Le stress avant une compétition",
-  "area1Desc": "Faire face aux attentes, aux erreurs et à la tension des compétitions.",
-  "area2Title": "La confiance et la concentration",
-  "area2Desc": "Mieux comprendre ses réactions et rester attentif à l’essentiel.",
-  "area3Title": "La motivation et la charge",
-  "area3Desc": "Quand l’entraînement ne fait plus plaisir et que l’exigence envers soi-même devient pesante.",
-  "area4Title": "Les échecs et le retour au sport",
-  "area4Desc": "Traverser les compétitions difficiles et retrouver ses repères après une pause.",
-  "aboutTitle": "Derrière chaque objectif sportif, il y a une personne",
-  "aboutP1": "Je m’appelle Prénom Nom. C’est ici que vous pourrez raconter votre parcours : comment vous en êtes venue à accompagner des sportifs, ce qui compte pour vous et votre manière de travailler.",
-  "aboutP2": "Présentez-vous avec des mots simples, sans promesses vagues ni jargon inutile. Les visiteurs doivent pouvoir se faire une idée de la personne qui les accompagnera.",
-  "credential1": "Formation et spécialités",
-  "credential1Desc": "Indiquez vos diplômes, qualifications et formations vérifiables.",
-  "credential2": "Expérience professionnelle",
-  "credential2Desc": "Présentez votre pratique, vos collaborations ou interventions — uniquement des faits.",
-  "processTitle": "Un accompagnement clair, sans formalisme inutile",
-  "processLead": "Il est important de savoir à quoi s’attendre. Le programme et le rythme des séances se définissent ensemble.",
-  "blogTitle": "Le sport et celles et ceux qui le vivent",
-  "blogLead": "Articles, réflexions et conseils pratiques pour les sportifs, les parents et les entraîneurs.",
-  "reviewsTitle": "Quelques mots sur notre travail ensemble",
-  "reviewsLead": "Des avis écrits avec une touche manuscrite, sans captures d’écran ni détails personnels superflus.",
-  "contactTitle": "On commence par échanger ?",
-  "contactLead": "Dites-moi quel moyen de contact vous convient. Vous n’avez pas besoin de raconter toute votre situation personnelle dans le premier message : une simple question suffit.",
-  "faq1Q": "Peut-on se rencontrer à distance ?",
-  "faq1A": "Vous pouvez indiquer votre préférence lors du premier contact. Les rendez-vous en présentiel sont à confirmer individuellement.",
-  "faq2Q": "Combien de temps dure une séance et quel est son tarif ?",
-  "faq2A": "Ajoutez ici la durée, les tarifs et les modalités de paiement une fois confirmés. Ces informations peuvent aussi être demandées avant la prise de rendez-vous.",
-  "faq3Q": "Puis-je demander un accompagnement pour mon enfant ?",
-  "faq3A": "Les conditions d’accompagnement des mineurs, la place des parents et les consentements nécessaires sont à préciser avant toute séance.",
-  "faq4Q": "Les échanges restent-ils confidentiels ?",
-  "faq4A": "Les règles de confidentialité, le traitement des données et leurs éventuelles exceptions doivent être expliqués avant de commencer, selon les obligations professionnelles et locales."
+  "meta": {
+    "title": "L’intuition dans le sport",
+    "description": "Une conversation sur l’intuition, le changement et le chemin dans le sport. La première consultation de 30 minutes est gratuite et sans engagement."
+  },
+  "hero": {
+    "hint": "faites défiler doucement",
+    "alt": "Portrait"
+  },
+  "quotes": {
+    "a": "Tu ne peux contrôler que toi-même.\nLe reste ne dépend pas de toi.",
+    "b": "Dans le sport, le corps sait souvent avant que l’esprit puisse l’expliquer.",
+    "c": "Le changement n’est pas toujours agréable. Mais c’est ainsi que la chenille devient papillon.",
+    "d": "L’intuition est la plus haute des intelligences.\nElle en sait plus sur toi que l’intelligence artificielle."
+  },
+  "story": {
+    "title": "Ce site est conçu autrement. Comme mon travail.",
+    "p1": "Ici, pas de méthode, pas d’entonnoir, pas de belles promesses. Tout repose sur une seule chose : l’intuition.",
+    "p2": "Dans le sport, il y a une seconde avant la décision. Le joueur sent où ira le ballon avant même que cela se voie. Le sportif comprend qu’il faut ralentir aujourd’hui, bien avant que le corps ne le signale. On appelle cela le flair, le sens du jeu, la voix intérieure.",
+    "p3": "On ne peut ni la mesurer ni la ranger dans un tableau, alors on en parle rarement. Pourtant, au plus haut niveau, c’est elle qui distingue ceux qui suivent un plan de ceux qui s’écoutent et saisissent l’instant. C’est pourquoi je commence par là."
+  },
+  "client": {
+    "title": "Cette conversation est pour vous si…",
+    "l1": "vous êtes dans le sport depuis des années et sentez que quelque chose a bougé en vous",
+    "l2": "les anciennes réponses ne conviennent plus et les nouvelles ne sont pas encore là",
+    "l3": "vous en avez assez de vous expliquer pourquoi il « faut »",
+    "l4": "vous n’avez pas besoin d’un nouveau plan, mais de vous entendre",
+    "note": "Si une seule ligne a résonné, vous n’êtes peut-être pas ici par hasard."
+  },
+  "why": {
+    "title": "Parce que le sport est une conversation honnête avec soi-même",
+    "text": "Chaque jour, le sportif se retrouve face à lui-même : la pression, le doute, la joie, sa propre limite. Impossible de se cacher derrière les mots — le corps dit tout.\nCe monde m’est proche : je le connais de l’intérieur. Et c’est ici que j’ai envie d’être aux côtés des gens."
+  },
+  "about": {
+    "title": "Un peu de moi",
+    "c1Title": "Dix ans à la FIFA",
+    "c1Text": "Pendant dix ans, j’ai travaillé à la FIFA : le sport de haut niveau, de grands objectifs, des plans précis.",
+    "c2Title": "Le moment où j’ai écouté",
+    "c2Text": "Puis j’ai décidé de changer de métier — par intuition. Pas selon un plan ni un tableau, mais parce que quelque chose en moi me le disait.",
+    "c3Title": "Les réponses que je cherche encore",
+    "c3Text": "Je n’ai pas de réponses toutes faites. Je les cherche encore, pour moi : je me pose des questions, je me trompe, j’écoute.",
+    "c4Title": "Et je veux vous aider",
+    "c4Text": "Ce que je trouve, j’ai envie de le partager. Si vous cherchez aussi, cherchons ensemble."
+  },
+  "check": {
+    "title": "Maintenant, écoutez-vous",
+    "l1": "Vous avez regardé les photos et lu comment j’en suis arrivée là.",
+    "l2": "Maintenant, écoutez votre intuition.",
+    "l3": "Quelque chose a-t-il résonné ? Avez-vous envie d’échanger ?",
+    "note1": "Sinon, vous pouvez fermer cette page. Et c’est tout à fait normal.",
+    "note2": "Choisir par intuition, c’est normal. Tout ce site parle exactement de cela."
+  },
+  "fork": {
+    "lead": "Si vous êtes ici, c’est que quelque chose vous y a déjà conduit.",
+    "voice": "Écoutez votre voix.",
+    "eyes": "Regardez-moi dans les yeux sur la photo.",
+    "yesTitle": "Ça a résonné",
+    "yesText": "Alors nous pouvons travailler plus en profondeur.",
+    "yesButton": "Lire la suite",
+    "noTitle": "Pas pour l’instant",
+    "noText": "C’est tout à fait normal.",
+    "noButton": "Fermer la page",
+    "photoAlt": "Portrait en gros plan",
+    "farewellTitle": "Merci de votre visite",
+    "farewellText": "Faites confiance à ce que vous avez ressenti. Vous pouvez fermer la page — ou revenir si l’envie vous en prend.",
+    "farewellBack": "Revenir à la page"
+  },
+  "change": {
+    "title1": "Quand quelque chose commence à changer en vous",
+    "text1": "Quand on pratique longtemps la même activité, il vient un moment où tout commence à bouger à l’intérieur. Nous résistons : nous voulons que ce soit confortable, comme avant.\nMais cette résistance mène rarement à quelque chose de bon.",
+    "title2": "De la chenille au papillon",
+    "text2": "Le chemin du changement n’est pas toujours agréable. Mais c’est justement lui qui, un jour, transforme la chenille en papillon.",
+    "title3": "Trouver un appui",
+    "text3": "Votre entourage peut ne pas vous comprendre. À ces moments-là, il est particulièrement important de trouver un appui à l’extérieur : quelqu’un qui sait écouter."
+  },
+  "invite": {
+    "title": "Je peux vous aider à parcourir ce chemin",
+    "text": "Je vous accompagnerai sur le chemin du changement. Si vous le souhaitez, écrivez-moi.",
+    "button": "Me contacter"
+  },
+  "free": {
+    "number": "30",
+    "unit": "minutes",
+    "badge": "gratuit",
+    "title": "Le premier rendez-vous est une simple conversation",
+    "text": "Nous échangeons, sans aucun engagement. Chacun écoute sa propre intuition. Ensuite, nous saurons si nous avons envie de continuer."
+  },
+  "contact": {
+    "title": "Écrivez-moi",
+    "lead": "Quelques mots sur vous suffisent. Les détails peuvent attendre notre conversation.",
+    "linksTitle": "Ou directement",
+    "formName": "Votre prénom",
+    "formReach": "Comment vous joindre (e-mail, Telegram ou WhatsApp)",
+    "formMessage": "Quelques mots sur ce qui a résonné (facultatif)",
+    "formSend": "Envoyer",
+    "formSent": "Merci. J’ai bien reçu votre message et je vous répondrai bientôt.",
+    "formNote": "Votre message arrivera dans ma boîte mail. Merci de ne pas y partager d’informations médicales ou sensibles."
+  },
+  "faq": {
+    "title": "Questions et réponses",
+    "lead": "Si quelque chose reste flou, la réponse est peut-être ici.",
+    "q1": "Comment se passe le premier rendez-vous ?",
+    "a1": "C’est une conversation de 30 minutes, gratuite et sans engagement. Nous échangeons simplement et chacun écoute son intuition. Ensuite, nous décidons ensemble de poursuivre ou non.",
+    "q2": "Faut-il se préparer ?",
+    "a2": "Non. Vous pouvez venir avec un seul mot ou une seule sensation, même si vous ne savez pas encore l’expliquer.",
+    "q3": "Combien coûte la suite ?",
+    "a3": "Le premier rendez-vous est gratuit. Nous parlerons du format et des conditions ensuite, calmement et sans pression.",
+    "q4": "Peut-on se rencontrer à distance ?",
+    "a4": "Vous pouvez indiquer votre préférence dans votre message. Les rendez-vous en présentiel sont confirmés individuellement.",
+    "q5": "Puis-je demander un accompagnement pour mon enfant ?",
+    "a5": "Vous pouvez m’écrire. Les conditions d’accompagnement des mineurs, la place des parents et les consentements nécessaires sont précisées avant toute séance.",
+    "q6": "Les échanges restent-ils confidentiels ?",
+    "a6": "J’explique les règles de confidentialité et de traitement des données avant de commencer, et vous pouvez poser toutes vos questions."
+  },
+  "notes": {
+    "title": "Notes",
+    "lead": "De courtes réflexions sur le sport, l’intuition et le changement."
+  },
+  "footer": {
+    "line": "Écoutez-vous."
+  }
 }

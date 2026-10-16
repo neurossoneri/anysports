@@ -5,5 +5,6 @@
   "role_ru": "Консультант по работе со спортсменами",
   "role_en": "Athlete support consultant",
   "role_fr": "Consultante en accompagnement des sportifs",
-  "publish_ready": false
+  "publish_ready": false,
+  "form_endpoint": ""
 }

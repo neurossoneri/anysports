@@ -1,40 +1,122 @@
 {
-  "heroEyebrow": "Support and growth in sport",
-  "heroLine1": "Sport is about more than",
-  "heroLine2": "results.",
-  "heroLead": "I support athletes, parents and coaches as they navigate pressure, motivation, confidence and the more difficult parts of life in sport.",
-  "heroNote": "The first conversation is a chance to meet and clarify your goals.",
-  "areasTitle": "When you need more than “pull yourself together”",
-  "areasLead": "Some challenges in sport call for more than another training session. This is a place to talk through what feels difficult and consider the next step.",
-  "area1Title": "Pre-competition nerves",
-  "area1Desc": "Managing expectations, mistakes and tension around competition.",
-  "area2Title": "Confidence and focus",
-  "area2Desc": "Understanding your reactions and keeping your attention where it matters.",
-  "area3Title": "Motivation and workload",
-  "area3Desc": "When training stops feeling rewarding and self-imposed pressure grows.",
-  "area4Title": "Setbacks and returning",
-  "area4Desc": "Working through difficult performances and adjusting after time away from sport.",
-  "aboutTitle": "Behind every sporting goal is a person",
-  "aboutP1": "My name is Full Name. This is where your personal story belongs: how you began working with athletes, what matters to you and how you approach your work.",
-  "aboutP2": "Write in your own voice, without generic promises or unnecessary jargon. Visitors should get a real sense of the person they may be working with.",
-  "credential1": "Education and specialisation",
-  "credential1Desc": "Add verified qualifications, degrees and relevant training.",
-  "credential2": "Professional experience",
-  "credential2Desc": "Include relevant work, collaborations or talks — facts only.",
-  "processTitle": "A clear, straightforward process",
-  "processLead": "It helps to know what to expect. The programme and frequency of meetings are agreed individually.",
-  "blogTitle": "About sport and the people who live it",
-  "blogLead": "Articles, reflections and practical insights for athletes, parents and coaches.",
-  "reviewsTitle": "A few words about working together",
-  "reviewsLead": "Written testimonials with a personal, handwritten feel — no screenshots or unnecessary client details.",
-  "contactTitle": "Shall we start with a conversation?",
-  "contactLead": "Let me know how you prefer to communicate. You do not need to share your whole personal story in the first message — a simple question is enough.",
-  "faq1Q": "Can we meet online?",
-  "faq1A": "You can share your preferred format when you get in touch. The availability of in-person sessions is confirmed individually.",
-  "faq2Q": "How long is a session and what does it cost?",
-  "faq2A": "Add the confirmed duration, prices and payment terms here before publishing. You can also ask for these details before booking.",
-  "faq3Q": "Can I ask about support for my child?",
-  "faq3A": "Arrangements for working with minors, parental involvement and any required consent should be clarified before sessions begin.",
-  "faq4Q": "Is our conversation confidential?",
-  "faq4A": "Confidentiality rules, data handling and any exceptions should be explained before work begins, in line with professional and local requirements."
+  "meta": {
+    "title": "Intuition in sport",
+    "description": "A conversation about intuition, change and the path in sport. The first 30-minute consultation is free and carries no obligation."
+  },
+  "hero": {
+    "hint": "scroll slowly",
+    "alt": "Portrait"
+  },
+  "quotes": {
+    "a": "You can only control yourself.\nThe rest is out of your control.",
+    "b": "In sport, the body often knows before the mind can explain.",
+    "c": "Change is not always pleasant. But that is how a caterpillar becomes a butterfly.",
+    "d": "Intuition is the highest intelligence.\nIt knows more about you than artificial intelligence."
+  },
+  "story": {
+    "title": "This site is built differently. So is my work.",
+    "p1": "There is no method here, no funnel, no polished promises. Everything is built around one thing: intuition.",
+    "p2": "In sport there is a second before the decision. A player feels where the ball is going before it becomes visible. An athlete knows that today is a day to ease off, long before the body gives a signal. People call it instinct, a feel for the game, an inner voice.",
+    "p3": "It cannot be measured or put into a table, so it is rarely discussed. Yet at the highest level it is what separates those who follow a plan from those who hear themselves and the moment. That is why I start there."
+  },
+  "client": {
+    "title": "This conversation is for you if…",
+    "l1": "you have been in sport for years and feel that something inside has shifted",
+    "l2": "the old answers no longer fit, and the new ones have not arrived yet",
+    "l3": "you are tired of explaining to yourself why you “should”",
+    "l4": "you do not need another plan — you need to hear yourself",
+    "note": "If even one line resonated, perhaps you are not here by accident."
+  },
+  "why": {
+    "title": "Because sport is an honest conversation with yourself",
+    "text": "Every day an athlete meets themselves face to face: pressure, doubt, joy, their own limit. There is no hiding behind words here — the body says everything on its own.\nThis world is close to me: I know it from the inside. And this is where I want to be beside people."
+  },
+  "about": {
+    "title": "A little about me",
+    "c1Title": "Ten years at FIFA",
+    "c1Text": "For ten years I worked at FIFA: big sport, big goals, precise plans.",
+    "c2Title": "The moment I listened",
+    "c2Text": "Then I decided to change careers — on intuition. Not by plan or by spreadsheet, but because something inside said so.",
+    "c3Title": "Answers I am still looking for",
+    "c3Text": "I do not have ready-made answers. I am still looking for them, for myself: asking questions, making mistakes, listening.",
+    "c4Title": "And I want to help you",
+    "c4Text": "What I find, I want to share. If you are searching too, let us search together."
+  },
+  "check": {
+    "title": "And now, listen",
+    "l1": "You have looked at the photos and read how I got here.",
+    "l2": "Now listen to your intuition.",
+    "l3": "Did something resonate? Do you feel like talking?",
+    "note1": "If not, you can close this page. And that is perfectly fine.",
+    "note2": "Choosing intuitively is fine. This whole site is about exactly that."
+  },
+  "fork": {
+    "lead": "If you are here, something has already brought you here.",
+    "voice": "Listen to your voice.",
+    "eyes": "Look me in the eyes in the photo.",
+    "yesTitle": "It resonated",
+    "yesText": "Then we can work more deeply.",
+    "yesButton": "Keep reading",
+    "noTitle": "Not yet",
+    "noText": "That is completely fine.",
+    "noButton": "Close the page",
+    "photoAlt": "Close-up portrait",
+    "farewellTitle": "Thank you for stopping by",
+    "farewellText": "Trust what you felt. You can close the page — or come back if you want to.",
+    "farewellBack": "Back to the page"
+  },
+  "change": {
+    "title1": "When something inside begins to change",
+    "text1": "When someone spends many years doing one thing, at some point everything inside begins to shift. We resist: we want things comfortable and as they were.\nBut that resistance rarely leads anywhere good.",
+    "title2": "From caterpillar to butterfly",
+    "text2": "The path of change is not always pleasant. But it is exactly what, at some point, turns a caterpillar into a butterfly.",
+    "title3": "Finding support",
+    "text3": "People around you may not understand. In those moments it is especially important to find support in the outside world: someone who listens."
+  },
+  "invite": {
+    "title": "I can help you walk this path",
+    "text": "I will help you follow the path of change. If you wish, get in touch.",
+    "button": "Get in touch"
+  },
+  "free": {
+    "number": "30",
+    "unit": "minutes",
+    "badge": "free",
+    "title": "The first meeting is just a conversation",
+    "text": "We simply talk, and it commits you to nothing. Each of us listens to our own intuition. Afterwards we will know whether we want to keep talking."
+  },
+  "contact": {
+    "title": "Write to me",
+    "lead": "A few words about you are enough. The details can wait for our conversation.",
+    "linksTitle": "Or reach out directly",
+    "formName": "Your name",
+    "formReach": "How to reach you (email, Telegram or WhatsApp)",
+    "formMessage": "A few words about what resonated (optional)",
+    "formSend": "Send",
+    "formSent": "Thank you. I have your message and will reply soon.",
+    "formNote": "Your message will arrive in my inbox. Please do not share medical or other sensitive information here."
+  },
+  "faq": {
+    "title": "Questions and answers",
+    "lead": "If something is still unclear, the answer may be here.",
+    "q1": "What is the first meeting like?",
+    "a1": "It is a 30-minute conversation — free and with no obligation. We simply talk and each listen to our own intuition. After that we decide together whether to continue.",
+    "q2": "Do I need to prepare?",
+    "a2": "No. You can come with a single word or a single feeling, even if you cannot yet explain it.",
+    "q3": "What does further work cost?",
+    "a3": "The first meeting is free. We will talk about format and terms afterwards, calmly and without pressure.",
+    "q4": "Can we meet online?",
+    "a4": "You can mention your preferred format in your message. Availability of in-person meetings is confirmed individually.",
+    "q5": "Can I ask about support for my child?",
+    "a5": "You can write to me. Terms for working with minors, parental involvement and any required consents are discussed before sessions begin.",
+    "q6": "Is our conversation confidential?",
+    "a6": "I explain confidentiality and data-handling rules before we begin, and you are welcome to ask anything."
+  },
+  "notes": {
+    "title": "Notes",
+    "lead": "Short thoughts on sport, intuition and change."
+  },
+  "footer": {
+    "line": "Listen to yourself."
+  }
 }

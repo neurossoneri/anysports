@@ -113,419 +113,1067 @@ content:
   - name: booking_url
     label: Booking URL (https://...)
     type: string
+  - name: form_endpoint
+    label: Адрес формы связи / Contact form endpoint (https://...)
+    description: Адрес из сервиса форм (например Formspree), который пересылает сообщения на вашу почту. Подробности в README.
+    type: string
   - name: public_url
     label: Public site URL (optional, https://...)
     type: string
   - name: portrait
-    label: Главное фото / Portrait
+    label: 'Главное фото наверху / Hero photo'
     type: image
-  - name: consultation_photo
-    label: Фото консультации / Consultation
+  - name: eyes_photo
+    label: 'Фото крупным планом, «посмотрите мне в глаза» (если пусто — главное фото)'
     type: image
-  - name: sport_photo
-    label: Фото со спорта / Sports
+  - name: story_photo_1
+    label: 'История · кадр 1 (FIFA)'
     type: image
-  - name: event_photo
-    label: Фото мероприятия / Event
+  - name: story_photo_2
+    label: 'История · кадр 2 (решение сменить путь)'
+    type: image
+  - name: story_photo_3
+    label: 'История · кадр 3 (поиск ответов)'
+    type: image
+  - name: story_photo_4
+    label: 'История · кадр 4 (помочь вам)'
     type: image
   - name: publish_ready
     label: Готов к индексации / Allow search indexing
-    description: Activate only after replacing all placeholders with verified details and obtaining permissions for reviews
-      and photos.
+    description: Activate only after replacing all placeholders with verified details and obtaining permissions for photos.
     type: boolean
-- name: reviews
-  label: Отзывы / Testimonials
-  type: file
-  path: content/reviews.json
-  format: json
-  list: true
-  operations:
-    delete: false
-  fields:
-  - name: visible
-    label: Опубликовать / Show
-    type: boolean
-  - name: quote_ru
-    label: Текст (RU)
-    type: text
-  - name: quote_en
-    label: Text (EN)
-    type: text
-  - name: quote_fr
-    label: Texte (FR)
-    type: text
-  - name: author_ru
-    label: Подпись (RU)
-    type: string
-  - name: author_en
-    label: Attribution (EN)
-    type: string
-  - name: author_fr
-    label: Attribution (FR)
-    type: string
 - name: home_ru
-  label: Тексты главной (RU)
+  label: 'Тексты сайта · русский'
   type: file
   path: content/home_ru.json
   format: json
   operations:
     delete: false
   fields:
-  - name: heroEyebrow
-    label: Подпись над заголовком
-    type: string
-  - name: heroLine1
-    label: Hero — строка 1
-    type: string
-  - name: heroLine2
-    label: Hero — выделенная строка
-    type: string
-  - name: heroLead
-    label: Hero — вводный текст
-    type: text
-  - name: heroNote
-    label: Hero — стеклянная плашка
-    type: text
-  - name: areasTitle
-    label: Направления — заголовок
-    type: string
-  - name: areasLead
-    label: Направления — описание
-    type: text
-  - name: area1Title
-    label: Направление 1 — название
-    type: string
-  - name: area1Desc
-    label: Направление 1 — описание
-    type: text
-  - name: area2Title
-    label: Направление 2 — название
-    type: string
-  - name: area2Desc
-    label: Направление 2 — описание
-    type: text
-  - name: area3Title
-    label: Направление 3 — название
-    type: string
-  - name: area3Desc
-    label: Направление 3 — описание
-    type: text
-  - name: area4Title
-    label: Направление 4 — название
-    type: string
-  - name: area4Desc
-    label: Направление 4 — описание
-    type: text
-  - name: aboutTitle
-    label: Обо мне — заголовок
-    type: string
-  - name: aboutP1
-    label: Обо мне — абзац 1
-    type: text
-  - name: aboutP2
-    label: Обо мне — абзац 2
-    type: text
-  - name: credential1
-    label: Квалификация — название 1
-    type: string
-  - name: credential1Desc
-    label: Квалификация — описание 1
-    type: text
-  - name: credential2
-    label: Квалификация — название 2
-    type: string
-  - name: credential2Desc
-    label: Квалификация — описание 2
-    type: text
-  - name: processTitle
-    label: Процесс — заголовок
-    type: string
-  - name: processLead
-    label: Процесс — описание
-    type: text
-  - name: blogTitle
-    label: Блог — заголовок
-    type: string
-  - name: blogLead
-    label: Блог — описание
-    type: text
-  - name: reviewsTitle
-    label: Отзывы — заголовок
-    type: string
-  - name: reviewsLead
-    label: Отзывы — описание
-    type: text
-  - name: contactTitle
-    label: Контакты — заголовок
-    type: string
-  - name: contactLead
-    label: Контакты — описание
-    type: text
-  - name: faq1Q
-    label: FAQ 1 — вопрос
-    type: string
-  - name: faq1A
-    label: FAQ 1 — ответ
-    type: text
-  - name: faq2Q
-    label: FAQ 2 — вопрос
-    type: string
-  - name: faq2A
-    label: FAQ 2 — ответ
-    type: text
-  - name: faq3Q
-    label: FAQ 3 — вопрос
-    type: string
-  - name: faq3A
-    label: FAQ 3 — ответ
-    type: text
-  - name: faq4Q
-    label: FAQ 4 — вопрос
-    type: string
-  - name: faq4A
-    label: FAQ 4 — ответ
-    type: text
+  - name: meta
+    label: 'Вкладка браузера и поиск'
+    type: object
+    fields:
+    - name: title
+      label: 'Название страницы (имя добавится само)'
+      type: string
+    - name: description
+      label: 'Описание для поисковиков и соцсетей'
+      type: text
+  - name: hero
+    label: '1 · Главное фото'
+    type: object
+    fields:
+    - name: hint
+      label: 'Тихая подпись под фото'
+      type: string
+    - name: alt
+      label: 'Описание фото для скринридеров'
+      type: string
+  - name: quotes
+    label: '2 · Цитаты (проявляются «от руки»)'
+    type: object
+    fields:
+    - name: a
+      label: 'Первая цитата, сразу под фото'
+      description: 'Новая строка = перенос строки в цитате.'
+      type: text
+    - name: b
+      label: 'Вторая цитата (после «Почему спортсмены»)'
+      description: 'Черновик: замените своими словами.'
+      type: text
+    - name: c
+      label: 'Третья цитата (про перемены)'
+      type: text
+    - name: d
+      label: 'Финальная фраза внизу страницы'
+      type: text
+  - name: story
+    label: '3 · Об этом сайте'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: p1
+      label: 'Абзац 1'
+      type: text
+    - name: p2
+      label: 'Абзац 2 (про интуицию в спорте)'
+      type: text
+    - name: p3
+      label: 'Абзац 3'
+      type: text
+  - name: client
+    label: '4 · Для вас'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: l1
+      label: 'Строка 1'
+      type: text
+    - name: l2
+      label: 'Строка 2'
+      type: text
+    - name: l3
+      label: 'Строка 3'
+      type: text
+    - name: l4
+      label: 'Строка 4'
+      type: text
+    - name: note
+      label: 'Рукописная строка внизу'
+      type: text
+  - name: why
+    label: '5 · Почему я работаю со спортсменами'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: text
+      label: 'Текст'
+      type: text
+  - name: about
+    label: '6 · Обо мне (четыре кадра; сами фотографии загружаются в «Контакты, фото, имя»)'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: c1Title
+      label: 'Кадр 1 · заголовок'
+      type: string
+    - name: c1Text
+      label: 'Кадр 1 · текст'
+      type: text
+    - name: c2Title
+      label: 'Кадр 2 · заголовок'
+      type: string
+    - name: c2Text
+      label: 'Кадр 2 · текст'
+      type: text
+    - name: c3Title
+      label: 'Кадр 3 · заголовок'
+      type: string
+    - name: c3Text
+      label: 'Кадр 3 · текст'
+      type: text
+    - name: c4Title
+      label: 'Кадр 4 · заголовок'
+      type: string
+    - name: c4Text
+      label: 'Кадр 4 · текст'
+      type: text
+  - name: check
+    label: '7 · Проверка интуицией'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: l1
+      label: 'Строка 1'
+      type: text
+    - name: l2
+      label: 'Строка 2'
+      type: text
+    - name: l3
+      label: 'Строка 3'
+      type: text
+    - name: note1
+      label: 'Рукописная строка 1'
+      type: text
+    - name: note2
+      label: 'Рукописная строка 2'
+      type: text
+  - name: fork
+    label: '8 · Развилка: откликнулось / пока нет'
+    type: object
+    fields:
+    - name: lead
+      label: 'Первая фраза'
+      type: text
+    - name: voice
+      label: 'Рукописная строка 1'
+      type: string
+    - name: eyes
+      label: 'Рукописная строка 2 (про взгляд на фото)'
+      type: string
+    - name: yesTitle
+      label: 'Путь «откликнулось» · заголовок'
+      type: string
+    - name: yesText
+      label: 'Путь «откликнулось» · текст'
+      type: string
+    - name: yesButton
+      label: 'Путь «откликнулось» · кнопка'
+      type: string
+    - name: noTitle
+      label: 'Путь «пока нет» · заголовок'
+      type: string
+    - name: noText
+      label: 'Путь «пока нет» · текст'
+      type: string
+    - name: noButton
+      label: 'Путь «пока нет» · кнопка (закрывает страницу)'
+      type: string
+    - name: photoAlt
+      label: 'Описание фото для скринридеров'
+      type: string
+    - name: farewellTitle
+      label: 'Прощание · заголовок'
+      description: 'Показывается, если браузер не дал закрыть вкладку сам.'
+      type: string
+    - name: farewellText
+      label: 'Прощание · текст'
+      type: text
+    - name: farewellBack
+      label: 'Прощание · кнопка «вернуться»'
+      type: string
+  - name: change
+    label: '9 · Про перемены'
+    type: object
+    fields:
+    - name: title1
+      label: 'Блок 1 · заголовок'
+      type: string
+    - name: text1
+      label: 'Блок 1 · текст'
+      type: text
+    - name: title2
+      label: 'Блок 2 (гусеница и бабочка) · заголовок'
+      type: string
+    - name: text2
+      label: 'Блок 2 · текст'
+      type: text
+    - name: title3
+      label: 'Блок 3 (опора) · заголовок'
+      type: string
+    - name: text3
+      label: 'Блок 3 · текст'
+      type: text
+  - name: invite
+    label: '10 · Приглашение'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: text
+      label: 'Текст'
+      type: text
+    - name: button
+      label: 'Кнопка (ведёт к форме)'
+      type: string
+  - name: free
+    label: '11 · Первая встреча'
+    type: object
+    fields:
+    - name: number
+      label: 'Число в круге'
+      type: string
+    - name: unit
+      label: 'Единица (минут)'
+      type: string
+    - name: badge
+      label: 'Рукописная пометка (бесплатно)'
+      type: string
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: text
+      label: 'Текст'
+      type: text
+  - name: contact
+    label: '12 · Контакты и форма'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: lead
+      label: 'Текст под заголовком'
+      type: text
+    - name: linksTitle
+      label: 'Подзаголовок над прямыми контактами'
+      type: string
+    - name: formName
+      label: 'Поле «имя»'
+      type: string
+    - name: formReach
+      label: 'Поле «как связаться»'
+      type: string
+    - name: formMessage
+      label: 'Поле «сообщение»'
+      type: string
+    - name: formSend
+      label: 'Кнопка отправки'
+      type: string
+    - name: formSent
+      label: 'Сообщение после отправки'
+      type: text
+    - name: formNote
+      label: 'Мелкая пометка под формой'
+      type: text
+  - name: faq
+    label: '13 · Вопросы и ответы'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: lead
+      label: 'Текст под заголовком'
+      type: text
+    - name: q1
+      label: 'Вопрос 1'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a1
+      label: 'Ответ 1'
+      type: text
+    - name: q2
+      label: 'Вопрос 2'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a2
+      label: 'Ответ 2'
+      type: text
+    - name: q3
+      label: 'Вопрос 3'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a3
+      label: 'Ответ 3'
+      type: text
+    - name: q4
+      label: 'Вопрос 4'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a4
+      label: 'Ответ 4'
+      type: text
+    - name: q5
+      label: 'Вопрос 5'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a5
+      label: 'Ответ 5'
+      type: text
+    - name: q6
+      label: 'Вопрос 6'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a6
+      label: 'Ответ 6'
+      type: text
+  - name: notes
+    label: '14 · Заметки (раздел виден, только если есть опубликованные статьи)'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: lead
+      label: 'Текст под заголовком'
+      type: text
+  - name: footer
+    label: '15 · Подвал'
+    type: object
+    fields:
+    - name: line
+      label: 'Короткая фраза'
+      type: string
 - name: home_en
-  label: Homepage text (EN)
+  label: 'Тексты сайта · English'
   type: file
   path: content/home_en.json
   format: json
   operations:
     delete: false
   fields:
-  - name: heroEyebrow
-    label: Подпись над заголовком
-    type: string
-  - name: heroLine1
-    label: Hero — строка 1
-    type: string
-  - name: heroLine2
-    label: Hero — выделенная строка
-    type: string
-  - name: heroLead
-    label: Hero — вводный текст
-    type: text
-  - name: heroNote
-    label: Hero — стеклянная плашка
-    type: text
-  - name: areasTitle
-    label: Направления — заголовок
-    type: string
-  - name: areasLead
-    label: Направления — описание
-    type: text
-  - name: area1Title
-    label: Направление 1 — название
-    type: string
-  - name: area1Desc
-    label: Направление 1 — описание
-    type: text
-  - name: area2Title
-    label: Направление 2 — название
-    type: string
-  - name: area2Desc
-    label: Направление 2 — описание
-    type: text
-  - name: area3Title
-    label: Направление 3 — название
-    type: string
-  - name: area3Desc
-    label: Направление 3 — описание
-    type: text
-  - name: area4Title
-    label: Направление 4 — название
-    type: string
-  - name: area4Desc
-    label: Направление 4 — описание
-    type: text
-  - name: aboutTitle
-    label: Обо мне — заголовок
-    type: string
-  - name: aboutP1
-    label: Обо мне — абзац 1
-    type: text
-  - name: aboutP2
-    label: Обо мне — абзац 2
-    type: text
-  - name: credential1
-    label: Квалификация — название 1
-    type: string
-  - name: credential1Desc
-    label: Квалификация — описание 1
-    type: text
-  - name: credential2
-    label: Квалификация — название 2
-    type: string
-  - name: credential2Desc
-    label: Квалификация — описание 2
-    type: text
-  - name: processTitle
-    label: Процесс — заголовок
-    type: string
-  - name: processLead
-    label: Процесс — описание
-    type: text
-  - name: blogTitle
-    label: Блог — заголовок
-    type: string
-  - name: blogLead
-    label: Блог — описание
-    type: text
-  - name: reviewsTitle
-    label: Отзывы — заголовок
-    type: string
-  - name: reviewsLead
-    label: Отзывы — описание
-    type: text
-  - name: contactTitle
-    label: Контакты — заголовок
-    type: string
-  - name: contactLead
-    label: Контакты — описание
-    type: text
-  - name: faq1Q
-    label: FAQ 1 — вопрос
-    type: string
-  - name: faq1A
-    label: FAQ 1 — ответ
-    type: text
-  - name: faq2Q
-    label: FAQ 2 — вопрос
-    type: string
-  - name: faq2A
-    label: FAQ 2 — ответ
-    type: text
-  - name: faq3Q
-    label: FAQ 3 — вопрос
-    type: string
-  - name: faq3A
-    label: FAQ 3 — ответ
-    type: text
-  - name: faq4Q
-    label: FAQ 4 — вопрос
-    type: string
-  - name: faq4A
-    label: FAQ 4 — ответ
-    type: text
+  - name: meta
+    label: 'Вкладка браузера и поиск'
+    type: object
+    fields:
+    - name: title
+      label: 'Название страницы (имя добавится само)'
+      type: string
+    - name: description
+      label: 'Описание для поисковиков и соцсетей'
+      type: text
+  - name: hero
+    label: '1 · Главное фото'
+    type: object
+    fields:
+    - name: hint
+      label: 'Тихая подпись под фото'
+      type: string
+    - name: alt
+      label: 'Описание фото для скринридеров'
+      type: string
+  - name: quotes
+    label: '2 · Цитаты (проявляются «от руки»)'
+    type: object
+    fields:
+    - name: a
+      label: 'Первая цитата, сразу под фото'
+      description: 'Новая строка = перенос строки в цитате.'
+      type: text
+    - name: b
+      label: 'Вторая цитата (после «Почему спортсмены»)'
+      description: 'Черновик: замените своими словами.'
+      type: text
+    - name: c
+      label: 'Третья цитата (про перемены)'
+      type: text
+    - name: d
+      label: 'Финальная фраза внизу страницы'
+      type: text
+  - name: story
+    label: '3 · Об этом сайте'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: p1
+      label: 'Абзац 1'
+      type: text
+    - name: p2
+      label: 'Абзац 2 (про интуицию в спорте)'
+      type: text
+    - name: p3
+      label: 'Абзац 3'
+      type: text
+  - name: client
+    label: '4 · Для вас'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: l1
+      label: 'Строка 1'
+      type: text
+    - name: l2
+      label: 'Строка 2'
+      type: text
+    - name: l3
+      label: 'Строка 3'
+      type: text
+    - name: l4
+      label: 'Строка 4'
+      type: text
+    - name: note
+      label: 'Рукописная строка внизу'
+      type: text
+  - name: why
+    label: '5 · Почему я работаю со спортсменами'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: text
+      label: 'Текст'
+      type: text
+  - name: about
+    label: '6 · Обо мне (четыре кадра; сами фотографии загружаются в «Контакты, фото, имя»)'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: c1Title
+      label: 'Кадр 1 · заголовок'
+      type: string
+    - name: c1Text
+      label: 'Кадр 1 · текст'
+      type: text
+    - name: c2Title
+      label: 'Кадр 2 · заголовок'
+      type: string
+    - name: c2Text
+      label: 'Кадр 2 · текст'
+      type: text
+    - name: c3Title
+      label: 'Кадр 3 · заголовок'
+      type: string
+    - name: c3Text
+      label: 'Кадр 3 · текст'
+      type: text
+    - name: c4Title
+      label: 'Кадр 4 · заголовок'
+      type: string
+    - name: c4Text
+      label: 'Кадр 4 · текст'
+      type: text
+  - name: check
+    label: '7 · Проверка интуицией'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: l1
+      label: 'Строка 1'
+      type: text
+    - name: l2
+      label: 'Строка 2'
+      type: text
+    - name: l3
+      label: 'Строка 3'
+      type: text
+    - name: note1
+      label: 'Рукописная строка 1'
+      type: text
+    - name: note2
+      label: 'Рукописная строка 2'
+      type: text
+  - name: fork
+    label: '8 · Развилка: откликнулось / пока нет'
+    type: object
+    fields:
+    - name: lead
+      label: 'Первая фраза'
+      type: text
+    - name: voice
+      label: 'Рукописная строка 1'
+      type: string
+    - name: eyes
+      label: 'Рукописная строка 2 (про взгляд на фото)'
+      type: string
+    - name: yesTitle
+      label: 'Путь «откликнулось» · заголовок'
+      type: string
+    - name: yesText
+      label: 'Путь «откликнулось» · текст'
+      type: string
+    - name: yesButton
+      label: 'Путь «откликнулось» · кнопка'
+      type: string
+    - name: noTitle
+      label: 'Путь «пока нет» · заголовок'
+      type: string
+    - name: noText
+      label: 'Путь «пока нет» · текст'
+      type: string
+    - name: noButton
+      label: 'Путь «пока нет» · кнопка (закрывает страницу)'
+      type: string
+    - name: photoAlt
+      label: 'Описание фото для скринридеров'
+      type: string
+    - name: farewellTitle
+      label: 'Прощание · заголовок'
+      description: 'Показывается, если браузер не дал закрыть вкладку сам.'
+      type: string
+    - name: farewellText
+      label: 'Прощание · текст'
+      type: text
+    - name: farewellBack
+      label: 'Прощание · кнопка «вернуться»'
+      type: string
+  - name: change
+    label: '9 · Про перемены'
+    type: object
+    fields:
+    - name: title1
+      label: 'Блок 1 · заголовок'
+      type: string
+    - name: text1
+      label: 'Блок 1 · текст'
+      type: text
+    - name: title2
+      label: 'Блок 2 (гусеница и бабочка) · заголовок'
+      type: string
+    - name: text2
+      label: 'Блок 2 · текст'
+      type: text
+    - name: title3
+      label: 'Блок 3 (опора) · заголовок'
+      type: string
+    - name: text3
+      label: 'Блок 3 · текст'
+      type: text
+  - name: invite
+    label: '10 · Приглашение'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: text
+      label: 'Текст'
+      type: text
+    - name: button
+      label: 'Кнопка (ведёт к форме)'
+      type: string
+  - name: free
+    label: '11 · Первая встреча'
+    type: object
+    fields:
+    - name: number
+      label: 'Число в круге'
+      type: string
+    - name: unit
+      label: 'Единица (минут)'
+      type: string
+    - name: badge
+      label: 'Рукописная пометка (бесплатно)'
+      type: string
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: text
+      label: 'Текст'
+      type: text
+  - name: contact
+    label: '12 · Контакты и форма'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: lead
+      label: 'Текст под заголовком'
+      type: text
+    - name: linksTitle
+      label: 'Подзаголовок над прямыми контактами'
+      type: string
+    - name: formName
+      label: 'Поле «имя»'
+      type: string
+    - name: formReach
+      label: 'Поле «как связаться»'
+      type: string
+    - name: formMessage
+      label: 'Поле «сообщение»'
+      type: string
+    - name: formSend
+      label: 'Кнопка отправки'
+      type: string
+    - name: formSent
+      label: 'Сообщение после отправки'
+      type: text
+    - name: formNote
+      label: 'Мелкая пометка под формой'
+      type: text
+  - name: faq
+    label: '13 · Вопросы и ответы'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: lead
+      label: 'Текст под заголовком'
+      type: text
+    - name: q1
+      label: 'Вопрос 1'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a1
+      label: 'Ответ 1'
+      type: text
+    - name: q2
+      label: 'Вопрос 2'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a2
+      label: 'Ответ 2'
+      type: text
+    - name: q3
+      label: 'Вопрос 3'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a3
+      label: 'Ответ 3'
+      type: text
+    - name: q4
+      label: 'Вопрос 4'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a4
+      label: 'Ответ 4'
+      type: text
+    - name: q5
+      label: 'Вопрос 5'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a5
+      label: 'Ответ 5'
+      type: text
+    - name: q6
+      label: 'Вопрос 6'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a6
+      label: 'Ответ 6'
+      type: text
+  - name: notes
+    label: '14 · Заметки (раздел виден, только если есть опубликованные статьи)'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: lead
+      label: 'Текст под заголовком'
+      type: text
+  - name: footer
+    label: '15 · Подвал'
+    type: object
+    fields:
+    - name: line
+      label: 'Короткая фраза'
+      type: string
 - name: home_fr
-  label: Textes d'accueil (FR)
+  label: 'Тексты сайта · Français'
   type: file
   path: content/home_fr.json
   format: json
   operations:
     delete: false
   fields:
-  - name: heroEyebrow
-    label: Подпись над заголовком
-    type: string
-  - name: heroLine1
-    label: Hero — строка 1
-    type: string
-  - name: heroLine2
-    label: Hero — выделенная строка
-    type: string
-  - name: heroLead
-    label: Hero — вводный текст
-    type: text
-  - name: heroNote
-    label: Hero — стеклянная плашка
-    type: text
-  - name: areasTitle
-    label: Направления — заголовок
-    type: string
-  - name: areasLead
-    label: Направления — описание
-    type: text
-  - name: area1Title
-    label: Направление 1 — название
-    type: string
-  - name: area1Desc
-    label: Направление 1 — описание
-    type: text
-  - name: area2Title
-    label: Направление 2 — название
-    type: string
-  - name: area2Desc
-    label: Направление 2 — описание
-    type: text
-  - name: area3Title
-    label: Направление 3 — название
-    type: string
-  - name: area3Desc
-    label: Направление 3 — описание
-    type: text
-  - name: area4Title
-    label: Направление 4 — название
-    type: string
-  - name: area4Desc
-    label: Направление 4 — описание
-    type: text
-  - name: aboutTitle
-    label: Обо мне — заголовок
-    type: string
-  - name: aboutP1
-    label: Обо мне — абзац 1
-    type: text
-  - name: aboutP2
-    label: Обо мне — абзац 2
-    type: text
-  - name: credential1
-    label: Квалификация — название 1
-    type: string
-  - name: credential1Desc
-    label: Квалификация — описание 1
-    type: text
-  - name: credential2
-    label: Квалификация — название 2
-    type: string
-  - name: credential2Desc
-    label: Квалификация — описание 2
-    type: text
-  - name: processTitle
-    label: Процесс — заголовок
-    type: string
-  - name: processLead
-    label: Процесс — описание
-    type: text
-  - name: blogTitle
-    label: Блог — заголовок
-    type: string
-  - name: blogLead
-    label: Блог — описание
-    type: text
-  - name: reviewsTitle
-    label: Отзывы — заголовок
-    type: string
-  - name: reviewsLead
-    label: Отзывы — описание
-    type: text
-  - name: contactTitle
-    label: Контакты — заголовок
-    type: string
-  - name: contactLead
-    label: Контакты — описание
-    type: text
-  - name: faq1Q
-    label: FAQ 1 — вопрос
-    type: string
-  - name: faq1A
-    label: FAQ 1 — ответ
-    type: text
-  - name: faq2Q
-    label: FAQ 2 — вопрос
-    type: string
-  - name: faq2A
-    label: FAQ 2 — ответ
-    type: text
-  - name: faq3Q
-    label: FAQ 3 — вопрос
-    type: string
-  - name: faq3A
-    label: FAQ 3 — ответ
-    type: text
-  - name: faq4Q
-    label: FAQ 4 — вопрос
-    type: string
-  - name: faq4A
-    label: FAQ 4 — ответ
-    type: text
+  - name: meta
+    label: 'Вкладка браузера и поиск'
+    type: object
+    fields:
+    - name: title
+      label: 'Название страницы (имя добавится само)'
+      type: string
+    - name: description
+      label: 'Описание для поисковиков и соцсетей'
+      type: text
+  - name: hero
+    label: '1 · Главное фото'
+    type: object
+    fields:
+    - name: hint
+      label: 'Тихая подпись под фото'
+      type: string
+    - name: alt
+      label: 'Описание фото для скринридеров'
+      type: string
+  - name: quotes
+    label: '2 · Цитаты (проявляются «от руки»)'
+    type: object
+    fields:
+    - name: a
+      label: 'Первая цитата, сразу под фото'
+      description: 'Новая строка = перенос строки в цитате.'
+      type: text
+    - name: b
+      label: 'Вторая цитата (после «Почему спортсмены»)'
+      description: 'Черновик: замените своими словами.'
+      type: text
+    - name: c
+      label: 'Третья цитата (про перемены)'
+      type: text
+    - name: d
+      label: 'Финальная фраза внизу страницы'
+      type: text
+  - name: story
+    label: '3 · Об этом сайте'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: p1
+      label: 'Абзац 1'
+      type: text
+    - name: p2
+      label: 'Абзац 2 (про интуицию в спорте)'
+      type: text
+    - name: p3
+      label: 'Абзац 3'
+      type: text
+  - name: client
+    label: '4 · Для вас'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: l1
+      label: 'Строка 1'
+      type: text
+    - name: l2
+      label: 'Строка 2'
+      type: text
+    - name: l3
+      label: 'Строка 3'
+      type: text
+    - name: l4
+      label: 'Строка 4'
+      type: text
+    - name: note
+      label: 'Рукописная строка внизу'
+      type: text
+  - name: why
+    label: '5 · Почему я работаю со спортсменами'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: text
+      label: 'Текст'
+      type: text
+  - name: about
+    label: '6 · Обо мне (четыре кадра; сами фотографии загружаются в «Контакты, фото, имя»)'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: c1Title
+      label: 'Кадр 1 · заголовок'
+      type: string
+    - name: c1Text
+      label: 'Кадр 1 · текст'
+      type: text
+    - name: c2Title
+      label: 'Кадр 2 · заголовок'
+      type: string
+    - name: c2Text
+      label: 'Кадр 2 · текст'
+      type: text
+    - name: c3Title
+      label: 'Кадр 3 · заголовок'
+      type: string
+    - name: c3Text
+      label: 'Кадр 3 · текст'
+      type: text
+    - name: c4Title
+      label: 'Кадр 4 · заголовок'
+      type: string
+    - name: c4Text
+      label: 'Кадр 4 · текст'
+      type: text
+  - name: check
+    label: '7 · Проверка интуицией'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: l1
+      label: 'Строка 1'
+      type: text
+    - name: l2
+      label: 'Строка 2'
+      type: text
+    - name: l3
+      label: 'Строка 3'
+      type: text
+    - name: note1
+      label: 'Рукописная строка 1'
+      type: text
+    - name: note2
+      label: 'Рукописная строка 2'
+      type: text
+  - name: fork
+    label: '8 · Развилка: откликнулось / пока нет'
+    type: object
+    fields:
+    - name: lead
+      label: 'Первая фраза'
+      type: text
+    - name: voice
+      label: 'Рукописная строка 1'
+      type: string
+    - name: eyes
+      label: 'Рукописная строка 2 (про взгляд на фото)'
+      type: string
+    - name: yesTitle
+      label: 'Путь «откликнулось» · заголовок'
+      type: string
+    - name: yesText
+      label: 'Путь «откликнулось» · текст'
+      type: string
+    - name: yesButton
+      label: 'Путь «откликнулось» · кнопка'
+      type: string
+    - name: noTitle
+      label: 'Путь «пока нет» · заголовок'
+      type: string
+    - name: noText
+      label: 'Путь «пока нет» · текст'
+      type: string
+    - name: noButton
+      label: 'Путь «пока нет» · кнопка (закрывает страницу)'
+      type: string
+    - name: photoAlt
+      label: 'Описание фото для скринридеров'
+      type: string
+    - name: farewellTitle
+      label: 'Прощание · заголовок'
+      description: 'Показывается, если браузер не дал закрыть вкладку сам.'
+      type: string
+    - name: farewellText
+      label: 'Прощание · текст'
+      type: text
+    - name: farewellBack
+      label: 'Прощание · кнопка «вернуться»'
+      type: string
+  - name: change
+    label: '9 · Про перемены'
+    type: object
+    fields:
+    - name: title1
+      label: 'Блок 1 · заголовок'
+      type: string
+    - name: text1
+      label: 'Блок 1 · текст'
+      type: text
+    - name: title2
+      label: 'Блок 2 (гусеница и бабочка) · заголовок'
+      type: string
+    - name: text2
+      label: 'Блок 2 · текст'
+      type: text
+    - name: title3
+      label: 'Блок 3 (опора) · заголовок'
+      type: string
+    - name: text3
+      label: 'Блок 3 · текст'
+      type: text
+  - name: invite
+    label: '10 · Приглашение'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: text
+      label: 'Текст'
+      type: text
+    - name: button
+      label: 'Кнопка (ведёт к форме)'
+      type: string
+  - name: free
+    label: '11 · Первая встреча'
+    type: object
+    fields:
+    - name: number
+      label: 'Число в круге'
+      type: string
+    - name: unit
+      label: 'Единица (минут)'
+      type: string
+    - name: badge
+      label: 'Рукописная пометка (бесплатно)'
+      type: string
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: text
+      label: 'Текст'
+      type: text
+  - name: contact
+    label: '12 · Контакты и форма'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: lead
+      label: 'Текст под заголовком'
+      type: text
+    - name: linksTitle
+      label: 'Подзаголовок над прямыми контактами'
+      type: string
+    - name: formName
+      label: 'Поле «имя»'
+      type: string
+    - name: formReach
+      label: 'Поле «как связаться»'
+      type: string
+    - name: formMessage
+      label: 'Поле «сообщение»'
+      type: string
+    - name: formSend
+      label: 'Кнопка отправки'
+      type: string
+    - name: formSent
+      label: 'Сообщение после отправки'
+      type: text
+    - name: formNote
+      label: 'Мелкая пометка под формой'
+      type: text
+  - name: faq
+    label: '13 · Вопросы и ответы'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: lead
+      label: 'Текст под заголовком'
+      type: text
+    - name: q1
+      label: 'Вопрос 1'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a1
+      label: 'Ответ 1'
+      type: text
+    - name: q2
+      label: 'Вопрос 2'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a2
+      label: 'Ответ 2'
+      type: text
+    - name: q3
+      label: 'Вопрос 3'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a3
+      label: 'Ответ 3'
+      type: text
+    - name: q4
+      label: 'Вопрос 4'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a4
+      label: 'Ответ 4'
+      type: text
+    - name: q5
+      label: 'Вопрос 5'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a5
+      label: 'Ответ 5'
+      type: text
+    - name: q6
+      label: 'Вопрос 6'
+      description: 'Оставьте пустым, чтобы скрыть этот вопрос.'
+      type: string
+    - name: a6
+      label: 'Ответ 6'
+      type: text
+  - name: notes
+    label: '14 · Заметки (раздел виден, только если есть опубликованные статьи)'
+    type: object
+    fields:
+    - name: title
+      label: 'Заголовок'
+      type: string
+    - name: lead
+      label: 'Текст под заголовком'
+      type: text
+  - name: footer
+    label: '15 · Подвал'
+    type: object
+    fields:
+    - name: line
+      label: 'Короткая фраза'
+      type: string
