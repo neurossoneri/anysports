@@ -5,85 +5,130 @@
   },
   "hero": {
     "hint": "faites défiler doucement",
-    "alt": "Portrait"
+    "alt": "Une femme souriante au bord de la mer au crépuscule, les bras grands ouverts",
+    "quote1": "L’intuition est une autre forme d’intelligence.",
+    "quote2": "Il y a des choses que l’on ne peut connaître qu’en s’écoutant de l’intérieur."
   },
   "quotes": {
     "a": "Tu ne peux contrôler que toi-même.\nLe reste ne dépend pas de toi.",
-    "b": "Dans le sport, le corps sait souvent avant que l’esprit puisse l’expliquer.",
-    "c": "Tu n’as pas à tout comprendre en solitaire.",
-    "d": "L’intuition est une autre forme d’intelligence.\nIl y a des choses que l’on ne découvre de soi qu’en s’écoutant."
+    "b": "Tout ne se comprend pas par la logique,\net il n’est pas nécessaire que tout se comprenne.",
+    "c": "Souvent, la transformation ne nous mène pas vers quelque chose de nouveau :\nelle nous ramène à nous-mêmes.",
+    "d": "L’intuition est une autre forme d’intelligence."
   },
   "story": {
-    "title": "Ce site est conçu autrement. Comme mon travail.",
-    "p1": "Ici, pas de méthode, pas d’entonnoir, pas de belles promesses. Tout repose sur une seule chose : l’intuition.",
-    "p2": "Dans le sport, il y a une seconde avant la décision. Le joueur sent où ira le ballon avant même que cela se voie. Le sportif comprend qu’il faut ralentir aujourd’hui, bien avant que le corps ne le signale. On appelle cela le flair, le sens du jeu, la voix intérieure.",
-    "p3": "On ne peut ni la mesurer ni la ranger dans un tableau, alors on en parle rarement. Pourtant, au plus haut niveau, c’est elle qui distingue ceux qui suivent un plan de ceux qui s’écoutent et saisissent l’instant. C’est pourquoi je commence par là."
+    "title": "L’intuition est pour tout le monde, alors pourquoi cette page est-elle créée spécialement pour les sportifs ?",
+    "p1": "Parce que je crois que l’intuition est essentielle dans le sport.",
+    "p2": "Au fil de leur carrière, les sportifs vivent souvent un lien puissant avec leur intuition. Au moins une fois, tout athlète de compétition a connu des moments où il sait instinctivement quelque chose qui va au-delà de la prochaine étape logique, des consignes de l’entraîneur ou d’une stratégie convenue.",
+    "p3": "L’élan, l’instinct, le sens du jeu — peu importe le nom qu’on lui donne.",
+    "p4": "Ils apportent un sentiment immédiat de fluidité et de clarté — un basculement intérieur qui change la réalité extérieure.",
+    "p5": "La durée et la profondeur de ce lien déterminent souvent la capacité d’un sportif à retourner une situation difficile en sa faveur, à rester présent et créatif, et à prendre plaisir à sa performance."
   },
   "client": {
-    "title": "Cette conversation est pour vous si…",
-    "l1": "vous êtes dans le sport depuis des années et sentez que quelque chose a bougé en vous",
-    "l2": "les anciennes réponses ne conviennent plus et les nouvelles ne sont pas encore là",
-    "l3": "vous en avez assez de vous expliquer pourquoi il « faut »",
-    "l4": "vous n’avez pas besoin d’un nouveau plan, mais de vous entendre",
-    "note": "Si une seule ligne a résonné, vous n’êtes peut-être pas ici par hasard."
+    "title": "Ce que nous pouvons explorer ensemble",
+    "intro": "Se relier plus profondément à son intuition peut aider les sportifs à traverser le sport comme la vie avec plus de conscience, d’équilibre et de confiance en eux. Voici quelques exemples de ce que nous pouvons explorer.",
+    "l1": "La pression de la performance",
+    "l1t": "Rester relié au processus plutôt que de se focaliser sur le résultat.",
+    "l2": "Votre voix intérieure",
+    "l2t": "La distinguer des peurs, du bavardage mental et des attentes extérieures.",
+    "l3": "Votre corps",
+    "l3t": "Construire avec lui une relation plus profonde et apprendre à remarquer ce qu’il vous dit.",
+    "l4": "L’incertitude et le changement",
+    "l4t": "Accepter les périodes d’incertitude, de crise, de repos, de croissance et de changement comme des parties naturelles du chemin de chacun.",
+    "l5": "L’authenticité",
+    "l5t": "S’exprimer au-delà de la pression sociale et des idées rigides sur ce qui est bien ou mal, possible ou impossible.",
+    "l6": "Une vie au-delà du sport",
+    "l6t": "Tourner son attention et son énergie vers d’autres aspects importants de la vie et développer une identité qui ne se réduit pas au sport.",
+    "l7": "D’abord se faire confiance",
+    "l7t": "Écouter les conseils de la famille, des amis, des entraîneurs, des médecins et d’autres experts — et les confronter aussi à soi-même.",
+    "note": "Si l’un de ces thèmes vous parle, vous pouvez poursuivre la lecture."
   },
   "why": {
-    "title": "Parce que le sport est une conversation honnête avec soi-même",
-    "text": "Chaque jour, le sportif se retrouve face à lui-même : la pression, le doute, la joie, sa propre limite. Impossible de se cacher derrière les mots — le corps dit tout.\nCe monde m’est proche : je le connais de l’intérieur. Et c’est ici que j’ai envie d’être aux côtés des gens."
+    "title": "Je ne suis pas sportive moi-même, mais le sport a toujours fait partie de ma vie",
+    "text": "Des clubs sportifs amateurs de mon enfance au statut de fan passionnée, puis au poste de Competition Manager dans les plus grandes organisations sportives du monde, mon parcours m’a fait traverser de nombreuses facettes du sport.\n\nEn chemin, j’ai rencontré des sportifs à différents stades de leur carrière, d’horizons, d’expériences et de niveaux de réussite très divers. C’est là, je crois, que j’ai commencé à les comprendre plus profondément — et à vouloir mettre mon énergie au service de leur accompagnement."
   },
   "about": {
-    "title": "Un peu de moi",
-    "c1Title": "Dix ans à la FIFA",
-    "c1Text": "Pendant dix ans, j’ai travaillé à la FIFA : le sport de haut niveau, de grands objectifs, des plans précis.",
-    "c2Title": "Le moment où j’ai écouté",
-    "c2Text": "Puis j’ai décidé de changer de métier — par intuition. Pas selon un plan ni un tableau, mais parce que quelque chose en moi me le disait.",
-    "c3Title": "Les réponses que je cherche encore",
-    "c3Text": "Je n’ai pas de réponses toutes faites. Je les cherche encore, pour moi : je me pose des questions, je me trompe, j’écoute.",
-    "c4Title": "Et je veux vous aider",
-    "c4Text": "Ce que je trouve, j’ai envie de le partager. Si vous cherchez aussi, cherchons ensemble."
+    "title": "Mon histoire",
+    "c1Title": "Le sport, depuis toujours",
+    "c1Text": "Le sport fait partie de ma vie depuis l’enfance : les clubs amateurs, puis la fan passionnée. Pendant dix ans à la FIFA, j’ai contribué à l’organisation des Coupes du monde de football et de nombreux événements associés.",
+    "c1Alt": "Une femme souriante en haut rose au bord de la mer",
+    "c2Title": "« Assez »",
+    "c2Text": "Il y a quelques années, j’ai décidé de changer de direction — sans plan, et sans autre plan en main. Quelque chose en moi a simplement dit « assez ». J’ai fait une pause, et mon attention s’est déplacée de la validation extérieure et d’un « super travail » vers la réflexion et l’exploration intérieures.",
+    "c2Alt": "Une femme près d’une clôture en bois, parmi les herbes des dunes, regardant sur le côté",
+    "c3Title": "Explorer",
+    "c3Text": "J’ai exploré la psychologie, les pratiques corporelles et énergétiques, des approches alternatives de soin et les philosophies anciennes. Je suis allée plus loin dans ma propre expérience, j’ai expérimenté, et peu à peu découvert de nouvelles façons de me comprendre.",
+    "c3Alt": "Une femme assise dans l’herbe sèche, dans la lumière chaude du soir",
+    "c4Title": "Apprendre à me faire confiance",
+    "c4Text": "J’ai toujours été intuitive, déjà enfant, mais ma sensibilité était souvent écartée ou vue comme une faiblesse dans ma famille ; je n’ai donc pas appris à lui faire confiance. Ces dernières années, j’ai dégagé ma voix intérieure des couches de conditionnement familial et d’attentes sociales. Je me fais plus profondément confiance et dépends moins de la validation extérieure et du besoin constant de contrôle et de sécurité. Ma vie en est devenue plus légère et plus heureuse.",
+    "c4Alt": "Une femme souriante en haut blanc au bord de la mer",
+    "note": "Ce chemin continue — et je veux soutenir les autres dans leur propre quête d’épanouissement et de bonheur."
   },
   "check": {
     "title": "Maintenant, écoutez-vous",
-    "l1": "Vous avez regardé les photos et lu comment j’en suis arrivée là.",
-    "l2": "Maintenant, écoutez votre intuition.",
-    "l3": "Quelque chose a-t-il résonné ? Avez-vous envie d’échanger ?",
-    "note1": "Sinon, vous pouvez fermer cette page. Et c’est tout à fait normal.",
-    "note2": "Choisir par intuition, c’est normal. Tout ce site parle exactement de cela."
+    "l1": "Vous avez vu mes photographies. Vous avez lu mon histoire.",
+    "l2": "Prenez maintenant un instant pour vous écouter.",
+    "l3": "Quelque chose résonne-t-il ? Avez-vous envie d’échanger ?",
+    "note1": "Sinon, c’est tout à fait normal aussi.",
+    "note2": "Voyez-y un premier petit test de votre intuition."
   },
   "fork": {
-    "lead": "Si vous êtes ici, c’est que quelque chose vous y a déjà conduit.",
-    "voice": "Écoutez votre voix.",
-    "eyes": "Regardez-moi dans les yeux sur la photo.",
-    "yesTitle": "Ça a résonné",
-    "yesText": "Alors nous pouvons travailler plus en profondeur.",
-    "yesButton": "Lire la suite",
-    "noTitle": "Pas pour l’instant",
+    "lead": "Prenez un instant.",
+    "voice": "Regardez la photographie. Remarquez ce qui monte en vous.",
+    "eyes": "Il n’y a pas de bonne réponse.",
+    "yesTitle": "Quelque chose résonne.",
+    "yesText": "J’aimerais en savoir plus.",
+    "yesButton": "Continuer",
+    "noTitle": "Je ne ressens pas de lien pour l’instant.",
     "noText": "C’est tout à fait normal.",
-    "noButton": "Fermer la page",
-    "photoAlt": "Portrait en gros plan",
+    "noButton": "Pas maintenant",
+    "photoAlt": "Portrait en gros plan : une partie du visage d’une femme, regardant l’objectif",
     "farewellTitle": "Merci de votre visite",
-    "farewellText": "Faites confiance à ce que vous avez ressenti. Vous pouvez fermer la page — ou revenir si l’envie vous en prend.",
-    "farewellBack": "Revenir à la page"
+    "farewellText": "Faites confiance à ce que vous avez ressenti. Vous pouvez terminer votre visite ici, ou continuer à explorer le site.",
+    "farewellEnd": "Terminer ma visite",
+    "farewellDone": "Merci pour votre temps. Vous pouvez fermer cet onglet quand vous le souhaitez.",
+    "farewellBack": "Continuer à explorer"
+  },
+  "sessions": {
+    "title": "Séances d’intuition",
+    "lead": "Un espace pour développer la capacité de se relier à soi, d’écouter sa voix intérieure et de reconnaître ce qu’elle dit.",
+    "h1": "Elle parle différemment à chacun",
+    "p1": "Pour certains, l’intuition vient comme une sensation au ventre ou dans le cœur ; pour d’autres, comme une voix, une image, un éclair soudain de compréhension, ou même quelque chose qui apparaît en rêve. Parfois elle arrive instantanément et clairement ; d’autres fois elle est subtile et demande du silence, de la patience et de l’attention pour être remarquée.",
+    "h2": "Là où nous commençons",
+    "p2": "Notre travail commence par explorer ce que l’intuition signifie pour vous : comment vous la percevez naturellement, comment elle se manifeste dans différentes situations, et ce qui vous aide à reconnaître ses signaux. Vous apprenez à remarquer, distinguer et interpréter ces messages, tout en développant la confiance nécessaire pour vous fier à vos propres perceptions.",
+    "h3": "Pas seulement des réponses",
+    "p3": "L’intuition peut nous reconnecter à notre vérité intérieure : nos valeurs, ce qui nous rend heureux, ce que nous voulons de la vie et la façon dont nous souhaitons la traverser. Pourtant, ce chemin ne consiste pas seulement à comprendre et à trouver des réponses. Il s’agit aussi d’apprendre à accepter l’inconnu, l’imprévisible et l’incontrôlable. Lâcher les limites qui empêchent votre alignement intérieur et votre contentement est l’une des rares compétences que nous pratiquons.",
+    "h4": "Comment se déroulent les séances",
+    "p4": "Ces séances sont menées de façon intuitive et individuelle. Il n’existe pas de programme prédéfini conçu pour tout le monde. Mon approche ne repose pas sur des études scientifiques ni sur des concepts établis, mais elle ne cherche pas non plus à nier ou à exclure un point de vue particulier.",
+    "p5": "Ce n’est ni du conseil psychologique ni du mental training classique, même si nous pouvons toucher à certains éléments de ces méthodes. Les séances se déroulent en général naturellement, instinctivement : votre intuition nous conduira là où votre attention et votre conscience sont le plus nécessaires.",
+    "note": "Les séances ne remplacent ni les soins médicaux ni une thérapie psychologique.",
+    "bring": "Comme pour toute nouvelle expérience, la curiosité, le courage, l’ouverture et la confiance sont essentiels. Apportez surtout l’envie d’explorer, de vivre quelque chose de nouveau et de découvrir votre beauté intérieure."
   },
   "change": {
-    "title1": "Quand quelque chose commence à changer en vous",
-    "text1": "Quand on pratique longtemps la même activité, il vient un moment où tout commence à bouger à l’intérieur. Et on ne comprend pas toujours pourquoi.\nNous nous accrochons à ce qui est familier : cela semble sûr, même quand cela ne nous convient plus. Résister au changement est naturel : nous ne savons pas ce qui se trouve de l’autre côté.",
-    "title2": "De la chenille au papillon",
-    "text2": "Le chemin du changement n’est pas toujours agréable. Parfois, il faut lâcher ce qui nous définissait, et il faut du temps pour que la nouvelle forme devienne lisible.",
-    "title3": "Trouver un appui",
-    "text3": "Votre entourage peut ne pas vous comprendre. À ces moments-là, il est particulièrement important de trouver un appui à l’extérieur : quelqu’un qui sait écouter."
+    "title": "Transformation",
+    "s1Title": "Cela commence avant que nous soyons prêts",
+    "s1Text": "La transformation commence souvent indépendamment de notre préparation ou de notre désir. À un certain moment de la vie, nous sentons que quelque chose change — d’abord en nous.\n\nAu début, nous écartons ces changements, les appelant des humeurs ou des phases passagères, pensant qu’une fois que quelque chose d’extérieur aura changé, tout redeviendra normal.",
+    "s2Title": "Nous changeons",
+    "s2Text": "Mais à un moment, nous réalisons que cela ne va pas simplement passer. Nous ne pouvons ni le fuir ni continuer à le nier. La première étape est de reconnaître la vérité : nous changeons.",
+    "s3Title": "Quand les choses perdent leur force",
+    "s3Text": "On reconnaît cette étape quand ce qui comptait autrefois perd sa force : ce qui apportait joie, sens et satisfaction ne le fait plus. Il y a une confusion intérieure, un vide où rien ne semble vivant ni porteur de sens.",
+    "s4Title": "L’attrait du familier",
+    "s4Text": "Nous cherchons le familier : il rassure, même quand il ne nous convient plus. Résister au changement est naturel — nous ne savons pas ce qui se trouve de l’autre côté.\n\nCet inconfort est difficile à supporter longtemps. Certains y parviennent, mais souvent le chemin le plus simple est de lui faire face — d’accueillir ce qui émerge, d’embrasser la transformation.",
+    "bTitle": "Retrouver ce qui nous ressemble",
+    "bText": "Après des années de conseils parentaux, d’éducation et de conditionnement social, nous nous éloignons souvent de qui nous sommes vraiment. La transformation nous pousse à prendre du recul et à retrouver ce qui nous ressemble vraiment.\n\nCe travail est difficile et exigeant.",
+    "mTitle": "Ne pas être compris",
+    "mText": "À ce stade, la pression sociale est forte. Les gens donnent des conseils bien intentionnés : continue d’essayer, va voir un thérapeute, change de travail, trouve une nouvelle relation. Ces changements peuvent distraire, mais finalement vous retrouverez les mêmes vérités intérieures.\n\nCette aliénation, ce sentiment de ne pas être compris, est profondément difficile.",
+    "wTitle": "Une présence stable",
+    "wText": "Ce que je propose, c’est simplement d’être un témoin — une présence stable pendant que vous traversez ces changements, pour normaliser ce que vous ressentez. C’est un travail profond et individuel, mais chacun a parfois besoin d’une main à tenir dans ces moments. Bien sûr, ce n’est pas une main sur laquelle on s’appuie pour toujours. Une grande partie du chemin se fait seul, mais un ami, un témoin, un guide — quelqu’un qui peut nommer votre expérience comme légitime — peut faire toute la différence.\n\nJe parle depuis mon propre chemin, et ce que je propose, c’est d’être cette main, ce témoin, peut-être même ce guide, quand vous en avez besoin.",
+    "wNote": "Si vous marchez sur ce chemin sans avoir ce soutien, vous pouvez me contacter."
   },
   "invite": {
-    "title": "Je peux vous aider à parcourir ce chemin",
-    "text": "Je vous accompagnerai sur le chemin du changement. Si vous le souhaitez, écrivez-moi.",
-    "button": "Me contacter"
+    "title": "Si quelque chose ici résonne, nous pouvons commencer par une conversation.",
+    "button": "M’écrire"
   },
   "free": {
     "number": "30",
     "unit": "minutes",
-    "badge": "gratuit",
-    "title": "Le premier rendez-vous est une simple conversation",
-    "text": "Nous échangeons, sans aucun engagement. Chacun écoute sa propre intuition. Ensuite, nous saurons si nous avons envie de continuer."
+    "title": "Les 30 premières minutes sont gratuites",
+    "text": "Nous pouvons simplement nous rencontrer, parler et écouter.\n\nIl n’y a aucune obligation de poursuivre. Nous déciderons tous les deux si cela nous convient de travailler ensemble."
   },
   "contact": {
     "title": "Écrivez-moi",
@@ -91,32 +136,37 @@
     "linksTitle": "Ou directement",
     "formName": "Votre prénom",
     "formReach": "Comment vous joindre (e-mail, Telegram ou WhatsApp)",
-    "formMessage": "Quelques mots sur ce qui a résonné (facultatif)",
+    "formMessage": "Qu’est-ce qui vous a amené ici ? (facultatif)",
     "formSend": "Envoyer",
-    "formSent": "Merci. J’ai bien reçu votre message et je vous répondrai bientôt.",
+    "formSent": "Merci. Votre message a bien été envoyé.",
     "formNote": "Votre message arrivera dans ma boîte mail. Merci de ne pas y partager d’informations médicales ou sensibles."
   },
   "faq": {
     "title": "Questions et réponses",
     "lead": "Si quelque chose reste flou, la réponse est peut-être ici.",
-    "q1": "Comment se passe le premier rendez-vous ?",
-    "a1": "C’est une conversation de 30 minutes, gratuite et sans engagement. Nous échangeons simplement et chacun écoute son intuition. Ensuite, nous décidons ensemble de poursuivre ou non.",
-    "q2": "Faut-il se préparer ?",
-    "a2": "Non. Vous pouvez venir avec un seul mot ou une seule sensation, même si vous ne savez pas encore l’expliquer.",
-    "q3": "Combien coûte la suite ?",
-    "a3": "Le premier rendez-vous est gratuit. Nous parlerons du format et des conditions ensuite, calmement et sans pression.",
-    "q4": "Peut-on se rencontrer à distance ?",
-    "a4": "Vous pouvez indiquer votre préférence dans votre message. Les rendez-vous en présentiel sont confirmés individuellement.",
-    "q5": "Puis-je demander un accompagnement pour mon enfant ?",
-    "a5": "Vous pouvez m’écrire. Les conditions d’accompagnement des mineurs, la place des parents et les consentements nécessaires sont précisées avant toute séance.",
-    "q6": "Les échanges restent-ils confidentiels ?",
-    "a6": "J’explique les règles de confidentialité et de traitement des données avant de commencer, et vous pouvez poser toutes vos questions."
+    "q1": "Comment se passe le premier échange ?",
+    "a1": "Les 30 premières minutes sont gratuites. Nous pouvons simplement nous rencontrer, parler et écouter. Rien ne vous oblige à poursuivre — nous déciderons tous les deux si cela nous convient de travailler ensemble.",
+    "q2": "Qu’est-ce qu’une séance d’intuition ?",
+    "a2": "C’est un espace pour développer la capacité de se relier à soi, d’écouter sa voix intérieure et de reconnaître ce qu’elle dit. Notre travail commence par explorer ce que l’intuition signifie pour vous : comment vous la percevez naturellement et ce qui vous aide à reconnaître ses signaux.",
+    "q3": "Y a-t-il un programme ou une méthode ?",
+    "a3": "Il n’existe pas de programme prédéfini conçu pour tout le monde. Les séances sont menées de façon intuitive et individuelle. Mon approche ne repose pas sur des études scientifiques ni sur des concepts établis, mais elle ne cherche pas non plus à nier ou à exclure un point de vue particulier.",
+    "q4": "Est-ce du conseil psychologique ?",
+    "a4": "Non. Ce n’est ni du conseil psychologique ni du mental training classique, même si nous pouvons toucher à certains éléments de ces méthodes. Les séances ne remplacent ni les soins médicaux ni une thérapie psychologique.",
+    "q5": "Quelle différence entre une séance d’intuition et l’accompagnement de transformation ?",
+    "a5": "Les séances d’intuition consistent à apprendre à remarquer, distinguer et faire confiance à sa propre intuition. L’accompagnement de transformation consiste à offrir une présence stable — un témoin, et peut-être un guide — pendant que quelque chose change en vous. Ce qui correspond le mieux à vos besoins, nous pouvons l’explorer lors du premier échange.",
+    "q6": "Que dois-je apporter ?",
+    "a6": "De la curiosité, du courage, de l’ouverture et de la confiance. Surtout l’envie d’explorer, de vivre quelque chose de nouveau et de découvrir votre beauté intérieure.",
+    "q7": "",
+    "a7": "",
+    "q8": "",
+    "a8": ""
   },
   "notes": {
     "title": "Notes",
     "lead": "De courtes réflexions sur le sport, l’intuition et le changement."
   },
   "footer": {
-    "line": "Écoutez-vous."
+    "line": "Écoutez-vous.",
+    "privacy": "Ce site n’utilise ni analyse d’audience ni suivi, et n’enregistre pas ce que vous choisissez en lisant. Vos préférences de langue et de thème restent dans votre propre navigateur. Si vous m’écrivez, votre prénom et votre message ne servent qu’à vous répondre."
   }
 }

@@ -405,7 +405,131 @@
       .mm .s3 { opacity:1; }
       .quote-stroke path { stroke-dashoffset:0; }
       .scroll-progress { animation:none!important; }
+    }    /* intuition-update:begin */
+    /* ---------- Intuition update: opening, composition ---------- */
+    .hero-photo::after { content:""; position:absolute; inset:0; z-index:1; pointer-events:none; background:linear-gradient(180deg,rgba(12,28,48,.60),rgba(12,28,48,.16) 44%,rgba(12,28,48,0) 68%); }
+    .hero-photo > img { object-position:50% 58%; }
+    .hero-quote { position:absolute; z-index:2; inset:clamp(22px,4.6vw,60px) clamp(64px,11vw,170px) auto clamp(56px,8vw,112px); display:flex; justify-content:space-between; align-items:flex-start; gap:clamp(20px,4vw,56px); color:#fff; text-shadow:0 2px 26px rgba(8,20,40,.5); pointer-events:none; }
+    .hero-q1 { flex:0 1 54%; font:500 clamp(2rem,4.7vw,4.5rem)/1.06 var(--serif); letter-spacing:-.03em; animation:riseIn 1.8s var(--ease) .9s both; }
+    .hero-q2 { flex:0 1 25%; margin-top:.5em; text-align:right; font:italic 400 clamp(1rem,1.7vw,1.4rem)/1.5 var(--serif); opacity:.94; animation:riseIn 1.8s var(--ease) 1.6s both; }
+    .hero-photo { overflow:hidden; }
+    .eyes img { object-position:84% 36%; }
+
+    /* ---------- The two choices are equal in size, weight and colour ---------- */
+    .paths { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; }
+    .path-yes, .path-no { background:var(--glass-bright); margin-top:0; border-radius:38px; }
+    .path-no:hover, .path-yes:hover { background:linear-gradient(135deg,var(--glass-bright),var(--soft-green)); }
+    .path em { align-self:end; }
+
+    /* ---------- Atmospheric quotation with an optional photograph ---------- */
+    .quote-bg { position:absolute; inset:0; z-index:-2; border-radius:inherit; box-shadow:none; background:none; }
+    .quote-card:has(.quote-bg.has-photo) { color:#fff; }
+    .quote-card:has(.quote-bg.has-photo)::before { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(12,28,48,.32),rgba(12,28,48,.58)); }
+    .quote-card:has(.quote-bg.has-photo) i { display:none; }
+    .quote-card:has(.quote-bg.has-photo) .quote-text { color:#fff; text-shadow:0 2px 24px rgba(8,20,40,.5); }
+    .quote-card:has(.quote-bg.has-photo) .quote-stroke path { stroke:rgba(255,255,255,.8); }
+
+    /* ---------- Intuition in sport ---------- */
+    .story .title { font-size:clamp(1.85rem,3.9vw,3rem); max-width:19em; }
+    .story-body { max-width:700px; }
+    .story-pull { margin:clamp(34px,6vw,76px) 0; font:500 clamp(2rem,4.6vw,3.7rem)/1.12 var(--hand); color:var(--blue-deep); max-width:14em; }
+
+    /* ---------- What we can explore: fragments at uneven offsets ---------- */
+    .client-head { max-width:720px; }
+    .threads { list-style:none; margin:clamp(44px,7vw,96px) 0 0; padding:0; display:grid; gap:clamp(30px,5vw,66px); }
+    .thread { position:relative; max-width:min(540px,100%); padding-left:26px; }
+    .thread::before { content:""; position:absolute; left:0; top:.7em; width:10px; height:10px; border-radius:50%; background:var(--mint); box-shadow:0 0 0 6px var(--soft-green); }
+    .thread strong { display:block; font:500 clamp(1.4rem,2.5vw,2.1rem)/1.2 var(--serif); letter-spacing:-.015em; }
+    .thread span { display:block; margin-top:8px; max-width:44ch; color:var(--text-muted); font-size:clamp(.98rem,1.3vw,1.08rem); line-height:1.75; }
+    .thread:nth-child(2) { margin-left:clamp(0px,18vw,260px); }
+    .thread:nth-child(3) { margin-left:clamp(0px,6vw,80px); }
+    .thread:nth-child(4) { margin-left:clamp(0px,30vw,430px); }
+    .thread:nth-child(5) { margin-left:clamp(0px,12vw,170px); }
+    .thread:nth-child(6) { margin-left:clamp(0px,24vw,340px); }
+    .thread:nth-child(7) { max-width:30em; margin:clamp(20px,4vw,60px) auto 0; padding-left:0; text-align:center; }
+    .thread:nth-child(7)::before { display:none; }
+    .thread:nth-child(7) strong { font:500 clamp(2rem,4.6vw,3.6rem)/1.12 var(--hand); color:var(--blue-deep); }
+    .thread:nth-child(7) span { margin-inline:auto; }
+    .client-note { margin-top:clamp(56px,8vw,110px); font-size:clamp(1.4rem,2.6vw,2rem); }
+
+    /* ---------- My story ---------- */
+    .c1 img { object-position:50% 30%; }
+    .c2 img { object-position:75% 52%; transform:scale(1.5); transform-origin:75% 52%; }
+    .c3 img { object-position:60% 40%; }
+    .c4 { grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); align-items:end; justify-items:stretch; }
+    .c4 .photo { order:2; width:min(100%,440px); aspect-ratio:4/5; justify-self:end; border-radius:var(--r-cloud); }
+    .c4 .chap-text { width:auto; margin:0; padding:clamp(24px,4vw,44px); border-radius:44px; justify-self:start; }
+    .c4 img { object-position:50% 26%; }
+    .about-note { margin:clamp(70px,10vw,140px) auto 0; max-width:19em; text-align:center; font:500 clamp(1.7rem,3.2vw,2.5rem)/1.3 var(--hand); color:var(--blue-deep); }
+
+    /* ---------- Intuition sessions ---------- */
+    .sessions-head { max-width:860px; }
+    .sessions-lead { max-width:24em; font:400 clamp(1.5rem,3vw,2.4rem)/1.35 var(--serif); letter-spacing:-.01em; }
+    .s-flow { display:grid; gap:clamp(56px,9vw,130px); margin-top:clamp(56px,9vw,120px); }
+    .s-block { max-width:540px; }
+    .s-block h3 { font:500 clamp(1.4rem,2.4vw,1.9rem)/1.25 var(--serif); margin-bottom:12px; }
+    .s-block h3::before { content:""; display:block; width:34px; height:34px; margin-bottom:16px; border-radius:var(--r-leaf); background:linear-gradient(135deg,var(--soft-blue),var(--soft-green)); }
+    .s-block p { color:var(--text-muted); line-height:1.9; font-size:clamp(1.02rem,1.4vw,1.14rem); }
+    .s1 { margin-left:clamp(0px,8vw,120px); }
+    .s2 { margin-left:auto; margin-right:clamp(0px,6vw,90px); }
+    .s3 { margin-left:clamp(0px,22vw,320px); }
+    .s-honest { display:grid; gap:16px; max-width:780px; margin:clamp(70px,11vw,150px) auto 0; padding:clamp(28px,5vw,56px); border-radius:56px 28px 56px 28px; }
+    .s-honest h3 { font:500 clamp(1.5rem,2.6vw,2rem)/1.25 var(--serif); }
+    .s-honest p { color:var(--text-muted); line-height:1.85; }
+    .s-honest .s-note { font-size:.92rem; color:var(--text); }
+    .s-bring { max-width:24em; margin:clamp(60px,9vw,120px) auto 0; text-align:center; font:italic 400 clamp(1.3rem,2.5vw,1.9rem)/1.5 var(--serif); color:var(--blue-deep); }
+
+    /* ---------- Transformation: a darker, slower scene ---------- */
+    .change { width:min(1240px,calc(100% - 24px)); margin:clamp(30px,6vw,90px) auto; isolation:isolate; overflow:hidden; color:#eef4fc; background:linear-gradient(165deg,#131f33,#1b2f4a 52%,#1f3a4c); border-radius:clamp(56px,10vw,150px) clamp(40px,6vw,90px); box-shadow:var(--shadow-strong); }
+    .change .container { position:relative; display:block; }
+    .change .title { color:#fff; max-width:12em; }
+    .change .shift { position:absolute; right:-4%; top:2%; width:min(44%,420px); opacity:.55; z-index:-1; }
+    .scene { max-width:540px; margin-top:clamp(56px,9vw,130px); }
+    .scene h3 { margin-bottom:16px; font:500 clamp(1.7rem,3.4vw,2.7rem)/1.15 var(--serif); letter-spacing:-.02em; color:#fff; }
+    .scene p { color:rgba(232,241,252,.84); line-height:1.9; font-size:clamp(1.04rem,1.5vw,1.2rem); }
+    .sc2 { margin-left:auto; }
+    .sc3 { margin-left:clamp(0px,9vw,130px); }
+    .sc4 { margin-left:auto; margin-right:clamp(0px,5vw,70px); }
+    .support .container { display:block; position:relative; }
+    .support .ripple { right:-6%; top:-20%; --s:clamp(240px,40vw,480px); }
+    .support-body { max-width:600px; margin-left:clamp(0px,14vw,200px); }
+    .witness .container { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); gap:clamp(28px,6vw,96px); align-items:center; }
+    .witness-body { max-width:600px; }
+    .witness-note { margin-top:clamp(28px,4vw,44px); font:500 clamp(1.5rem,2.6vw,2rem)/1.35 var(--hand); color:var(--blue-deep); }
+
+    /* ---------- Invitation: quiet, not a funnel ---------- */
+    .invite .title { max-width:16em; margin-inline:auto; }
+    .button-primary { background:linear-gradient(110deg,#5878ad,#6a97a6 58%,#78a896); box-shadow:0 14px 34px -22px rgba(40,90,130,.6); }
+    .footer-privacy { margin-top:14px; max-width:64ch; font-size:.8rem; line-height:1.6; color:var(--text-muted); }
+
+    .field input[aria-invalid="true"] { border-color:#b64c56; box-shadow:0 0 0 3px rgba(182,76,86,.18); }
+
+    /* ---------- Calm farewell ---------- */
+    .farewell-card p { margin-bottom:28px; }
+    .farewell-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; }
+
+    @media (max-width:900px) {
+      .c4 { grid-template-columns:1fr; }
+      .c4 .photo { order:0; width:min(82%,380px); aspect-ratio:4/5; justify-self:end; }
+      .c4 .chap-text { width:92%; margin-top:-44px; justify-self:start; }
+      .witness .container { grid-template-columns:1fr; }
+      .support-body { margin-left:0; }
+      .change .shift { opacity:.35; }
     }
+    @media (max-width:700px) {
+      .hero-photo::after { display:none; }
+      .hero-quote { position:static; display:grid; gap:14px; padding:clamp(20px,6vw,32px) 10px 0; color:var(--text); text-shadow:none; }
+      .hero-tag { position:static; width:max-content; max-width:100%; margin:18px 10px 0; transform:none; }
+      .hero-q1 { font-size:clamp(2rem,9vw,2.7rem); }
+      .hero-q2 { margin:0; text-align:left; font-size:1.1rem; color:var(--text-muted); }
+      .paths { grid-template-columns:1fr; }
+      .change { padding-inline:clamp(8px,4vw,24px); }
+      .thread:nth-child(n+2):nth-child(-n+6) { margin-left:clamp(0px,7vw,28px); }
+      .s1, .s2, .s3 { margin-inline:0; }
+      .sc2, .sc3, .sc4 { margin-inline:0; }
+      .change { border-radius:48px 36px; }
+    }
+    /* intuition-update:end */
   </style>
 </head>
 <body>
@@ -430,28 +554,31 @@
   </header>
 
   <main id="main" tabindex="-1">
-    <!-- 1. The photograph arrives first -->
+    <!-- 1. Opening: the encounter. The quotation and the photograph form one composition. -->
     <section class="hero" id="hero">
-      <h1 class="sr-only" data-i18n="meta.title"></h1>
       <div class="hero-stage">
         <figure class="photo hero-photo">
           <img data-photo="portrait" data-i18n-alt="hero.alt" alt="" fetchpriority="high" decoding="async">
           <div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="32" cy="22" r="10"/><path d="M10 58c1-14 9-22 22-22s21 8 22 22"/></svg><span data-i18n="photoSoon"></span></div>
         </figure>
+        <div class="hero-quote">
+          <h1 class="hero-q1" data-i18n="hero.quote1"></h1>
+          <p class="hero-q2" data-i18n="hero.quote2"></p>
+        </div>
         <div class="hero-tag glass"><strong data-i18n="portraitName"></strong><span data-i18n="portraitJob"></span></div>
       </div>
       <p class="hero-hint"><i aria-hidden="true"></i><span data-i18n="hero.hint"></span></p>
     </section>
 
-    <!-- 2. Her quote -->
+    <!-- 2. Atmospheric pause (optional landscape photo: site.json -> quote_photo) -->
     <section class="quote q-a">
-      <div class="quote-card"><i></i><i></i><i></i>
+      <div class="quote-card"><i></i><i></i><i></i><figure class="photo quote-bg" aria-hidden="true"><img data-photo="quote_photo" alt="" loading="lazy" decoding="async"></figure>
         <blockquote class="quote-text" data-write data-i18n="quotes.a"></blockquote>
         <svg class="quote-stroke" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M2 11 C40 2 72 17 112 9 S190 3 232 10 S282 15 298 7"/></svg>
       </div>
     </section>
 
-    <!-- 3. About this site: intuition in sport -->
+    <!-- 3. Intuition in sport -->
     <section class="sec story" id="story" aria-labelledby="story-title">
       <div class="container">
         <div class="ripple" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -459,26 +586,34 @@
           <h2 class="title" id="story-title" data-fade data-i18n="story.title"></h2>
           <p class="lead" data-fade style="--d:.15s" data-i18n="story.p1"></p>
           <p class="mid" data-fade style="--d:.1s" data-i18n="story.p2"></p>
-          <p class="lead" data-fade style="--d:.1s" data-i18n="story.p3"></p>
+          <p class="story-pull" data-fade data-i18n="story.p3"></p>
+          <p class="mid" data-fade data-i18n="story.p4"></p>
+          <p class="lead" data-fade style="--d:.1s" data-i18n="story.p5"></p>
         </div>
       </div>
     </section>
 
-    <!-- 4. For the person who is drawn here -->
+    <!-- 4. What we can explore: a quiet sequence of fragments, not cards -->
     <section class="sec client" id="client" aria-labelledby="client-title">
       <div class="container">
-        <div class="client-head"><h2 class="title" id="client-title" data-fade data-i18n="client.title"></h2></div>
-        <div class="thoughts">
-          <p class="thought glass" data-fade data-i18n="client.l1"></p>
-          <p class="thought glass" data-fade style="--d:.2s" data-i18n="client.l2"></p>
-          <p class="thought glass" data-fade style="--d:.1s" data-i18n="client.l3"></p>
-          <p class="thought glass" data-fade style="--d:.3s" data-i18n="client.l4"></p>
+        <div class="client-head">
+          <h2 class="title" id="client-title" data-fade data-i18n="client.title"></h2>
+          <p class="lead" data-fade style="--d:.1s" data-i18n="client.intro"></p>
         </div>
+        <ul class="threads">
+          <li class="thread" data-fade style="--d:0.12s"><strong data-i18n="client.l1"></strong><span data-i18n="client.l1t"></span></li>
+          <li class="thread" data-fade style="--d:0.24s"><strong data-i18n="client.l2"></strong><span data-i18n="client.l2t"></span></li>
+          <li class="thread" data-fade><strong data-i18n="client.l3"></strong><span data-i18n="client.l3t"></span></li>
+          <li class="thread" data-fade style="--d:0.12s"><strong data-i18n="client.l4"></strong><span data-i18n="client.l4t"></span></li>
+          <li class="thread" data-fade style="--d:0.24s"><strong data-i18n="client.l5"></strong><span data-i18n="client.l5t"></span></li>
+          <li class="thread" data-fade><strong data-i18n="client.l6"></strong><span data-i18n="client.l6t"></span></li>
+          <li class="thread" data-fade style="--d:0.12s"><strong data-i18n="client.l7"></strong><span data-i18n="client.l7t"></span></li>
+        </ul>
         <p class="client-note" data-fade data-i18n="client.note"></p>
       </div>
     </section>
 
-    <!-- 5. Why she works with athletes -->
+    <!-- 5. Why athletes -->
     <section class="sec why" id="why" aria-labelledby="why-title">
       <div class="container">
         <div class="why-art" aria-hidden="true"><i></i><i></i></div>
@@ -496,30 +631,31 @@
       </div>
     </section>
 
-    <!-- 6. About her, in four frames -->
+    <!-- 6. My story: four frames, ongoing -->
     <section class="sec about" id="about" aria-labelledby="about-title">
       <div class="container">
         <div class="about-head"><h2 class="title" id="about-title" data-fade data-i18n="about.title"></h2></div>
         <article class="chapter c1">
-          <figure class="photo"><img data-photo="story_photo_1" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
+          <figure class="photo"><img data-photo="story_photo_1" data-i18n-alt="about.c1Alt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
           <div class="chap-text" data-fade><h3 data-i18n="about.c1Title"></h3><p data-i18n="about.c1Text"></p></div>
         </article>
         <article class="chapter c2">
           <div class="chap-text" data-fade><h3 data-i18n="about.c2Title"></h3><p data-i18n="about.c2Text"></p></div>
-          <figure class="photo"><img data-photo="story_photo_2" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
+          <figure class="photo"><img data-photo="story_photo_2" data-i18n-alt="about.c2Alt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
         </article>
         <article class="chapter c3">
-          <figure class="photo"><img data-photo="story_photo_3" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
+          <figure class="photo"><img data-photo="story_photo_3" data-i18n-alt="about.c3Alt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
           <div class="chap-text" data-fade><h3 data-i18n="about.c3Title"></h3><p data-i18n="about.c3Text"></p></div>
         </article>
         <article class="chapter c4">
-          <figure class="photo"><img data-photo="story_photo_4" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
+          <figure class="photo"><img data-photo="story_photo_4" data-i18n-alt="about.c4Alt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
           <div class="chap-text glass" data-fade><h3 data-i18n="about.c4Title"></h3><p data-i18n="about.c4Text"></p></div>
         </article>
+        <p class="about-note" data-fade data-i18n="about.note"></p>
       </div>
     </section>
 
-    <!-- 7. The intuition check -->
+    <!-- 7. The intuition moment -->
     <section class="sec sec--air check" id="check" aria-labelledby="check-title">
       <div class="container">
         <div class="ripple" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -532,7 +668,7 @@
       </div>
     </section>
 
-    <!-- 8. The fork: it resonated, or not yet -->
+    <!-- 8. Two equal choices. Nothing is recorded. -->
     <section class="sec fork" id="fork" aria-labelledby="fork-lead">
       <div class="container">
         <figure class="photo eyes"><img data-photo="eyes_photo" data-i18n-alt="fork.photoAlt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="32" cy="22" r="10"/><path d="M10 58c1-14 9-22 22-22s21 8 22 22"/></svg><span data-i18n="photoSoon"></span></div></figure>
@@ -541,25 +677,55 @@
           <p class="fork-voice" data-fade style="--d:.2s" data-i18n="fork.voice"></p>
           <p class="fork-voice" data-fade style="--d:.4s" data-i18n="fork.eyes"></p>
           <div class="paths">
-            <a class="path path-yes" href="#change"><strong data-i18n="fork.yesTitle"></strong><span data-i18n="fork.yesText"></span><em data-i18n="fork.yesButton"></em></a>
+            <a class="path path-yes" href="#sessions"><strong data-i18n="fork.yesTitle"></strong><span data-i18n="fork.yesText"></span><em data-i18n="fork.yesButton"></em></a>
             <button class="path path-no" type="button" id="close-page"><strong data-i18n="fork.noTitle"></strong><span data-i18n="fork.noText"></span><em data-i18n="fork.noButton"></em></button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 9. Change: when everything inside begins to move -->
-    <section class="sec change" id="change" aria-labelledby="change-title-1">
+    <!-- 9. Intuition sessions -->
+    <section class="sec sessions" id="sessions" aria-labelledby="sessions-title">
       <div class="container">
-        <div class="shift" aria-hidden="true"><i></i><i></i></div>
-        <div class="change-body">
-          <h2 class="title" id="change-title-1" data-fade data-i18n="change.title1"></h2>
-          <p class="lead" data-fade style="--d:.15s" data-i18n="change.text1"></p>
+        <div class="sessions-head">
+          <h2 class="title" id="sessions-title" data-fade data-i18n="sessions.title"></h2>
+          <p class="sessions-lead" data-fade style="--d:.1s" data-i18n="sessions.lead"></p>
         </div>
+        <div class="s-flow">
+          <article class="s-block s1" data-fade><h3 data-i18n="sessions.h1"></h3><p data-i18n="sessions.p1"></p></article>
+          <article class="s-block s2" data-fade><h3 data-i18n="sessions.h2"></h3><p data-i18n="sessions.p2"></p></article>
+          <article class="s-block s3" data-fade><h3 data-i18n="sessions.h3"></h3><p data-i18n="sessions.p3"></p></article>
+        </div>
+        <div class="s-honest glass" data-fade>
+          <h3 data-i18n="sessions.h4"></h3>
+          <p data-i18n="sessions.p4"></p>
+          <p data-i18n="sessions.p5"></p>
+          <p class="s-note" data-i18n="sessions.note"></p>
+        </div>
+        <p class="s-bring" data-fade data-i18n="sessions.bring"></p>
       </div>
     </section>
 
-    <!-- 10. From caterpillar to butterfly -->
+    <!-- 10. Transformation: the emotional centre. A darker, slower scene. -->
+    <section class="sec change" id="change" aria-labelledby="change-title-1">
+      <div class="container">
+        <div class="shift" aria-hidden="true"><i></i><i></i></div>
+        <h2 class="title" id="change-title-1" data-fade data-i18n="change.title"></h2>
+        <article class="scene sc1"><h3 data-fade data-i18n="change.s1Title"></h3><p data-fade style="--d:.15s" data-i18n="change.s1Text"></p></article>
+        <article class="scene sc2"><h3 data-fade data-i18n="change.s2Title"></h3><p data-fade style="--d:.15s" data-i18n="change.s2Text"></p></article>
+        <article class="scene sc3"><h3 data-fade data-i18n="change.s3Title"></h3><p data-fade style="--d:.15s" data-i18n="change.s3Text"></p></article>
+        <article class="scene sc4"><h3 data-fade data-i18n="change.s4Title"></h3><p data-fade style="--d:.15s" data-i18n="change.s4Text"></p></article>
+      </div>
+    </section>
+
+    <section class="quote q-c">
+      <div class="quote-card"><i></i><i></i><i></i>
+        <blockquote class="quote-text" data-write data-i18n="quotes.c"></blockquote>
+        <svg class="quote-stroke" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M2 11 C40 2 72 17 112 9 S190 3 232 10 S282 15 298 7"/></svg>
+      </div>
+    </section>
+
+    <!-- The butterfly appears once, here -->
     <section class="sec change2" aria-labelledby="change-title-2">
       <div class="container">
         <svg class="mm" viewBox="0 0 360 250" aria-hidden="true">
@@ -600,24 +766,27 @@
             <path d="M177 103 C170 88 160 82 153 80 M183 103 C190 88 200 82 207 80" fill="none" stroke="#5d6fa8" stroke-width="2" stroke-linecap="round"/>
           </g>
         </svg>
-        <h2 class="title" id="change-title-2" data-fade data-i18n="change.title2"></h2>
-        <p class="lead" data-fade style="--d:.15s" data-i18n="change.text2"></p>
+        <h2 class="title" id="change-title-2" data-fade data-i18n="change.bTitle"></h2>
+        <p class="lead" data-fade style="--d:.15s" data-i18n="change.bText"></p>
       </div>
     </section>
 
-    <section class="quote q-c">
-      <div class="quote-card"><i></i><i></i><i></i>
-        <blockquote class="quote-text" data-write data-i18n="quotes.c"></blockquote>
-        <svg class="quote-stroke" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M2 11 C40 2 72 17 112 9 S190 3 232 10 S282 15 298 7"/></svg>
-      </div>
-    </section>
-
-    <!-- 11. People may not understand: find support outside -->
     <section class="sec support" aria-labelledby="change-title-3">
       <div class="container">
+        <div class="ripple" aria-hidden="true"><i></i><i></i><i></i></div>
         <div class="support-body">
-          <h2 class="title" id="change-title-3" data-fade data-i18n="change.title3"></h2>
-          <p class="lead" data-fade style="--d:.15s" data-i18n="change.text3"></p>
+          <h2 class="title" id="change-title-3" data-fade data-i18n="change.mTitle"></h2>
+          <p class="lead" data-fade style="--d:.15s" data-i18n="change.mText"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec witness" aria-labelledby="change-title-4">
+      <div class="container">
+        <div class="witness-body">
+          <h2 class="title" id="change-title-4" data-fade data-i18n="change.wTitle"></h2>
+          <p class="lead" data-fade style="--d:.15s" data-i18n="change.wText"></p>
+          <p class="witness-note" data-fade data-i18n="change.wNote"></p>
         </div>
         <svg class="hold support-art" viewBox="0 0 360 280" aria-hidden="true">
           <defs>
@@ -633,19 +802,17 @@
       </div>
     </section>
 
-    <!-- 12. The invitation -->
+    <!-- 11. A quiet invitation -->
     <section class="sec invite" id="invite" aria-labelledby="invite-title">
       <div class="container">
         <h2 class="title" id="invite-title" data-fade data-i18n="invite.title"></h2>
-        <p class="lead" data-fade style="--d:.15s" data-i18n="invite.text"></p>
-        <a class="button button-primary" href="#contact" data-i18n="invite.button"></a>
+        <a class="button button-outline" href="#contact" data-i18n="invite.button"></a>
       </div>
     </section>
 
-    <!-- 13. First meeting: 30 minutes, free -->
     <section class="sec free" aria-labelledby="free-title">
       <div class="container">
-        <div class="coin" aria-hidden="true"><b data-i18n="free.number"></b><span data-i18n="free.unit"></span><em data-i18n="free.badge"></em></div>
+        <div class="coin" aria-hidden="true"><b data-i18n="free.number"></b><span data-i18n="free.unit"></span></div>
         <div>
           <h2 class="title" id="free-title" data-fade data-i18n="free.title"></h2>
           <p class="lead" data-fade style="--d:.15s" data-i18n="free.text"></p>
@@ -653,7 +820,7 @@
       </div>
     </section>
 
-    <!-- 14. Contacts and the form -->
+    <!-- 12. Contacts and the form -->
     <section class="sec contact" id="contact" aria-labelledby="contact-title">
       <div class="container">
         <div class="contact-card glass">
@@ -670,8 +837,8 @@
           </div>
           <div>
             <form id="contact-form" novalidate>
-              <label class="field"><span data-i18n="contact.formName"></span><input type="text" name="name" autocomplete="name" required maxlength="120"></label>
-              <label class="field"><span data-i18n="contact.formReach"></span><input type="text" name="contact" autocomplete="email" required maxlength="160"></label>
+              <label class="field"><span data-i18n="contact.formName"></span><input type="text" name="name" autocomplete="name" required aria-required="true" aria-describedby="form-status" maxlength="120"></label>
+              <label class="field"><span data-i18n="contact.formReach"></span><input type="text" name="contact" autocomplete="email" required aria-required="true" aria-describedby="form-status" maxlength="160"></label>
               <label class="field"><span data-i18n="contact.formMessage"></span><textarea name="message" rows="4" maxlength="4000"></textarea></label>
               <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
               <button class="button button-primary" type="submit" id="form-send" data-i18n="contact.formSend"></button>
@@ -684,7 +851,7 @@
       </div>
     </section>
 
-    <!-- 15. Questions and answers (blank question = hidden slot) -->
+    <!-- 13. Questions and answers (blank question = hidden slot) -->
     <section class="sec faq" id="faq" aria-labelledby="faq-title">
       <div class="container">
         <h2 class="title" id="faq-title" data-i18n="faq.title"></h2>
@@ -696,13 +863,15 @@
           <details data-faq="4"><summary data-i18n="faq.q4"></summary><p data-i18n="faq.a4"></p></details>
           <details data-faq="5"><summary data-i18n="faq.q5"></summary><p data-i18n="faq.a5"></p></details>
           <details data-faq="6"><summary data-i18n="faq.q6"></summary><p data-i18n="faq.a6"></p></details>
+          <details data-faq="7"><summary data-i18n="faq.q7"></summary><p data-i18n="faq.a7"></p></details>
+          <details data-faq="8"><summary data-i18n="faq.q8"></summary><p data-i18n="faq.a8"></p></details>
         </div>
       </div>
     </section>
 
     <!--@@NOTES@@-->
 
-    <!-- 16. The closing phrase -->
+    <!-- 14. The closing phrase -->
     <section class="quote q-d">
       <div class="quote-card"><i></i><i></i><i></i>
         <blockquote class="quote-text" data-write data-i18n="quotes.d"></blockquote>
@@ -711,15 +880,19 @@
     </section>
   </main>
 
-  <footer class="site-footer"><div class="container footer-inner"><p>© <span id="year">2026</span> <span data-i18n="footerName"></span> · <span data-i18n="footer.line"></span></p><a href="#top" data-i18n="backToTop"></a></div></footer>
+  <footer class="site-footer"><div class="container footer-inner"><p>© <span id="year">2026</span> <span data-i18n="footerName"></span> · <span data-i18n="footer.line"></span></p><a href="#top" data-i18n="backToTop"></a></div><div class="container"><p class="footer-privacy" data-i18n="footer.privacy"></p></div></footer>
 
   <button class="to-top" id="to-top" type="button" data-i18n-aria="backToTop"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg></button>
 
   <div class="farewell" id="farewell" role="dialog" aria-modal="true" aria-labelledby="farewell-title" tabindex="-1" hidden>
     <div class="farewell-card glass">
       <h2 id="farewell-title" data-i18n="fork.farewellTitle"></h2>
-      <p data-i18n="fork.farewellText"></p>
-      <button class="button button-outline" type="button" id="farewell-back" data-i18n="fork.farewellBack"></button>
+      <p class="farewell-ask" data-i18n="fork.farewellText"></p>
+      <p class="farewell-done" data-i18n="fork.farewellDone" hidden></p>
+      <div class="farewell-actions">
+        <button class="button button-outline" type="button" id="farewell-end" data-i18n="fork.farewellEnd"></button>
+        <button class="button button-outline" type="button" id="farewell-back" data-i18n="fork.farewellBack"></button>
+      </div>
     </div>
   </div>
 
@@ -906,10 +1079,13 @@
       $$('main > section').forEach(section => rest.observe(section));
     }
 
-    /* ---------- The fork: "not yet" closes the page gently ---------- */
+    /* ---------- The fork: "not now" opens a calm message. Nothing is recorded; the tab is never force-closed ---------- */
     const farewell = $('#farewell');
     const frozen = ['header', 'main', 'footer', '#to-top'].map(selector => $(selector));
-    let farewellEntry = false;                           // true while the farewell owns a history entry
+    const farewellAsk = $('.farewell-ask');
+    const farewellDone = $('.farewell-done');
+    const farewellEnd = $('#farewell-end');
+    let farewellEntry = false;                           // true while the message owns a history entry
     let ignoreNextPop = false;
     function showFarewell(open) {
       farewell.hidden = !open;
@@ -919,6 +1095,7 @@
     }
     function openFarewell() {
       if (!farewell.hidden) return;
+      farewellAsk.hidden = false; farewellDone.hidden = true; farewellEnd.hidden = false;
       try { history.pushState({ farewell: true }, ''); farewellEntry = true; } catch (_) { farewellEntry = false; }
       showFarewell(true);
     }
@@ -927,13 +1104,14 @@
       showFarewell(false);
       if (farewellEntry) { farewellEntry = false; ignoreNextPop = true; history.back(); }
     }
-    addEventListener('popstate', () => {                 // the system Back button closes the farewell, not the site
+    addEventListener('popstate', () => {                 // the system Back button closes the message, not the site
       if (ignoreNextPop) { ignoreNextPop = false; return; }
       if (!farewell.hidden) { farewellEntry = false; showFarewell(false); }
     });
-    $('#close-page').addEventListener('click', () => {
-      window.close();                                    // works only for tabs opened by a script
-      setTimeout(() => { if (!window.closed) openFarewell(); }, 250);
+    $('#close-page').addEventListener('click', openFarewell);
+    farewellEnd.addEventListener('click', () => {        // an honest goodbye: a page cannot reliably close the tab itself
+      farewellAsk.hidden = true; farewellDone.hidden = false; farewellEnd.hidden = true;
+      $('#farewell-back').focus();
     });
     $('#farewell-back').addEventListener('click', closeFarewell);
     addEventListener('keydown', event => { if (event.key === 'Escape') closeFarewell(); });
@@ -964,9 +1142,13 @@
       const name = String(data.get('name') || '').trim();
       const contact = String(data.get('contact') || '').trim();
       const message = String(data.get('message') || '').trim();
+      form.elements.namedItem('name').removeAttribute('aria-invalid');
+      form.elements.namedItem('contact').removeAttribute('aria-invalid');
       if (!name || !contact) {
         say('formRequired', true);
-        form.elements.namedItem(name ? 'contact' : 'name').focus();
+        const missing = form.elements.namedItem(name ? 'contact' : 'name');
+        missing.setAttribute('aria-invalid', 'true');   // announced by screen readers, styled below
+        missing.focus();
         return;
       }
       const payload = { name, contact, message, language: lang, _subject: t('formSubject') + ' — ' + name };

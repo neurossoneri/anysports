@@ -80,8 +80,8 @@ SAFE_IMAGE = re.compile(r'^(?:media/|images/)[\w\-/%.]+\.(?:jpe?g|png|gif|webp|a
 ALLOWED_TAGS = ['p', 'br', 'strong', 'em', 'b', 'i', 'a', 'ul', 'ol', 'li', 'blockquote', 'h2', 'h3', 'h4', 'hr', 'img', 'code', 'pre', 'table', 'thead', 'tbody', 'tr', 'th', 'td']
 ALLOWED_ATTRS = {'a': ['href', 'title'], 'img': ['src', 'alt', 'title', 'loading'], 'th': ['align'], 'td': ['align']}
 # Page photos: data-photo marker in the template -> field in content/site.json.
-PHOTO_FIELDS = ('portrait', 'eyes_photo', 'story_photo_1', 'story_photo_2', 'story_photo_3', 'story_photo_4')
-FAQ_SLOTS = 6
+PHOTO_FIELDS = ('portrait', 'eyes_photo', 'quote_photo', 'story_photo_1', 'story_photo_2', 'story_photo_3', 'story_photo_4')
+FAQ_SLOTS = 8
 
 
 def esc(v):

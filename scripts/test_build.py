@@ -12,7 +12,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 LANGS = ('ru', 'en', 'fr')
-SECTION_IDS = ('hero', 'story', 'client', 'why', 'about', 'check', 'fork', 'change', 'invite', 'contact', 'faq')
+SECTION_IDS = ('hero', 'story', 'client', 'why', 'about', 'check', 'fork', 'sessions', 'change', 'invite', 'contact', 'faq')
 
 
 def load_builder():
@@ -67,7 +67,7 @@ def check_static(destination):
     assert 'id="close-page"' in home and 'id="farewell"' in home
     assert 'id="to-top"' in home and 'class="scroll-progress"' in home, 'back-to-top button or progress line is missing'
     assert re.search(r'<div id="top"', home) and not re.search(r'<header[^>]*\bid="top"', home), '#top must be a plain anchor at the very top, not the sticky header'
-    assert 'Этот сайт устроен иначе' in home and 'Ты можешь контролировать только себя' in home
+    assert 'Интуиция нужна каждому' in home and 'Ты можешь контролировать только себя' in home
     assert 'id="notes"' not in home, 'notes must stay hidden until an article is published'
     for gone in ('review-grid', 'quiz', 'credential', 'mobile-cta', 'hero-floating'):
         assert gone not in home, f'old template block is back: {gone}'
@@ -78,6 +78,28 @@ def check_static(destination):
     for lang in LANGS:
         assert (destination / lang / 'articles/index.html').exists()
     assert (destination / '.nojekyll').exists()
+
+
+def check_integrity(builder):
+    """Guards added with the Intuition update: honesty of copy, calm exit, editable FAQ, accessible form."""
+    template = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
+    assert 'window.close' not in template, 'a web page must not pretend it can close the tab'
+    assert builder.FAQ_SLOTS == 8 and template.count('<details data-faq=') == 8, 'FAQ must have 8 editable slots'
+    assert 'quote_photo' in builder.PHOTO_FIELDS and 'id="sessions"' in template
+    assert 'id="farewell-end"' in template and 'aria-describedby="form-status"' in template
+    assert template.count('<h1') == 1, 'exactly one h1 (the opening quotation)'
+    banned = {
+        'en': [r'risk of (?:physical )?injur', r'\bprevent', r'burn-?out', r'guarantee', r'\bcures?\b', r'\btreat(?:s|ment)?\b'],
+        'ru': [r'снижени[ея] риск', r'предотвращ', r'выгоран', r'гарантир', r'излеч', r'лечени'],
+        'fr': [r'risque de blessure', r'prévenir', r'burn-?out', r'garanti', r'guérir', r'traitement'],
+    }
+    for lang, patterns in banned.items():
+        text = json.dumps(json.loads((ROOT / f'content/home_{lang}.json').read_text(encoding='utf-8')), ensure_ascii=False).lower()
+        for pattern in patterns:
+            assert not re.search(pattern, text), f'{lang}: promise-like wording must not return: {pattern}'
+    for lang in LANGS:
+        data = json.loads((ROOT / f'content/home_{lang}.json').read_text(encoding='utf-8'))
+        assert data['faq']['q1'].strip() and data['fork']['farewellEnd'].strip() and data['fork']['farewellBack'].strip()
 
 
 def write_post(work, lang, body, name='published'):
@@ -118,12 +140,13 @@ def build_fixture(builder, mutate, posts):
 def main():
     builder = load_builder()
     check_consistency(builder)
+    check_integrity(builder)
     check_static(ROOT / '_site')
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
     def full(work, site):
         site.update({'name_ru': 'Наталья Тестовая', 'email': 'hello@example.com', 'portrait': 'media/test-cover.webp',
-                     'story_photo_2': 'media/test-cover.webp', 'form_endpoint': 'https://formspree.io/f/abc123', 'publish_ready': True})
+                     'story_photo_2': 'media/test-cover.webp', 'eyes_photo': '', 'quote_photo': '', 'story_photo_1': '', 'story_photo_3': '', 'story_photo_4': '', 'form_endpoint': 'https://formspree.io/f/abc123', 'publish_ready': True})
         ru = json.loads((work / 'content/home_ru.json').read_text(encoding='utf-8'))
         ru['faq']['q5'] = ''
         ru['story']['title'] = '</script><b>x</b>'
