@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Regression checks: copy/template/CMS consistency, static output, form settings, notes, safe HTML."""
+import html
 import importlib.util
 import json
 import os
@@ -11,6 +12,7 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
+esc = lambda v: html.escape(v, quote=True)
 LANGS = ('ru', 'en', 'fr')
 SECTION_IDS = ('hero', 'intro', 'sessions', 'change', 'about', 'contact', 'faq')   # page order, top to bottom
 
@@ -55,7 +57,7 @@ def check_consistency(builder):
         assert key in cms_keys(entries['site']['fields']), f'site settings lack {key}'
 
 
-def check_static(destination):
+def check_static(builder, destination):
     home = (destination / 'index.html').read_text(encoding='utf-8')
     css = (destination / 'assets/site.css').read_text(encoding='utf-8')
     assert '<html lang="ru">' in home and 'const CMS_OVERRIDES' in home
@@ -73,8 +75,9 @@ def check_static(destination):
     assert 'id="close-page"' not in home and 'farewell' not in home, 'no forced choice and no farewell dialog'
     assert 'id="to-top"' in home and 'class="scroll-progress"' in home, 'back-to-top button or progress line is missing'
     assert re.search(r'<div id="top"', home) and not re.search(r'<header[^>]*\bid="top"', home), '#top must be a plain anchor at the very top, not the sticky header'
-    assert 'Интуиция нужна каждому' in home and 'Ты можешь контролировать только себя' in home
-    assert 'id="notes"' not in home, 'notes must stay hidden until an article is published'
+    ru = json.loads((ROOT / 'content/home_ru.json').read_text(encoding='utf-8'))
+    assert esc(ru['story']['title']) in home and esc(ru['quotes']['a'].split('\n')[0]) in home, 'Russian copy must be baked into the static HTML'
+    assert ('id="notes"' in home) == bool(builder.parse_posts()), 'notes appear exactly when an article is published'
     for gone in ('review-grid', 'quiz', 'credential', 'mobile-cta', 'hero-floating', 'hero-tag', 'hero-hint', 'contact-booking', 'id="check"', 'id="fork"', 'id="invite"'):
         assert gone not in home, f'old template block is back: {gone}'
     assert 'prefers-reduced-motion' in home and '[hidden] { display:none!important; }' in home
@@ -99,19 +102,39 @@ def check_integrity(builder):
     assert 'quote_photo' in builder.PHOTO_FIELDS and 'id="sessions"' in template
     assert 'aria-describedby="form-status"' in template and 'data-write' in template
     assert template.count('<h1') == 1, 'exactly one h1 (the opening quotation)'
-    banned = {
-        'en': [r'risk of (?:physical )?injur', r'\bprevent', r'burn-?out', r'guarantee', r'\bcures?\b', r'\btreat(?:s|ment)?\b'],
-        'ru': [r'снижени[ея] риск', r'предотвращ', r'выгоран', r'гарантир', r'излеч', r'лечени'],
-        'fr': [r'risque de blessure', r'prévenir', r'burn-?out', r'garanti', r'guérir', r'traitement'],
-    }
+    banned = builder.BANNED_PHRASES
     for lang, patterns in banned.items():
         text = json.dumps(json.loads((ROOT / f'content/home_{lang}.json').read_text(encoding='utf-8')), ensure_ascii=False).lower()
         for pattern in patterns:
             assert not re.search(pattern, text), f'{lang}: promise-like wording must not return: {pattern}'
     for lang in LANGS:
         data = json.loads((ROOT / f'content/home_{lang}.json').read_text(encoding='utf-8'))
-        assert data['faq']['q1'].strip() and data['about']['lead'].strip() and data['sessions']['photoAlt'].strip()
+        for dotted in builder.REQUIRED_COPY:
+            group, key = dotted.split('.')
+            assert data[group][key].strip(), f'{lang}: {dotted} must not be blank'
         assert 'fork' not in data and 'check' not in data and 'invite' not in data and 'why' not in data, 'removed blocks must stay removed'
+
+
+def check_brand_and_dashboard(builder, destination):
+    """Sport Intuitive everywhere the site names itself; numbered photo slots; the owner's dashboard ships with the site."""
+    home = (destination / 'index.html').read_text(encoding='utf-8')
+    brand = builder.BRAND_DEFAULT
+    assert f'<title>' in home and brand in re.search(r'<title>(.*?)</title>', home).group(1), 'brand missing from <title>'
+    assert re.search(r'data-i18n="brand" class="brand-name">' + re.escape(brand) + '<', home), 'brand must be visible in the header'
+    assert brand in re.search(r'<footer.*?</footer>', home, re.S).group(0), 'brand missing from the footer'
+    slots = sorted(int(n) for n in re.findall(r'data-slot="(\d+)"', home))
+    assert slots == list(range(1, 8)), f'photo slots must be numbered 1..7, got {slots}'
+    assert 'slot-badge' in home and 'photos' in home, 'the ?photos mode is missing'
+    schema = json.loads((destination / 'admin/schema.json').read_text(encoding='utf-8'))
+    assert [p['num'] for p in schema['photos']] == list(range(1, 8)) and schema['brand'] == brand
+    assert {s['name'] for s in schema['sections']} >= {'hero', 'story', 'sessions', 'about', 'faq'}
+    assert 'banned' in schema and schema['required'] == list(builder.REQUIRED_COPY)
+    admin = (destination / 'admin/index.html').read_text(encoding='utf-8')
+    assert 'noindex' in admin and 'fonts.googleapis' not in admin and 'localStorage' in admin
+    for field in builder.PHOTO_FIELDS:
+        assert any(p['field'] == field for p in schema['photos'])
+    robots = (destination / 'robots.txt').read_text(encoding='utf-8')
+    assert 'Disallow' in robots
 
 
 def write_post(work, lang, body, name='published'):
@@ -126,6 +149,8 @@ def build_fixture(builder, mutate, posts):
     work = Path(temporary.name)
     shutil.copytree(ROOT / 'templates', work / 'templates')
     shutil.copytree(ROOT / 'content', work / 'content')
+    shutil.copytree(ROOT / 'admin', work / 'admin')
+    shutil.copy(ROOT / '.pages.yml', work / '.pages.yml')
     (work / 'media').mkdir()
     (work / 'media/test-cover.webp').write_bytes(b'fake image bytes')
     site = json.loads((work / 'content/site.json').read_text(encoding='utf-8'))
@@ -153,7 +178,8 @@ def main():
     builder = load_builder()
     check_consistency(builder)
     check_integrity(builder)
-    check_static(ROOT / '_site')
+    check_static(builder, ROOT / '_site')
+    check_brand_and_dashboard(builder, ROOT / '_site')
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
     def full(work, site):
@@ -167,7 +193,8 @@ def main():
     with temporary:
         home = (work / '_site/index.html').read_text(encoding='utf-8')
         article = (work / '_site/ru/articles/sample/index.html').read_text(encoding='utf-8')
-        assert 'Наталья Тестовая' in home and 'hello@example.com' in home
+        assert 'Наталья Тестовая' in home and 'hello@example.com' in home and 'Sport Intuitive' in home
+        assert 'Disallow: /admin/' in (work / '_site/robots.txt').read_text(encoding='utf-8')
         assert home.count('src="media/test-cover.webp"') == 6, 'hero, eyes fallback, story frame 2 and three note covers'
         assert '"formEndpoint":"https://formspree.io/f/abc123"' in home
         assert 'id="notes"' in home and 'CMS_VISIBLE_POSTS = {"ru":1,"en":1,"fr":1}' in home
@@ -183,7 +210,7 @@ def main():
         for lang in ('en', 'fr'):
             assert (work / f'_site/{lang}/articles/sample/index.html').exists()
         assert (work / '_site/media/test-cover.webp').exists() and (work / '_site/sitemap.xml').exists()
-        assert 'Disallow:' not in (work / '_site/robots.txt').read_text(encoding='utf-8')
+        assert 'Disallow: /\n' not in (work / '_site/robots.txt').read_text(encoding='utf-8'), 'an indexable site must not block everything'
 
     # Defensive build: an insecure form endpoint is dropped, nothing is published, no notes appear.
     def careless(work, site):

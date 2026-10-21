@@ -80,12 +80,40 @@ SAFE_IMAGE = re.compile(r'^(?:media/|images/)[\w\-/%.]+\.(?:jpe?g|png|gif|webp|a
 ALLOWED_TAGS = ['p', 'br', 'strong', 'em', 'b', 'i', 'a', 'ul', 'ol', 'li', 'blockquote', 'h2', 'h3', 'h4', 'hr', 'img', 'code', 'pre', 'table', 'thead', 'tbody', 'tr', 'th', 'td']
 ALLOWED_ATTRS = {'a': ['href', 'title'], 'img': ['src', 'alt', 'title', 'loading'], 'th': ['align'], 'td': ['align']}
 # Page photos: data-photo marker in the template -> field in content/site.json.
-PHOTO_FIELDS = ('portrait', 'eyes_photo', 'quote_photo', 'story_photo_1', 'story_photo_2', 'story_photo_3', 'story_photo_4')
+# Numbered in page order, top to bottom. The same numbers appear on the live site (open it with ?photos)
+# and in the dashboard, so the owner always knows which photo she is replacing.
+PHOTO_SLOTS = (
+    {'field': 'portrait', 'num': 1, 'title': 'Главное фото', 'where': 'Первый экран, слева', 'anchor': 'hero', 'shape': 'вертикаль или горизонталь, обрезка по центру'},
+    {'field': 'quote_photo', 'num': 2, 'title': 'Атмосферное фото', 'where': 'Фон за цитатой А (необязательно)', 'anchor': 'intro', 'shape': 'пейзаж, горизонталь'},
+    {'field': 'eyes_photo', 'num': 3, 'title': 'Крупный план', 'where': 'Рядом с «Интуитивными сессиями» (если пусто — берётся фото 1)', 'anchor': 'sessions', 'shape': 'вертикаль 3:4'},
+    {'field': 'story_photo_1', 'num': 4, 'title': 'Обо мне · слева сверху', 'where': 'Мозаика «Обо мне»', 'anchor': 'about', 'shape': 'вертикаль 3:4 или 4:5'},
+    {'field': 'story_photo_2', 'num': 5, 'title': 'Обо мне · справа сверху', 'where': 'Мозаика «Обо мне»', 'anchor': 'about', 'shape': 'квадрат или 4:5'},
+    {'field': 'story_photo_3', 'num': 6, 'title': 'Обо мне · слева снизу', 'where': 'Мозаика «Обо мне»', 'anchor': 'about', 'shape': 'квадрат или 4:5'},
+    {'field': 'story_photo_4', 'num': 7, 'title': 'Обо мне · справа снизу', 'where': 'Мозаика «Обо мне»', 'anchor': 'about', 'shape': 'вертикаль 3:4 или 4:5'},
+)
+PHOTO_FIELDS = tuple(slot['field'] for slot in PHOTO_SLOTS)
 FAQ_SLOTS = 8
+BRAND_DEFAULT = 'Sport Intuitive'
+# Dashboard: which page section a group of copy lives in (for the "show on the site" link).
+SECTION_ANCHORS = {'hero': 'hero', 'story': 'intro', 'quotes': 'intro', 'sessions': 'sessions', 'client': 'sessions',
+                   'change': 'change', 'about': 'about', 'contact': 'contact', 'faq': 'faq', 'free': 'free'}
+# Copy that must never be blank (tests check it; the dashboard enforces it before saving).
+REQUIRED_COPY = ('faq.q1', 'about.lead', 'sessions.photoAlt')
+# Promise-like wording the site must never carry (checked by the tests and, before saving, by the dashboard).
+BANNED_PHRASES = {
+    'en': [r'risk of (?:physical )?injur', r'\bprevent', r'burn-?out', r'guarantee', r'\bcures?\b', r'\btreat(?:s|ment)?\b'],
+    'ru': [r'снижени[ея] риск', r'предотвращ', r'выгоран', r'гарантир', r'излеч', r'лечени'],
+    'fr': [r'risque de blessure', r'prévenir', r'burn-?out', r'garanti', r'guérir', r'traitement'],
+}
 
 
 def esc(v):
     return html.escape(str(v if v is not None else ''), quote=True)
+
+
+def brand_name(site):
+    """The site's name (Sport Intuitive). Separate from the author's personal name."""
+    return str(site.get('brand') or '').strip() or BRAND_DEFAULT
 
 
 def read_json(path):
@@ -211,15 +239,17 @@ def replace_required(text, old, new, name):
 def seo_head(site, public_url):
     """Canonical, Open Graph and JSON-LD for the home page."""
     name = str(site.get('name_ru') or '').strip()
+    brand = brand_name(site)
     out = (f'  <link rel="canonical" href="{esc(public_url)}">\n'
            f'  <meta property="og:url" content="{esc(public_url)}">\n'
-           f'  <meta property="og:site_name" content="{esc(name)}">\n')
+           f'  <meta property="og:site_name" content="{esc(brand)}">\n')
     portrait = photo_path(site.get('portrait'))
     if portrait:
         out += f'  <meta property="og:image" content="{esc(public_url + portrait)}">\n'
     if name:
         person = {'@context': 'https://schema.org', '@type': 'Person', 'name': name,
-                  'jobTitle': str(site.get('role_ru') or ''), 'url': public_url}
+                  'jobTitle': str(site.get('role_ru') or ''), 'url': public_url,
+                  'brand': {'@type': 'Brand', 'name': brand}}
         if portrait:
             person['image'] = public_url + portrait
         out += '  <script type="application/ld+json">' + js_json(person) + '</script>\n'
@@ -237,11 +267,13 @@ def collect_values(site):
         flat = flatten(content, source)
         name = str(site.get('name_' + lang) or '').strip()
         role = str(site.get('role_' + lang) or '').strip()
+        brand = brand_name(site)
         title = flat.get('meta.title', '').strip()
         values[lang] = {
             **UI[lang], **flat,
-            'brand': name, 'portraitName': name, 'footerName': name, 'portraitJob': role,
-            'meta.fullTitle': f'{title} — {name}' if name and title else (title or name),
+            'brand': brand, 'portraitName': name, 'portraitJob': role,
+            'footerName': f'{brand} · {name}' if name else brand,
+            'meta.fullTitle': f'{title} — {brand}' if title else brand,
         }
     return values
 
@@ -270,8 +302,9 @@ def build_home(site, posts, public_url, ready):
     paths = {field: photo_path(site.get(field)) for field in PHOTO_FIELDS}
     paths['eyes_photo'] = paths['eyes_photo'] or paths['portrait']
     for field in PHOTO_FIELDS:
+        slot = next(item['num'] for item in PHOTO_SLOTS if item['field'] == field)
         template = replace_required(template, f'data-photo="{field}"',
-                                    f'src="{esc(paths[field])}"' if paths[field] else '', f'photo {field}')
+                                    f'data-slot="{slot}"' + (f' src="{esc(paths[field])}"' if paths[field] else ''), f'photo {field}')
     settings = {
         'email': str(site.get('email') or ''),
         'whatsapp': str(site.get('whatsapp') or ''),
@@ -320,11 +353,11 @@ def site_chrome():
     return {'brand_html': brand.group(1) if brand else 'S', 'favicon_html': icon.group(0) if icon else ''}
 
 
-def article_shell(*, title, description, lang, css_prefix, body, public_url, ready, author, image='', date='', kind='article', brand_html='S', favicon_html=''):
+def article_shell(*, title, description, lang, css_prefix, body, public_url, ready, author, brand, image='', date='', kind='article', brand_html='S', favicon_html=''):
     canonical = (public_url + css_prefix + '/') if public_url else ''
     canonical_html = f'<link rel="canonical" href="{esc(canonical)}">' if canonical else ''
     desc = esc(description)
-    name = esc(author)
+    name = esc(brand)
     route = '../../' if kind == 'archive' else '../../../'
     json_ld = ''
     if kind == 'article':
@@ -346,7 +379,7 @@ def article_shell(*, title, description, lang, css_prefix, body, public_url, rea
 <base href="{route}"><link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/articles.css">
 {canonical_html}{json_ld}<script>(function(){{try{{var t=localStorage.getItem('sport-site-theme');document.documentElement.dataset.theme=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}}catch(e){{}}}})()</script></head>
 <body><div class="scroll-progress" aria-hidden="true"></div><a class="skip" href="{css_prefix}/#content">{esc(SKIP_LABEL[lang])}</a><header class="site-header"><div class="container header-inner">
-<a class="brand" href="./"><span class="brand-mark" aria-hidden="true">{brand_html}</span><span>{name}</span></a>
+<a class="brand" href="./"><span class="brand-mark" aria-hidden="true">{brand_html}</span><span class="brand-name">{name}</span></a>
 <nav class="article-nav"><a href="./">{esc(BACK_LABEL[lang])}</a><a href="{lang}/articles/">{esc(BLOG_LABEL[lang])}</a><a href="./#contact">{esc(CONTACT_LABEL[lang])}</a></nav>
 <button class="icon-button" type="button" id="article-theme" aria-label="Theme" aria-pressed="false">◐</button></div></header>
 <main id="content" class="article-layout"><div class="container article-wrap">{article_header}<h1>{esc(title)}</h1>
@@ -357,6 +390,7 @@ def article_shell(*, title, description, lang, css_prefix, body, public_url, rea
 
 
 ARTICLES_CSS = '''
+.brand-name { font-family:var(--serif); font-size:1.12rem; font-weight:600; letter-spacing:.01em; white-space:nowrap; }
 .article-nav { display:flex; align-items:center; gap:22px; margin-left:auto; font-weight:650; color:var(--header-muted); font-size:.91rem; }
 .article-layout { min-height:65vh; padding:clamp(72px,9vw,128px) 0 clamp(56px,8vw,100px); }
 .article-wrap { max-width:760px; }
@@ -404,7 +438,7 @@ def build_articles(site, posts, public_url, ready):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(article_shell(**chrome, title=post['title'], description=post['summary'], lang=post['lang'],
                                       css_prefix=post['url'].rstrip('/'), body=body, public_url=public_url, ready=ready,
-                                      author=site.get('name_' + post['lang'], '') or '', image=post['cover'], date=post['date']), encoding='utf-8')
+                                      author=site.get('name_' + post['lang'], '') or '', brand=brand_name(site), image=post['cover'], date=post['date']), encoding='utf-8')
     for lang in LANGS:
         current = [p for p in posts if p['lang'] == lang]
         body = '<div class="archive-grid">' + ''.join(card(p) for p in current) + '</div>' if current else f'<p>{esc(EMPTY_LABEL[lang])}</p>'
@@ -412,7 +446,50 @@ def build_articles(site, posts, public_url, ready):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(article_shell(**chrome, title=BLOG_LABEL[lang], description=BLOG_LABEL[lang], lang=lang,
                                       css_prefix=f'{lang}/articles', body=body, public_url=public_url, ready=ready,
-                                      author=site.get('name_' + lang, '') or '', kind='archive'), encoding='utf-8')
+                                      author=site.get('name_' + lang, '') or '', brand=brand_name(site), kind='archive'), encoding='utf-8')
+
+
+def admin_schema(site):
+    """Everything the dashboard needs to draw its forms, generated from .pages.yml so there is one source of truth."""
+    config = yaml.safe_load((ROOT / '.pages.yml').read_text(encoding='utf-8'))
+    entries = {entry['name']: entry for entry in config['content']}
+
+    def leaf(field):
+        item = {'name': field['name'], 'label': field.get('label', field['name']), 'type': field.get('type', 'string')}
+        if field.get('description'):
+            item['description'] = field['description']
+        return item
+
+    sections = []
+    for group in entries['home_ru']['fields']:
+        if group.get('type') != 'object':
+            continue
+        sections.append({'name': group['name'], 'label': group.get('label', group['name']),
+                         'anchor': SECTION_ANCHORS.get(group['name'], ''),
+                         'fields': [leaf(f) for f in group['fields']]})
+    skip = set(PHOTO_FIELDS) | {'publish_ready'}
+    contacts = [leaf(f) for f in entries['site']['fields'] if f['name'] not in skip]
+    return {
+        'repo': os.environ.get('GITHUB_REPOSITORY', ''),
+        'branch': os.environ.get('GITHUB_REF_NAME', '') or 'main',
+        'brand': brand_name(site),
+        'langs': list(LANGS), 'langLabels': LANG_LABEL,
+        'sections': sections, 'contacts': contacts,
+        'photos': [dict(slot) for slot in PHOTO_SLOTS],
+        'banned': BANNED_PHRASES, 'required': list(REQUIRED_COPY),
+        'publishReady': bool(site.get('publish_ready')),
+    }
+
+
+def build_admin(site):
+    """Copy the owner's dashboard (admin/) next to the site and give it its generated schema."""
+    source = ROOT / 'admin'
+    if not source.exists():
+        return False
+    target = OUT / 'admin'
+    shutil.copytree(source, target)
+    (target / 'schema.json').write_text(json.dumps(admin_schema(site), ensure_ascii=False, indent=1), encoding='utf-8')
+    return True
 
 
 def main():
@@ -425,6 +502,7 @@ def main():
     OUT.mkdir(parents=True)
     build_home(site, posts, public_url, ready)
     build_articles(site, posts, public_url, ready)
+    has_admin = build_admin(site)
     if (ROOT / 'media').exists():
         shutil.copytree(ROOT / 'media', OUT / 'media', dirs_exist_ok=True, ignore=shutil.ignore_patterns('.gitkeep'))
         for photo in sorted((OUT / 'media').rglob('*')):
@@ -436,8 +514,13 @@ def main():
         sitemap = [public_url] + [public_url + f'{lang}/articles/' for lang in LANGS] + [public_url + p['url'] for p in posts]
     if sitemap:
         (OUT / 'sitemap.xml').write_text('<?xml version="1.0" encoding="utf-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join(f'<url><loc>{esc(u)}</loc></url>' for u in sitemap) + '</urlset>', encoding='utf-8')
-    (OUT / 'robots.txt').write_text('User-agent: *\n' + ('Allow: /\n' + (f'Sitemap: {public_url}sitemap.xml\n' if sitemap else '') if ready else 'Disallow: /\n'), encoding='utf-8')
-    print(f'Built homepage, {len(posts)} published posts, 3 archives -> {OUT} | indexable={ready} | URL={public_url or "local"}')
+    robots = 'User-agent: *\n'
+    if ready:
+        robots += 'Allow: /\nDisallow: /admin/\n' + (f'Sitemap: {public_url}sitemap.xml\n' if sitemap else '')
+    else:
+        robots += 'Disallow: /\n'
+    (OUT / 'robots.txt').write_text(robots, encoding='utf-8')
+    print(f'Built homepage, {len(posts)} published posts, 3 archives, dashboard={has_admin} -> {OUT} | indexable={ready} | URL={public_url or "local"}')
 
 
 if __name__ == '__main__':

@@ -83,6 +83,10 @@ content:
   operations:
     delete: false
   fields:
+  - name: brand
+    label: Название сайта (бренд)
+    description: Показывается в шапке, во вкладке браузера, в подвале и в превью ссылок. Не переводится.
+    type: string
   - name: name_ru
     label: Имя (RU)
     type: string
@@ -118,25 +122,25 @@ content:
     label: Public site URL (optional, https://...)
     type: string
   - name: portrait
-    label: Главное фото (крупное, слева на первом экране)
+    label: Фото 1 · Главное фото (первый экран, слева)
     type: image
   - name: eyes_photo
-    label: Фото крупным планом («Интуитивные сессии»; если пусто — главное фото)
+    label: Фото 3 · Крупный план («Интуитивные сессии»; если пусто — фото 1)
     type: image
   - name: quote_photo
-    label: Атмосферное фото рядом с цитатой А (необязательно; если пусто — холодный градиент)
+    label: Фото 2 · Атмосферное фото за цитатой А (необязательно)
     type: image
   - name: story_photo_1
-    label: Обо мне · фото 1 (слева сверху)
+    label: Фото 4 · Обо мне (слева сверху)
     type: image
   - name: story_photo_2
-    label: Обо мне · фото 2 (справа сверху)
+    label: Фото 5 · Обо мне (справа сверху)
     type: image
   - name: story_photo_3
-    label: Обо мне · фото 3 (слева снизу)
+    label: Фото 6 · Обо мне (слева снизу)
     type: image
   - name: story_photo_4
-    label: Обо мне · фото 4 (справа снизу)
+    label: Фото 7 · Обо мне (справа снизу)
     type: image
   - name: publish_ready
     label: Готов к индексации / Allow search indexing
@@ -155,7 +159,7 @@ content:
     type: object
     fields:
     - name: title
-      label: Название страницы (имя добавится само)
+      label: Название страницы (« — Sport Intuitive» добавится само)
       type: string
     - name: description
       label: Описание для поисковиков и соцсетей
@@ -550,7 +554,7 @@ content:
     type: object
     fields:
     - name: title
-      label: Название страницы (имя добавится само)
+      label: Название страницы (« — Sport Intuitive» добавится само)
       type: string
     - name: description
       label: Описание для поисковиков и соцсетей
@@ -945,7 +949,7 @@ content:
     type: object
     fields:
     - name: title
-      label: Название страницы (имя добавится само)
+      label: Название страницы (« — Sport Intuitive» добавится само)
       type: string
     - name: description
       label: Описание для поисковиков и соцсетей
