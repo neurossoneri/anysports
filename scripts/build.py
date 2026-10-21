@@ -42,7 +42,7 @@ UI = {
         'skip': SKIP_LABEL['ru'], 'brandAria': 'В начало страницы', 'languageLabel': 'Язык',
         'themeDark': 'Включить тёмную тему', 'themeLight': 'Включить светлую тему',
         'photoSoon': 'Здесь будет фотография', 'backToTop': 'Наверх',
-        'contactEmail': 'Написать на email', 'contactBooking': 'Выбрать время',
+        'contactEmail': 'Написать на email',
         'formRequired': 'Пожалуйста, укажите имя и способ связи.', 'formSending': 'Отправляю…',
         'formMailto': 'Открываю вашу почтовую программу…',
         'formUnset': 'Форма пока не подключена. Пожалуйста, напишите напрямую.',
@@ -53,7 +53,7 @@ UI = {
         'skip': SKIP_LABEL['en'], 'brandAria': 'Back to the top', 'languageLabel': 'Language',
         'themeDark': 'Switch to dark theme', 'themeLight': 'Switch to light theme',
         'photoSoon': 'A photograph will be here', 'backToTop': 'Back to top',
-        'contactEmail': 'Write by email', 'contactBooking': 'Choose a time',
+        'contactEmail': 'Write by email',
         'formRequired': 'Please add your name and a way to reach you.', 'formSending': 'Sending…',
         'formMailto': 'Opening your mail app…',
         'formUnset': 'The form is not connected yet. Please write directly.',
@@ -64,7 +64,7 @@ UI = {
         'skip': SKIP_LABEL['fr'], 'brandAria': 'Retour en haut', 'languageLabel': 'Langue',
         'themeDark': 'Passer au thème sombre', 'themeLight': 'Passer au thème clair',
         'photoSoon': 'Une photographie sera ici', 'backToTop': 'Haut de page',
-        'contactEmail': 'Écrire par e-mail', 'contactBooking': 'Choisir un horaire',
+        'contactEmail': 'Écrire par e-mail',
         'formRequired': 'Veuillez indiquer votre prénom et un moyen de vous joindre.', 'formSending': 'Envoi…',
         'formMailto': 'Ouverture de votre messagerie…',
         'formUnset': 'Le formulaire n’est pas encore connecté. Merci d’écrire directement.',
@@ -252,7 +252,7 @@ def notes_section(posts):
         return ''
     cards = ''.join(card(p, hidden=p['lang'] != 'ru') for p in posts[:1000])
     hidden = '' if any(p['lang'] == 'ru' for p in posts) else ' hidden'
-    return ('<section class="sec notes" id="notes" aria-labelledby="notes-title"' + hidden + '>'
+    return ('<section class="band band-frost notes" id="notes" aria-labelledby="notes-title"' + hidden + '>'
             '<div class="container"><h2 class="title" id="notes-title" data-i18n="notes.title"></h2>'
             '<p class="lead" data-i18n="notes.lead"></p>'
             f'<div class="notes-grid">{cards}</div>'
@@ -276,7 +276,6 @@ def build_home(site, posts, public_url, ready):
         'email': str(site.get('email') or ''),
         'whatsapp': str(site.get('whatsapp') or ''),
         'telegram': str(site.get('telegram') or ''),
-        'bookingUrl': str(site.get('booking_url') or ''),
         'formEndpoint': form_endpoint(site),
     }
     # Content inserted before the page script reads it, right after the empty translation object.
@@ -341,7 +340,7 @@ def article_shell(*, title, description, lang, css_prefix, body, public_url, rea
     article_header = f'<p class="post-meta">{esc(date)} · {esc(LANG_LABEL[lang])}</p>' if date else ''
     return f'''<!DOCTYPE html>
 <html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light dark"><meta name="theme-color" content="#f5f9fc">{favicon_html}{FONT_LINKS}<meta name="robots" content="{'index,follow' if ready else 'noindex,nofollow'}">
+<meta name="color-scheme" content="light dark"><meta name="theme-color" content="#06121e">{favicon_html}{FONT_LINKS}<meta name="robots" content="{'index,follow' if ready else 'noindex,nofollow'}">
 <meta name="description" content="{desc}"><meta property="og:type" content="{'article' if kind == 'article' else 'website'}"><meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{desc}"><title>{esc(title)} — {name}</title>
 <base href="{route}"><link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/articles.css">
@@ -358,24 +357,24 @@ def article_shell(*, title, description, lang, css_prefix, body, public_url, rea
 
 
 ARTICLES_CSS = '''
-.article-nav { display:flex; align-items:center; gap:22px; margin-left:auto; font-weight:650; color:var(--text-muted); font-size:.91rem; }
+.article-nav { display:flex; align-items:center; gap:22px; margin-left:auto; font-weight:650; color:var(--header-muted); font-size:.91rem; }
 .article-layout { min-height:65vh; padding:clamp(72px,9vw,128px) 0 clamp(56px,8vw,100px); }
 .article-wrap { max-width:760px; }
 .article-wrap h1 { font:500 clamp(2.5rem,6vw,4.3rem)/1.08 var(--serif); letter-spacing:-.035em; margin:10px 0 23px; text-wrap:balance; }
 .article-intro { font-size:clamp(1.12rem,2.4vw,1.38rem); line-height:1.6; color:var(--text-muted); margin:0 0 48px; text-wrap:pretty; }
 .post-meta { color:var(--mint-strong); letter-spacing:.04em; font-size:.84rem; font-weight:700; }
-.post-hero-image { max-height:490px; border-radius:44px; margin-bottom:52px; box-shadow:var(--shadow-strong); }
+.post-hero-image { max-height:490px; margin-bottom:52px; box-shadow:var(--shadow-strong); }
 .article-body { overflow-wrap:anywhere; font-size:1.14rem; line-height:1.9; }
 .article-body > * { max-width:100%; }
 .article-body p { margin:0 0 1.4em; }
 .article-body h2 { font:500 1.9rem/1.25 var(--serif); letter-spacing:-.015em; margin:38px 0 14px; }
 .article-body h3 { font:500 1.5rem/1.25 var(--serif); letter-spacing:-.015em; margin:34px 0 12px; }
 .article-body a { color:var(--blue-deep); text-decoration:underline; text-underline-offset:3px; }
-.article-body img { height:auto; border-radius:32px; margin:25px 0; }
-.article-body blockquote { margin:28px 0; padding:20px 28px; border-radius:32px; color:var(--text-muted); background:var(--glass); }
+.article-body img { height:auto; margin:25px 0; }
+.article-body blockquote { margin:28px 0; padding:20px 28px; border-left:3px solid var(--mint-strong); color:var(--text-muted); background:var(--glass); }
 .article-body blockquote > :last-child { margin-bottom:0; }
 .article-body li { margin-bottom:10px; }
-.article-body pre { overflow-x:auto; max-width:100%; padding:20px 24px; background:var(--paper); border:1px solid var(--border); border-radius:28px; }
+.article-body pre { overflow-x:auto; max-width:100%; padding:20px 24px; background:var(--paper); border:1px solid var(--border); }
 .article-body table { border-collapse:collapse; max-width:100%; display:block; overflow:auto; }
 .article-body th, .article-body td { padding:10px 14px; border:1px solid var(--border); }
 .article-end { margin-top:72px; }

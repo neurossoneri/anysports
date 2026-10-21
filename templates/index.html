@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#f5f9fc" id="theme-color">
+  <meta name="theme-color" content="#06121e">
   <title>Intuition</title>
   <meta name="description" content="">
   <meta property="og:type" content="website">
@@ -12,391 +12,308 @@
   <meta property="og:description" content="">
   <link rel="icon" type="image/svg+xml" sizes="any" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22%3E%3CclipPath id=%22c%22%3E%3Crect width=%2248%22 height=%2248%22 rx=%2211%22/%3E%3C/clipPath%3E%3Cg clip-path=%22url(%23c)%22%3E%3Crect width=%2248%22 height=%2214%22 fill=%22%23cfe0f5%22/%3E%3Crect y=%2214%22 width=%2248%22 height=%2210%22 fill=%22%23dce8f8%22/%3E%3Crect y=%2224%22 width=%2248%22 height=%228%22 fill=%22%23e8ecf9%22/%3E%3Ccircle cx=%2237%22 cy=%2211%22 r=%224.6%22 fill=%22%23fff%22 opacity=%22.85%22/%3E%3Cpath d=%22M-2 31 13 12l8 9 8-12 21 22z%22 fill=%22%23aab9e4%22/%3E%3Cpath d=%22M9.7 16 13 12l3.6 4-1.8-1.1-1.6 1.7-1.6-1.7zM25.9 13.6 29 9l4.6 4.6-2.3-1.2-2.1 2-1.6-1.9z%22 fill=%22%23fff%22 opacity=%22.93%22/%3E%3Cpath d=%22M-2 31v-4l8-5 9 9zM19 31l11-9 10 6 10-4v7z%22 fill=%22%237f9fd3%22/%3E%3Crect y=%2231%22 width=%2248%22 height=%2217%22 fill=%22%2386c4bc%22/%3E%3Crect y=%2231%22 width=%2248%22 height=%226%22 fill=%22%23c3e2e0%22 opacity=%22.55%22/%3E%3Cpath d=%22M12 34.5h9M27 37.5h11M8 40h7%22 stroke=%22%23fff%22 stroke-width=%221.2%22 stroke-linecap=%22round%22 opacity=%22.6%22/%3E%3Cpath d=%22M-2 48v-8c8-4 15-1 22 3 8 4 18 3 30-2v7z%22 fill=%22%238ec99b%22/%3E%3Cpath d=%22M14 48c10-3 22-2 36-7v7z%22 fill=%22%2364aa8b%22/%3E%3Cpath d=%22M36 46.5l-.6-4.2M39 46.5l.3-5M42 46.5l1.3-4%22 stroke=%22%234f9a7a%22 stroke-width=%221%22 stroke-linecap=%22round%22 fill=%22none%22/%3E%3C/g%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400..800&family=Source+Serif+4:opsz,wght@8..60,400..700&display=swap" rel="stylesheet">
-  <script>(function(){var r=document.documentElement;r.classList.add('js');try{var t=localStorage.getItem('sport-site-theme');r.dataset.theme=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}catch(e){r.dataset.theme='light'}})()</script>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..600&display=swap" rel="stylesheet">
+  <script>document.documentElement.classList.add('js')</script>
   <style>
+    /* ===== Cold redesign: dark and light bands, square edges, blue and green accents ===== */
     /* ---------- Tokens ---------- */
     :root {
       --serif:"Source Serif 4",Georgia,"Palatino Linotype",serif;
       --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
       --hand:"Caveat","Segoe Script","Bradley Hand","Comic Sans MS",cursive;
       --ease:cubic-bezier(.16,1,.3,1);
-      --glass-inner:inset 0 1px 0 rgba(255,255,255,.65);
-      --bg:#f5f9fc; --bg-soft:#eaf2f9; --paper:#ffffff; --paper-alt:#f4f8fd;
-      --text:#1b3452; --text-muted:#465e75;
-      --blue:#3f6cb0; --blue-deep:#2c559a; --mint:#79b9a3; --mint-strong:#25735f;
-      --border:rgba(63,100,165,.16);
-      --shadow:0 26px 66px -42px rgba(44,85,154,.34);
-      --shadow-strong:0 36px 90px -46px rgba(38,76,140,.36);
-      --focus:#3a64ae;
-      --glass:rgba(255,255,255,.58); --glass-bright:rgba(255,255,255,.74); --glass-stroke:rgba(255,255,255,.85);
-      --glass-shadow:0 22px 65px -34px rgba(52,92,166,.30);
-      --soft-blue:rgba(160,188,234,.52); --soft-green:rgba(140,201,178,.42); --soft-lav:rgba(196,185,232,.42);
-      --veil:rgba(255,255,255,.42);
-      --wash-indigo:rgba(116,142,210,.50); --wash-blue:rgba(156,190,238,.55); --wash-teal:rgba(110,184,166,.46);
-      --wash-lav:rgba(184,170,228,.46); --wash-lemon:rgba(238,242,208,.55);
-      --aura:rgba(140,178,236,.30); --ripple:rgba(63,108,176,.24);
-      --ink-q:#1f3558; --line-q:rgba(44,85,154,.5);
-      --grad-a:linear-gradient(135deg,#e2ecfc,#ebe4f8 55%,#dcf1ea);
-      --grad-b:linear-gradient(135deg,#dff2ea,#e4eefb 60%,#f1f4d9);
-      --grad-c:linear-gradient(135deg,#ece5f8,#f8e8ec 55%,#e3ecfb);
-      --grad-d:linear-gradient(135deg,#1d3a70,#2b4f8f 48%,#2a6c78);
-      /* Organic outlines: no sharp corners anywhere. */
-      --r-hero-a:34% 28% 30% 36% / 30% 34% 28% 32%;
-      --r-hero-b:26% 36% 34% 28% / 34% 26% 32% 30%;
-      --r-leaf:62% 38% 56% 44% / 46% 54% 46% 54%;
-      --r-egg:50% 50% 46% 54% / 58% 56% 44% 42%;
-      --r-cloud:38% 62% 42% 58% / 52% 38% 62% 48%;
+      /* Cold palette. Deep tones open the page; frost and ice are the light bands. */
+      --abyss:#06121e; --deep:#08192a; --teal:#0c2a3d; --frost:#edf3f7; --ice:#dae7f0;
+      --blue:#2f6fb3; --blue-hi:#8dbdf0; --green:#1f8a74; --green-hi:#6fd2b8;
+      /* Photo grading: one knob. 0 = off (use when every photograph is already cold-graded), 1 = strongest. */
+      --photo-grade:.32;
+      /* Shared with article pages */
+      --bg:#f3f7fa; --bg-soft:#e7eff5; --paper:#ffffff; --paper-alt:#f4f8fd;
+      --text:#10243a; --text-muted:#46607a; --blue-deep:#1f5f9e; --mint-strong:#1f7a67;
+      --border:rgba(16,36,58,.16); --shadow-strong:0 30px 70px -44px rgba(6,18,30,.55);
+      --glass:rgba(255,255,255,.62); --focus:#2f6fb3;
+      --header-muted:#a3b9cc;
     }
     :root[data-theme="dark"] {
       color-scheme:dark;
-      --glass-inner:inset 0 1px 0 rgba(207,235,255,.10);
-      --bg:#0e1f34; --bg-soft:#13293f; --paper:#182f48; --paper-alt:#1c3752;
-      --text:#f1f6fd; --text-muted:#bdd0e4;
-      --blue:#9fb9ee; --blue-deep:#b7caf5; --mint:#8fd1bb; --mint-strong:#a8dfc9;
-      --border:rgba(168,196,240,.18);
-      --shadow:0 26px 65px -40px rgba(0,7,20,.8); --shadow-strong:0 34px 80px -40px rgba(0,7,20,.82);
-      --focus:#b7caf5;
-      --glass:rgba(28,52,82,.62); --glass-bright:rgba(33,62,96,.74); --glass-stroke:rgba(176,200,240,.22);
-      --glass-shadow:0 24px 70px -35px rgba(0,9,29,.72);
-      --soft-blue:rgba(78,108,184,.30); --soft-green:rgba(50,140,120,.24); --soft-lav:rgba(110,96,186,.26);
-      --veil:rgba(16,38,62,.46);
-      --wash-indigo:rgba(66,88,170,.42); --wash-blue:rgba(54,96,164,.34); --wash-teal:rgba(34,126,116,.34);
-      --wash-lav:rgba(96,82,170,.30); --wash-lemon:rgba(120,140,100,.10);
-      --aura:rgba(110,140,230,.22); --ripple:rgba(168,196,240,.28);
-      --ink-q:#f1f6fd; --line-q:rgba(190,212,255,.55);
-      --grad-a:linear-gradient(135deg,#1c3158,#2a2c5c 55%,#1b4a4d);
-      --grad-b:linear-gradient(135deg,#17413f,#1d3560 60%,#33432d);
-      --grad-c:linear-gradient(135deg,#2c2a5c,#4a2f52 55%,#1f3560);
-      --grad-d:linear-gradient(135deg,#0f2447,#193a6b 50%,#1b5560);
+      --bg:#0a1a2a; --bg-soft:#0e2336; --paper:#10283c; --paper-alt:#133049;
+      --text:#e8f0f7; --text-muted:#a9bdd0; --blue-deep:#8dbdf0; --mint-strong:#6fd2b8;
+      --border:rgba(160,196,230,.22); --shadow-strong:0 30px 70px -44px rgba(0,6,16,.85);
+      --glass:rgba(16,40,60,.62); --focus:#8dbdf0;
     }
+
+    /* ---------- Bands: the section background carries the colours ---------- */
+    .band { position:relative; padding:clamp(72px,9vw,140px) 0; color:var(--c-text); background:var(--c-bg); }
+    .band-deep { --c-bg:var(--deep); --c-text:#e8f0f7; --c-muted:#a6bccf; --c-line:rgba(141,189,240,.24); --c-a:var(--blue-hi); --c-b:var(--green-hi); --c-panel:rgba(141,189,240,.07); --focus:#8dbdf0; color-scheme:dark;
+      background:radial-gradient(70% 90% at 100% 0%,rgba(47,111,179,.22),transparent 62%),radial-gradient(60% 70% at 0% 100%,rgba(31,138,116,.14),transparent 64%),var(--deep); }
+    .band-teal { --c-bg:var(--teal); --c-text:#e8f0f7; --c-muted:#a6bccf; --c-line:rgba(141,189,240,.26); --c-a:var(--blue-hi); --c-b:var(--green-hi); --c-panel:rgba(141,189,240,.08); --focus:#8dbdf0; color-scheme:dark;
+      background:radial-gradient(60% 80% at 0% 0%,rgba(31,138,116,.22),transparent 62%),radial-gradient(60% 80% at 100% 100%,rgba(47,111,179,.2),transparent 64%),var(--teal); }
+    .band-frost { --c-bg:var(--frost); --c-text:#10243a; --c-muted:#46607a; --c-line:rgba(16,36,58,.2); --c-a:#2f6fb3; --c-b:#1f8a74; --c-panel:rgba(47,111,179,.07); }
+    .band-ice { --c-bg:var(--ice); --c-text:#10243a; --c-muted:#3f5a74; --c-line:rgba(16,36,58,.22); --c-a:#1f5f9e; --c-b:#1b7a68; --c-panel:rgba(255,255,255,.5);
+      background:linear-gradient(180deg,#e3edf4,#d4e3ee); }
 
     /* ---------- Base ---------- */
     * { box-sizing:border-box; }
-    html { scroll-behavior:smooth; scroll-padding-top:96px; scrollbar-gutter:stable; }
-    html.farewell-open { overflow:hidden; }
+    html { scroll-behavior:smooth; scroll-padding-top:72px; }
     body { margin:0; min-width:320px; color:var(--text); background:var(--bg); font-family:var(--sans); line-height:1.65; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; overflow-x:hidden; }
-    body::before { content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
-      background:radial-gradient(ellipse 80% 60% at 0% 104%, var(--wash-indigo), transparent 68%),
-                 radial-gradient(ellipse 60% 46% at 42% 112%, var(--wash-teal), transparent 70%),
-                 radial-gradient(ellipse 50% 44% at 104% 86%, var(--wash-blue), transparent 68%),
-                 radial-gradient(ellipse 44% 36% at 8% 38%, var(--wash-lav), transparent 70%),
-                 radial-gradient(ellipse 60% 40% at 92% -4%, var(--wash-lemon), transparent 70%),
-                 linear-gradient(180deg, var(--bg), var(--bg-soft)); }
     main { overflow-x:clip; }
     main:focus { outline:none; }
     figure { margin:0; }
     img { display:block; width:100%; height:100%; object-fit:cover; }
-    button, input, select, textarea { font:inherit; color:inherit; }
+    button, input, select, textarea { font:inherit; color:inherit; border-radius:0; }
     button { cursor:pointer; }
     a { color:inherit; text-decoration:none; }
-    :where(a,button,select,input,textarea,summary):focus-visible { outline:3px solid var(--focus); outline-offset:4px; }
+    :where(a,button,select,input,textarea,summary):focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
     h1,h2,h3 { text-wrap:balance; margin:0; }
     p { text-wrap:pretty; margin:0; white-space:pre-line; }
-    ::selection { background:rgba(148,178,230,.42); }
+    ::selection { background:rgba(111,180,240,.4); }
     [hidden] { display:none!important; }
     .sr-only { position:absolute!important; width:1px!important; height:1px!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; }
-    .skip { position:fixed; top:-90px; left:15px; z-index:1000; background:var(--paper); padding:12px 20px; border-radius:999px; }
+    .skip { position:fixed; top:-90px; left:15px; z-index:1000; background:#fff; color:#10243a; padding:12px 20px; }
     .skip:focus { top:15px; }
-    .container { width:min(1120px,calc(100% - 40px)); margin-inline:auto; }
-    .hand { font-family:var(--hand); }
-    .title { font:500 clamp(2.1rem,4.8vw,3.7rem)/1.12 var(--serif); letter-spacing:-.025em; margin:0 0 clamp(20px,3vw,32px); }
-    .lead { font-size:clamp(1.05rem,1.5vw,1.2rem); line-height:1.85; color:var(--text-muted); max-width:56ch; }
-    .lead + .lead { margin-top:1.3em; }
-    .sec { position:relative; padding:clamp(64px,10vw,150px) 0; }
-    .sec--air { padding:clamp(110px,16vw,250px) 0; }
+    .container { width:min(1200px,calc(100% - 48px)); margin-inline:auto; }
+    .title { font:500 clamp(2rem,4.2vw,3.4rem)/1.12 var(--serif); letter-spacing:-.025em; margin:0 0 clamp(20px,3vw,32px); color:var(--c-text); }
+    .lead { font-size:clamp(1.03rem,1.35vw,1.15rem); line-height:1.85; color:var(--c-muted); max-width:58ch; }
+    .lead + .lead { margin-top:1.2em; }
+    .split { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:clamp(32px,6vw,96px); align-items:start; }
+    .sticky { position:sticky; top:96px; }
 
-    /* ---------- Buttons and glass ---------- */
-    .glass { background:var(--glass-bright); border:1px solid var(--glass-stroke); box-shadow:var(--glass-inner),var(--glass-shadow); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); }
-    .button { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:54px; padding:14px 30px; border-radius:999px; border:1px solid var(--glass-stroke); background:var(--glass-bright); color:var(--text); font-weight:650; font-size:.97rem; text-align:center; box-shadow:var(--glass-inner),var(--glass-shadow); transition:transform .6s var(--ease),box-shadow .6s var(--ease),background-color .3s; }
+    /* ---------- Buttons and fields ---------- */
+    .button { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:52px; padding:13px 30px; border:1px solid var(--border); background:transparent; color:var(--text); font-weight:650; font-size:.95rem; text-align:center; transition:background-color .3s,transform .5s var(--ease); }
     .button:hover { transform:translateY(-2px); }
     .button:active { transform:scale(.98); transition-duration:.12s; }
-    .button-primary { border-color:transparent; color:#fff; background:linear-gradient(110deg,#4a7cc4,#5a9fb0 55%,#5fae98); box-shadow:0 20px 44px -24px rgba(40,110,150,.85); }
+    .button-primary { border-color:transparent; color:#fff; background:linear-gradient(110deg,#2b66ab,#2a8f86 60%,#2f9a7e); }
     .button-outline { background:var(--glass); }
-    .icon-button { display:grid; place-items:center; width:40px; height:40px; border-radius:50%; border:1px solid var(--glass-stroke); background:var(--glass); box-shadow:var(--glass-inner); color:var(--text); flex:none; }
-    .icon-button { font-size:1.05rem; line-height:1; }
-    .icon-button svg { width:19px; height:19px; }
-    .theme-icon-sun, .theme-icon-moon { display:none; }
-    :root[data-theme="dark"] .theme-icon-sun { display:block; }
-    :root[data-theme="light"] .theme-icon-moon { display:block; }
+    .icon-button { display:grid; place-items:center; width:36px; height:36px; border:1px solid rgba(141,189,240,.32); background:transparent; color:#e8f0f7; flex:none; font-size:1rem; line-height:1; }
 
-    /* ---------- Header ---------- */
-    .site-header { position:sticky; top:12px; z-index:90; width:min(1120px,calc(100% - 24px)); margin:12px auto 0; border-radius:999px; background:var(--glass-bright); border:1px solid var(--glass-stroke); box-shadow:var(--glass-inner),0 14px 42px -28px rgba(25,78,113,.45); backdrop-filter:blur(22px) saturate(1.45); -webkit-backdrop-filter:blur(22px) saturate(1.45); }
-    .header-inner { display:flex; align-items:center; gap:14px; min-height:60px; width:calc(100% - 28px); margin-inline:auto; }
+    /* ---------- Header: a flat dark bar, no name, no pill ---------- */
+    .site-header { position:sticky; top:0; z-index:90; background:var(--abyss); color:#e8f0f7; border-bottom:1px solid rgba(141,189,240,.16); }
+    .header-inner { display:flex; align-items:center; gap:14px; min-height:56px; }
+    .site-header .header-inner { width:min(1200px,calc(100% - 48px)); margin-inline:auto; }
     .brand { display:flex; align-items:center; gap:11px; margin-right:auto; font-weight:700; letter-spacing:-.02em; font-size:.95rem; line-height:1.15; max-width:260px; }
-    .brand-mark { flex:none; display:grid; place-items:center; width:35px; height:35px; border-radius:50%; overflow:hidden; background:#dce8f8; box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),0 7px 20px -12px rgba(63,100,165,.8); }
+    .brand-mark { flex:none; display:grid; place-items:center; width:32px; height:32px; overflow:hidden; background:#dce8f8; }
     .brand-mark svg { width:100%; height:100%; }
     .header-actions { display:flex; align-items:center; gap:8px; }
-    .language-select { height:40px; border-radius:999px; border:1px solid var(--glass-stroke); background:var(--glass); box-shadow:var(--glass-inner); padding:0 12px; font-size:.8rem; font-weight:700; cursor:pointer; }
+    .language-select { height:36px; border:1px solid rgba(141,189,240,.32); background:transparent; color:#e8f0f7; padding:0 10px; font-size:.8rem; font-weight:700; cursor:pointer; }
+    .language-select option { color:#10243a; background:#fff; }
 
-    /* ---------- Hero: the photograph arrives first ---------- */
-    .hero { padding:clamp(24px,4vw,48px) 0 0; }
-    .hero-stage { position:relative; width:min(1180px,calc(100% - 28px)); margin-inline:auto; }
-    .photo { position:relative; overflow:hidden; isolation:isolate; background:linear-gradient(135deg,#d6e4f6,#c3d6ee 45%,#bfe0d3); box-shadow:var(--shadow-strong); }
-    :root[data-theme="dark"] .photo { background:linear-gradient(135deg,#27406c,#2a4e78 50%,#2a6a62); }
-    .photo > img { position:absolute; inset:0; opacity:0; transition:opacity 1.2s var(--ease),scale 2.2s var(--ease); }
+    /* ---------- Photographs: square frames, cold grading ---------- */
+    .photo { position:relative; overflow:hidden; isolation:isolate; background:linear-gradient(135deg,#0f3148,#1b4d63 55%,#1d5f5b); }
+    .photo > img { position:absolute; inset:0; opacity:0; filter:saturate(calc(1 - var(--photo-grade) * .7)) contrast(calc(1 + var(--photo-grade) * .1)); transition:opacity 1.2s var(--ease); }
     .photo.has-photo > img { opacity:1; }
     .photo.has-photo .ph { display:none; }
-    .photo:hover > img { scale:1.035; }
-    .ph { position:absolute; inset:0; display:grid; place-content:center; justify-items:center; gap:10px; padding:24px; text-align:center; color:var(--blue-deep); font-size:.82rem; font-weight:600; opacity:.85; }
+    .photo::before, .photo::after { content:""; position:absolute; inset:0; z-index:1; pointer-events:none; }
+    .photo::before { background:linear-gradient(160deg,#2b6aa8,#1b5a6a); mix-blend-mode:color; opacity:calc(var(--photo-grade) * 1.1); }
+    .photo::after { background:linear-gradient(160deg,#2f6aa6,#124057); mix-blend-mode:soft-light; opacity:var(--photo-grade); }
+    .ph { position:absolute; inset:0; display:grid; place-content:center; justify-items:center; gap:10px; padding:24px; text-align:center; color:var(--blue-hi); font-size:.82rem; font-weight:600; opacity:.85; }
     .ph svg { width:48px; height:48px; opacity:.7; }
-    .hero-photo { height:clamp(430px,80svh,840px); border-radius:var(--r-hero-a); animation:heroIn 2s var(--ease) both,morph 20s ease-in-out 2s infinite alternate; }
-    .hero-tag { position:absolute; left:clamp(16px,4vw,52px); bottom:clamp(16px,4vw,46px); display:grid; gap:2px; padding:14px 26px; border-radius:36px; animation:fadeIn 1.6s ease 1.1s both; }
-    .hero-tag strong { font:500 1.2rem var(--serif); }
-    .hero-tag span { font-size:.8rem; color:var(--text-muted); }
-    .hero-tag span:empty { display:none; }
-    .hero-hint { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:clamp(22px,3vw,34px); font:500 clamp(1.3rem,2.2vw,1.7rem) var(--hand); color:var(--text-muted); animation:fadeIn 1.6s ease 1.8s both; }
-    .hero-hint i { width:9px; height:9px; border-radius:50%; background:var(--mint-strong); box-shadow:0 0 0 6px var(--soft-green); animation:breathe 4.5s ease-in-out infinite; }
 
-    /* ---------- Quote cards on soft backgrounds ---------- */
-    .quote { position:relative; width:min(var(--qw,1160px),calc(100% - 24px)); margin:clamp(40px,7vw,110px) var(--qmr,auto) clamp(40px,7vw,110px) var(--qml,auto); }
-    .quote-card { position:relative; isolation:isolate; overflow:hidden; padding:clamp(84px,13vw,190px) clamp(26px,8vw,120px); text-align:center; border-radius:var(--qr); background:var(--qbg); box-shadow:var(--shadow-strong),inset 0 1px 0 rgba(255,255,255,.5); }
-    .quote-card i { position:absolute; z-index:-1; border-radius:50%; filter:blur(54px); pointer-events:none; animation:drift 26s ease-in-out infinite alternate; }
-    .quote-card i:nth-child(1) { left:-8%; top:-24%; width:46%; aspect-ratio:1; background:var(--o1); }
-    .quote-card i:nth-child(2) { right:-10%; bottom:-34%; width:52%; aspect-ratio:1; background:var(--o2); animation-delay:-9s; }
-    .quote-card i:nth-child(3) { left:36%; top:34%; width:28%; aspect-ratio:1; background:var(--o3); animation-delay:-16s; }
-    .quote-text { margin:0; font:500 clamp(2.1rem,5.4vw,4.4rem)/1.18 var(--hand); color:var(--ink-q); text-wrap:balance; }
-    .quote-stroke { display:block; width:min(240px,52%); height:18px; margin:clamp(20px,3vw,36px) auto 0; overflow:visible; }
-    .quote-stroke path { fill:none; stroke:var(--line-q); stroke-width:2.2; stroke-linecap:round; stroke-dasharray:1; stroke-dashoffset:1; transition:stroke-dashoffset 2.4s var(--ease) var(--stroke-delay,1.2s); }
+    /* ---------- 1. Hero: large photograph on one side, the quotation on the other ---------- */
+    .hero { padding:0; }
+    .hero-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr); min-height:min(calc(100svh - 56px),880px); }
+    .hero-photo { min-height:100%; animation:heroIn 1.8s var(--ease) both; }
+    .hero-photo > img { object-position:50% 30%; }
+    .hero-quote { align-self:center; padding:clamp(40px,6vw,96px) clamp(24px,5vw,88px) clamp(40px,6vw,96px) clamp(28px,5vw,80px); }
+    .hero-quote::before { content:""; display:block; width:64px; height:3px; margin-bottom:clamp(24px,3vw,40px); background:linear-gradient(90deg,var(--blue-hi),var(--green-hi)); }
+    .hero-q1 { font:500 clamp(2.2rem,4vw,4rem)/1.08 var(--serif); letter-spacing:-.03em; animation:riseIn 1.6s var(--ease) .5s both; }
+    .hero-q2 { margin-top:clamp(22px,3vw,36px); max-width:24em; font:italic 400 clamp(1.05rem,1.5vw,1.3rem)/1.6 var(--serif); color:var(--c-muted); animation:riseIn 1.6s var(--ease) 1.1s both; }
+
+    /* ---------- 2. Introduction ---------- */
+    .intro .split { grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); align-items:stretch; }
+    .intro .title { font-size:clamp(1.8rem,3.4vw,2.8rem); max-width:19em; }
+    .intro-body > p + p { margin-top:1.1em; }
+    .intro-body .mid { font:400 clamp(1.08rem,1.4vw,1.2rem)/1.8 var(--serif); color:var(--c-text); max-width:56ch; }
+    .intro-pull { margin:clamp(26px,4vw,44px) 0; padding-left:22px; border-left:3px solid var(--c-b); font:italic 500 clamp(1.4rem,2.4vw,2rem)/1.35 var(--serif); color:var(--c-a); max-width:20em; }
+
+    /* ---------- Quotations: handwritten, on a cold panel ---------- */
+    .quote-panel { position:relative; isolation:isolate; display:grid; align-content:end; min-height:clamp(360px,44vw,640px); padding:clamp(28px,4vw,52px); color:#fff; overflow:hidden; background:linear-gradient(150deg,#0b2c44,#0f4a5b 60%,#14604f); }
+    .quote-panel .quote-bg { position:absolute; inset:0; z-index:-2; }
+    .quote-panel::before { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(6,18,30,.05),rgba(6,18,30,.72)); }
+    .quote-text { margin:0; font:500 clamp(2rem,3.6vw,3.2rem)/1.2 var(--hand); color:var(--c-a); text-wrap:balance; }
+    .quote-panel .quote-text { color:#fff; text-shadow:0 2px 22px rgba(4,14,24,.55); }
+    .quote-stroke { display:block; width:min(220px,60%); height:16px; margin-top:clamp(16px,2.4vw,26px); overflow:visible; }
+    .quote-stroke path { fill:none; stroke:var(--c-b); stroke-width:2.2; stroke-linecap:round; stroke-dasharray:1; stroke-dashoffset:1; transition:stroke-dashoffset 2.4s var(--ease) var(--stroke-delay,1.2s); }
+    .quote-panel .quote-stroke path { stroke:var(--green-hi); }
     .is-written + .quote-stroke path { stroke-dashoffset:0; }
-    .q-a { --qbg:var(--grad-a); --qr:clamp(48px,9vw,140px) clamp(32px,5vw,72px) clamp(48px,9vw,140px) clamp(32px,5vw,72px); --o1:rgba(120,150,230,.55); --o2:rgba(190,170,235,.5); --o3:rgba(130,200,180,.45); }
-    .q-b { --qbg:var(--grad-b); --qw:940px; --qml:auto; --qmr:clamp(12px,5vw,80px); --qr:clamp(32px,5vw,72px) clamp(52px,10vw,150px) clamp(32px,5vw,72px) clamp(52px,10vw,150px); --o1:rgba(120,200,175,.5); --o2:rgba(150,185,240,.5); --o3:rgba(236,236,170,.5); }
-    .q-c { --qbg:var(--grad-c); --qw:1000px; --qml:clamp(12px,6vw,90px); --qmr:auto; --qr:clamp(64px,12vw,170px) clamp(40px,6vw,90px); --o1:rgba(196,170,235,.55); --o2:rgba(250,196,190,.5); --o3:rgba(150,185,240,.45); }
-    .q-c .quote-card { text-align:left; }
-    .q-c .quote-stroke { margin-left:0; }
-    .q-d { --qbg:var(--grad-d); --ink-q:#f4f8ff; --line-q:rgba(214,230,255,.6); --qr:clamp(56px,11vw,170px); --o1:rgba(110,150,235,.5); --o2:rgba(140,120,225,.4); --o3:rgba(100,200,180,.4); margin-bottom:clamp(60px,9vw,130px); }
+    .quote-inline { margin-top:clamp(32px,4vw,52px); padding-top:clamp(20px,3vw,32px); border-top:1px solid var(--c-line); }
 
     /* ---------- Handwriting: text is written in real time ---------- */
     .js [data-write]:not(.is-split) { visibility:hidden; }
     .w { display:inline-block; white-space:nowrap; }
     .js .ch { display:inline-block; opacity:0; filter:blur(5px); transform:translateY(.2em) rotate(-3deg); clip-path:inset(-.4em 100% -.4em -.1em); transition:opacity .7s var(--ease),filter .7s var(--ease),transform .9s var(--ease),clip-path .9s var(--ease); transition-delay:calc(var(--i) * var(--step,45ms)); }
     .js .is-written .ch { opacity:1; filter:none; transform:none; clip-path:inset(-.4em -.4em -.4em -.1em); }
-
-    /* ---------- Quiet fade for ordinary text ---------- */
-    .js [data-fade] { opacity:0; transition:opacity 1.6s ease var(--d,0s); }
+    .js [data-fade] { opacity:0; transition:opacity 1.4s ease var(--d,0s); }
     .js [data-fade].in { opacity:1; }
 
-    /* ---------- Decoration: ripples, drifting orbs ---------- */
-    .ripple { position:absolute; width:var(--s,420px); aspect-ratio:1; pointer-events:none; z-index:-1; }
-    .ripple i { position:absolute; inset:0; border-radius:50%; border:1px solid var(--ripple); animation:ripple 10s ease-in-out infinite; }
-    .ripple i:nth-child(2) { inset:12%; animation-delay:-3.3s; }
-    .ripple i:nth-child(3) { inset:26%; animation-delay:-6.6s; }
-    .aura { position:fixed; left:0; top:0; z-index:-1; width:540px; height:540px; margin:-270px 0 0 -270px; border-radius:50%; pointer-events:none; opacity:0; transition:opacity 1.2s ease; background:radial-gradient(circle,var(--aura),transparent 66%); }
+    /* ---------- 3. Intuitive sessions ---------- */
+    .sessions .split { grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); }
+    .eyes { aspect-ratio:4/5; width:100%; }
+    .eyes > img { object-position:84% 36%; }
+    .sessions-lead { margin-bottom:clamp(36px,5vw,64px); max-width:24em; font:400 clamp(1.4rem,2.6vw,2.1rem)/1.35 var(--serif); letter-spacing:-.01em; color:var(--c-text); }
+    .s-block { padding:clamp(22px,3vw,34px) 0; border-top:1px solid var(--c-line); }
+    .s-block h3 { font:500 clamp(1.25rem,2vw,1.6rem)/1.25 var(--serif); margin-bottom:10px; color:var(--c-text); }
+    .s-block p { color:var(--c-muted); line-height:1.85; max-width:60ch; }
+    .s-honest { margin-top:clamp(18px,3vw,32px); padding:clamp(24px,3.4vw,40px); background:var(--c-panel); border-left:3px solid var(--c-b); display:grid; gap:14px; }
+    .s-honest h3 { font:500 clamp(1.25rem,2vw,1.6rem)/1.25 var(--serif); }
+    .s-honest p { color:var(--c-muted); line-height:1.8; }
+    .s-honest .s-note { font-size:.92rem; color:var(--c-text); }
+    .s-bring { margin-top:clamp(28px,4vw,48px); max-width:26em; font:italic 400 clamp(1.2rem,2vw,1.55rem)/1.5 var(--serif); color:var(--c-a); }
 
-    /* ---------- Story about the site ---------- */
-    .story .container { position:relative; }
-    .story .ripple { left:-8%; top:-10%; --s:clamp(260px,44vw,540px); }
-    .story-body { max-width:640px; margin-left:clamp(0px,14vw,210px); }
-    .story-body .mid { margin:1.5em 0; font:400 clamp(1.2rem,1.9vw,1.5rem)/1.75 var(--serif); color:var(--text); }
+    /* What we can explore: seven symbols */
+    .themes { margin-top:clamp(64px,9vw,120px); padding-top:clamp(36px,5vw,56px); border-top:1px solid var(--c-line); }
+    .themes-title { font:500 clamp(1.5rem,2.8vw,2.2rem)/1.2 var(--serif); letter-spacing:-.02em; margin-bottom:14px; }
+    .theme-grid { list-style:none; margin:clamp(28px,4vw,48px) 0 0; padding:0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0; }
+    .theme { padding:clamp(22px,3vw,34px) clamp(18px,2.4vw,30px) clamp(22px,3vw,34px) 0; border-top:1px solid var(--c-line); }
+    .theme:nth-child(3n+2), .theme:nth-child(3n+3) { padding-left:clamp(18px,2.4vw,30px); border-left:1px solid var(--c-line); }
+    .theme:last-child { grid-column:1 / -1; padding-left:0; border-left:0; display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:clamp(18px,3vw,36px); align-items:start; }
+    .theme:last-child .glyph { grid-row:1 / span 2; }
+    .glyph { display:block; width:36px; height:36px; margin-bottom:16px; fill:none; stroke:var(--c-a); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+    .theme strong { display:block; font:500 clamp(1.15rem,1.7vw,1.4rem)/1.25 var(--serif); }
+    .theme span { display:block; margin-top:8px; max-width:40ch; color:var(--c-muted); font-size:.98rem; line-height:1.7; }
+    .theme:last-child strong { font-size:clamp(1.4rem,2.4vw,1.9rem); }
 
-    /* ---------- For whom ---------- */
-    .client-head { max-width:700px; }
-    .thoughts { display:grid; gap:clamp(14px,2vw,22px); margin-top:clamp(36px,6vw,72px); }
-    .thought { width:fit-content; max-width:min(560px,100%); padding:22px 30px; border-radius:44px 44px 44px 16px; font:400 clamp(1.15rem,1.8vw,1.4rem)/1.55 var(--serif); animation:bob 9s ease-in-out infinite; }
-    .thought:nth-child(2) { margin-left:clamp(0px,16vw,220px); border-radius:44px 16px 44px 44px; animation-delay:-2.2s; }
-    .thought:nth-child(3) { margin-left:clamp(0px,5vw,70px); animation-delay:-4.4s; }
-    .thought:nth-child(4) { margin-left:clamp(0px,24vw,330px); border-radius:44px 44px 16px 44px; animation-delay:-6.6s; }
-    .client-note { margin:clamp(56px,8vw,110px) auto 0; max-width:22em; text-align:center; font:500 clamp(1.7rem,3.2vw,2.5rem)/1.3 var(--hand); color:var(--blue-deep); }
-
-    /* ---------- Why athletes ---------- */
-    .why .container { display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); gap:clamp(24px,6vw,96px); align-items:center; }
-    .why-art { position:relative; aspect-ratio:1; width:min(100%,360px); }
-    .why-art i { position:absolute; inset:0; background:linear-gradient(135deg,var(--soft-blue),var(--soft-lav)); border-radius:var(--r-cloud); animation:morph2 14s ease-in-out infinite alternate; }
-    .why-art i + i { inset:14% 8% 6% 22%; background:linear-gradient(135deg,var(--soft-green),var(--soft-blue)); animation-duration:18s; animation-delay:-5s; }
-    .why-body { max-width:580px; margin-left:auto; }
-
-    /* ---------- About: a life story in four frames ---------- */
-    .about-head { max-width:720px; }
-    .chapter { display:grid; align-items:center; gap:clamp(24px,5vw,72px); margin-top:clamp(64px,10vw,150px); }
-    .chapter h3 { font:500 clamp(1.5rem,2.6vw,2.1rem)/1.25 var(--serif); margin-bottom:14px; }
-    .chapter p { font-size:clamp(1.02rem,1.4vw,1.15rem); line-height:1.85; color:var(--text-muted); max-width:46ch; }
-    .c1 { grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); }
-    .c1 .photo { aspect-ratio:4/5; border-radius:var(--r-leaf); }
-    .c2 { grid-template-columns:minmax(0,1fr) minmax(0,.7fr); padding-left:clamp(0px,7vw,100px); }
-    .c2 .photo { order:2; aspect-ratio:1; border-radius:50%; }
-    .c3 { grid-template-columns:minmax(0,.62fr) minmax(0,1fr); }
-    .c3 .photo { aspect-ratio:3/4; border-radius:var(--r-egg); transform:translateY(-6%); }
-    .c3 .chap-text { padding-left:clamp(0px,5vw,70px); }
-    .c4 { grid-template-columns:1fr; justify-items:end; }
-    .c4 .photo { width:min(100%,900px); aspect-ratio:16/10; border-radius:var(--r-cloud); }
-    .c4 .chap-text { width:min(520px,92%); margin:calc(-1 * clamp(48px,8vw,110px)) auto 0 0; padding:clamp(24px,4vw,40px); border-radius:44px; justify-self:start; }
-
-    /* ---------- Listening to intuition ---------- */
-    .check .container { position:relative; text-align:center; max-width:820px; }
-    .check .ripple { left:50%; top:50%; translate:-50% -50%; --s:min(100vw,820px); }
-    .check .title { margin-bottom:clamp(28px,4vw,48px); }
-    .check-line { margin:0 auto; font:400 clamp(1.5rem,3.6vw,2.7rem)/1.4 var(--serif); letter-spacing:-.01em; }
-    .check-line + .check-line { margin-top:clamp(18px,3vw,34px); }
-    .check-note { margin:clamp(40px,6vw,76px) auto 0; font:500 clamp(1.5rem,2.6vw,2rem)/1.35 var(--hand); color:var(--text-muted); max-width:26em; }
-    .check-note + .check-note { margin-top:10px; color:var(--blue-deep); }
-
-    /* ---------- The fork: it resonated / not yet ---------- */
-    .fork .container { display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); gap:clamp(28px,6vw,88px); align-items:center; }
-    .eyes { aspect-ratio:1; width:min(100%,420px); border-radius:50%; box-shadow:0 0 0 14px rgba(255,255,255,.35),0 0 0 15px var(--glass-stroke),var(--shadow-strong); }
-    .fork-lead { font:500 clamp(1.6rem,3vw,2.4rem)/1.3 var(--serif); letter-spacing:-.01em; }
-    .fork-voice { margin-top:18px; font:500 clamp(1.7rem,3vw,2.3rem)/1.3 var(--hand); color:var(--blue-deep); }
-    .paths { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); gap:16px; align-items:start; margin-top:clamp(32px,5vw,56px); }
-    .path { display:grid; gap:6px; text-align:left; padding:26px 28px; border-radius:38px; border:1px solid var(--glass-stroke); background:var(--glass-bright); box-shadow:var(--glass-inner),var(--glass-shadow); transition:transform .6s var(--ease),box-shadow .6s var(--ease); }
-    .path:hover { transform:translateY(-3px); box-shadow:var(--glass-inner),var(--shadow-strong); }
-    .path strong { font:500 1.5rem/1.25 var(--serif); }
-    .path span { color:var(--text-muted); font-size:.95rem; }
-    .path em { margin-top:10px; font-style:normal; font-weight:650; font-size:.95rem; color:var(--blue-deep); }
-    .path-yes { background:linear-gradient(135deg,var(--glass-bright),var(--soft-green)); }
-    .path-no { margin-top:clamp(0px,3vw,38px); border-radius:34px; }
-
-    /* ---------- Change: three quiet movements ---------- */
-    .change .container { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:clamp(28px,6vw,96px); align-items:center; }
-    .shift { position:relative; aspect-ratio:1; width:min(100%,380px); }
-    .shift i { position:absolute; inset:0; background:linear-gradient(135deg,var(--soft-lav),var(--soft-blue)); border-radius:var(--r-egg); animation:morph2 11s ease-in-out infinite alternate; }
-    .shift i + i { inset:20%; background:linear-gradient(135deg,var(--soft-green),var(--soft-lav)); animation-duration:15s; animation-delay:-4s; }
-    .change-body { max-width:560px; }
-    .change2 .container { display:grid; justify-items:center; text-align:center; gap:clamp(8px,2vw,20px); }
-    .change2 .lead { margin-inline:auto; }
-    .change2 .title { margin-bottom:0; }
-    .mm { width:min(100%,460px); height:auto; overflow:visible; margin-bottom:clamp(8px,2vw,24px); }
+    /* ---------- 4. Transformation ---------- */
+    .change .split { grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); }
+    .change .title { max-width:9em; }
+    .mm { display:block; width:min(100%,400px); height:auto; overflow:visible; margin:clamp(8px,2vw,24px) 0 0; }
     .mm .s1, .mm .s2, .mm .s3 { opacity:0; }
     .mm .s1 { animation:mm1 16s ease-in-out infinite; }
     .mm .s2 { animation:mm2 16s ease-in-out infinite; }
     .mm .s3 { animation:mm3 16s ease-in-out infinite; transform-origin:180px 130px; }
     .mm .sway { transform-origin:180px 30px; animation:sway 6s ease-in-out infinite alternate; }
     .mm .wing { transform-origin:180px 125px; animation:flap 3.4s ease-in-out infinite; }
-    .support .container { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); gap:clamp(28px,6vw,96px); align-items:center; }
-    .support-body { max-width:560px; margin-left:clamp(0px,8vw,120px); }
-    .hold { width:min(100%,380px); height:auto; justify-self:center; overflow:visible; }
-    .hold .orbit { transform-origin:180px 110px; animation:spin 40s linear infinite; }
-    .hold .core { transform-origin:180px 110px; animation:breathe 6s ease-in-out infinite; }
+    .scene { padding:clamp(26px,3.6vw,44px) 0; border-top:1px solid var(--c-line); }
+    .scene:first-child { padding-top:0; border-top:0; }
+    .scene h3 { margin-bottom:14px; font:500 clamp(1.45rem,2.6vw,2.1rem)/1.18 var(--serif); letter-spacing:-.02em; color:var(--c-text); }
+    .scene p { color:var(--c-muted); line-height:1.9; font-size:clamp(1.02rem,1.3vw,1.12rem); max-width:62ch; }
+    .scene p + p { margin-top:1em; }
+    .scene-note { margin-top:clamp(8px,2vw,20px); padding-left:20px; border-left:3px solid var(--c-b); font:italic 500 clamp(1.2rem,1.9vw,1.5rem)/1.45 var(--serif); color:var(--c-a); max-width:26em; }
 
-    /* ---------- Invitation and the free first meeting ---------- */
-    .invite .container { max-width:760px; text-align:center; }
-    .invite .lead { margin:0 auto clamp(28px,4vw,44px); }
-    .free .container { display:grid; grid-template-columns:auto minmax(0,1fr); gap:clamp(28px,6vw,80px); align-items:center; max-width:920px; }
-    .coin { display:grid; place-content:center; justify-items:center; width:clamp(200px,26vw,280px); aspect-ratio:1; border-radius:50%; text-align:center; background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.9),rgba(255,255,255,0) 42%),linear-gradient(145deg,var(--soft-blue),var(--soft-green)); border:1px solid var(--glass-stroke); box-shadow:var(--glass-inner),var(--shadow-strong); animation:bob 9s ease-in-out infinite; }
-    .coin b { font:500 clamp(4rem,8vw,5.6rem)/1 var(--serif); letter-spacing:-.04em; }
-    .coin span { color:var(--text-muted); font-size:1rem; }
-    .coin em { margin-top:12px; padding:5px 16px; border-radius:999px; background:var(--glass-bright); font:600 1.3rem var(--hand); font-style:normal; color:var(--mint-strong); }
+    /* ---------- 5. About me: compact, text beside a photograph mosaic ---------- */
+    .about .split { grid-template-columns:minmax(0,1fr) minmax(0,.9fr); align-items:center; }
+    .about .title { margin-bottom:18px; }
+    .about-lead { margin-bottom:clamp(22px,3vw,34px); font:italic 400 clamp(1.25rem,2.1vw,1.7rem)/1.4 var(--serif); color:var(--c-a); max-width:24em; }
+    .chap { color:var(--c-muted); line-height:1.8; font-size:1rem; max-width:58ch; }
+    .chap + .chap { margin-top:1em; }
+    .chap strong { color:var(--c-text); font-weight:650; }
+    .chap strong::after { content:" \2014"; color:var(--c-b); font-weight:400; }
+    .about-note { margin-top:clamp(22px,3vw,34px); padding-left:20px; border-left:3px solid var(--c-b); font:500 clamp(1.45rem,2.4vw,1.9rem)/1.3 var(--hand); color:var(--c-b); max-width:20em; }
+    .mosaic { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:clamp(8px,1.4vw,16px); }
+    .mcol { display:grid; gap:clamp(8px,1.4vw,16px); align-content:start; }
+    .mcol:nth-child(2) { margin-top:clamp(28px,6vw,84px); }
+    .m-tall { aspect-ratio:4/5; }
+    .m-square { aspect-ratio:1; }
+    .mosaic img { object-position:50% 30%; }
 
-    /* ---------- Contact ---------- */
-    .contact-card { display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:clamp(28px,5vw,64px); padding:clamp(28px,6vw,72px); border-radius:clamp(40px,7vw,96px) clamp(28px,4vw,56px) clamp(40px,7vw,96px) clamp(28px,4vw,56px); }
-    .contact-card h2 { font:500 clamp(2rem,4vw,3rem)/1.15 var(--serif); letter-spacing:-.02em; margin-bottom:18px; }
-    .contact-links { display:grid; gap:10px; margin-top:clamp(24px,4vw,40px); }
-    .contact-links h3 { font:500 1.05rem var(--serif); color:var(--text-muted); margin-bottom:2px; }
-    .contact-links a { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:14px 22px; border-radius:999px; background:var(--glass-bright); border:1px solid var(--glass-stroke); font-weight:650; font-size:.93rem; transition:transform .6s var(--ease); }
-    .contact-links a:hover { transform:translateX(4px); }
+    /* ---------- 6. Contact ---------- */
+    .contact .split { grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); }
+    .contact-links { display:grid; gap:10px; margin-top:clamp(24px,4vw,40px); max-width:380px; }
+    .contact-links a { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:14px 20px; border:1px solid var(--c-line); font-weight:650; font-size:.93rem; transition:background-color .3s,border-color .3s; }
+    .contact-links a:hover { background:var(--c-panel); border-color:var(--c-a); }
     .field { display:block; margin-bottom:16px; }
-    .field span { display:block; margin:0 0 8px 10px; font-size:.86rem; color:var(--text-muted); }
-    .field input, .field textarea { width:100%; padding:15px 22px; border-radius:30px; border:1px solid var(--border); background:var(--paper); color:var(--text); }
-    .field textarea { min-height:132px; resize:vertical; border-radius:28px; }
+    .field span { display:block; margin:0 0 8px; font-size:.86rem; color:var(--c-muted); }
+    .field input, .field textarea { width:100%; padding:14px 16px; border:1px solid var(--c-line); background:#fff; color:#10243a; }
+    .field input:focus, .field textarea:focus { border-color:var(--c-a); }
+    .field textarea { min-height:140px; resize:vertical; }
+    .field input[aria-invalid="true"] { border-color:#b64c56; box-shadow:0 0 0 3px rgba(182,76,86,.18); }
     .hp { position:absolute!important; left:-9999px!important; width:1px; height:1px; opacity:0; }
-    .form-status { min-height:1.6em; margin-top:12px; font-size:.92rem; color:var(--text-muted); }
+    .form-status { min-height:1.6em; margin-top:12px; font-size:.92rem; color:var(--c-muted); }
     .form-status.is-error { color:#b64c56; }
-    .form-note { margin-top:10px; font-size:.8rem; line-height:1.6; color:var(--text-muted); }
-    .form-sent { display:grid; place-content:center; min-height:260px; text-align:center; font:500 clamp(1.8rem,3.4vw,2.6rem)/1.35 var(--hand); color:var(--blue-deep); }
+    .form-note { margin-top:10px; font-size:.8rem; line-height:1.6; color:var(--c-muted); }
+    .form-sent { display:grid; place-content:center; min-height:260px; text-align:center; font:500 clamp(1.8rem,3.4vw,2.6rem)/1.35 var(--hand); color:var(--c-a); }
 
-    /* ---------- FAQ ---------- */
-    .faq .container { max-width:860px; }
-    .faq-list { margin-top:clamp(28px,4vw,48px); display:grid; gap:12px; }
-    .faq-list details { border-radius:32px; background:var(--glass); border:1px solid var(--glass-stroke); padding:0 28px; box-shadow:var(--glass-inner); }
+    /* ---------- 7. Questions, closing with the free first meeting ---------- */
+    .faq .split { grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr); }
+    .faq-list { border-bottom:1px solid var(--c-line); }
+    .faq-list details { border-top:1px solid var(--c-line); }
     .faq-list summary { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:22px 0; font-weight:650; cursor:pointer; list-style:none; }
     .faq-list summary::-webkit-details-marker { display:none; }
-    .faq-list summary::after { content:""; flex:none; width:22px; height:22px; color:var(--blue-deep); background:linear-gradient(currentColor,currentColor) center/13px 1.8px no-repeat,linear-gradient(currentColor,currentColor) center/1.8px 13px no-repeat; transition:background-size .45s var(--ease),transform .45s var(--ease); }
+    .faq-list summary::after { content:""; flex:none; width:22px; height:22px; color:var(--c-a); background:linear-gradient(currentColor,currentColor) center/13px 1.8px no-repeat,linear-gradient(currentColor,currentColor) center/1.8px 13px no-repeat; transition:background-size .45s var(--ease),transform .45s var(--ease); }
     .faq-list details[open] summary::after { background-size:13px 1.8px,1.8px 0; transform:rotate(180deg); }
     .faq-list details[open] p { animation:fadeIn .6s ease both; }
-    .faq-list p { margin:0 0 24px; color:var(--text-muted); line-height:1.8; max-width:62ch; }
+    .faq-list p { margin:0 0 24px; color:var(--c-muted); line-height:1.8; max-width:62ch; }
+    .free { display:grid; grid-template-columns:auto minmax(0,1fr); gap:clamp(24px,5vw,72px); align-items:center; margin-top:clamp(48px,7vw,96px); padding:clamp(28px,5vw,64px); color:#fff; background:linear-gradient(120deg,#0e5560,#1b7f6c); }
+    .free-num { display:grid; justify-items:start; line-height:1; }
+    .free-num b { font:500 clamp(4.5rem,10vw,8rem)/.9 var(--serif); letter-spacing:-.05em; }
+    .free-num span { margin-top:10px; font-size:1rem; letter-spacing:.02em; opacity:.9; }
+    .free h3 { font:500 clamp(1.6rem,3vw,2.4rem)/1.2 var(--serif); letter-spacing:-.015em; margin-bottom:14px; }
+    .free p { color:rgba(255,255,255,.9); line-height:1.8; max-width:52ch; }
 
     /* ---------- Notes (appear only when an article is published) ---------- */
     .notes-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:22px; margin-top:clamp(28px,4vw,48px); }
-    .blog-card { display:flex; flex-direction:column; overflow:hidden; border-radius:36px; background:var(--glass-bright); border:1px solid var(--glass-stroke); box-shadow:var(--glass-inner),var(--glass-shadow); }
-    .blog-cover { display:flex; align-items:flex-end; height:190px; padding:22px; color:#1d3f6e; background:linear-gradient(135deg,#d3def4,#a9bfe8); overflow:hidden; }
-    .blog-card:nth-child(3n+2) .blog-cover { background:linear-gradient(135deg,#d6edeb,#8fc9c3); }
-    .blog-card:nth-child(3n+3) .blog-cover { background:linear-gradient(135deg,#e3f0d6,#a5d0a9); }
-    .blog-illustration { font:400 3.4rem/1 var(--serif); color:var(--blue-deep); opacity:.6; }
+    .blog-card { display:flex; flex-direction:column; overflow:hidden; background:#fff; border:1px solid rgba(16,36,58,.14); color:#10243a; }
+    .blog-cover { display:flex; align-items:flex-end; height:190px; padding:22px; color:#123b63; background:linear-gradient(135deg,#d3e2f2,#a3c0de); overflow:hidden; }
+    .blog-card:nth-child(3n+2) .blog-cover { background:linear-gradient(135deg,#d3ebe9,#8cc7c0); }
+    .blog-card:nth-child(3n+3) .blog-cover { background:linear-gradient(135deg,#dbe9ee,#9bbfcf); }
+    .blog-illustration { font:400 3.4rem/1 var(--serif); color:#1f5f9e; opacity:.6; }
     .blog-cover:has(> img) { padding:0; }
-    .blog-body { display:flex; flex:1; flex-direction:column; padding:24px 28px 28px; }
-    .blog-category { font-size:.78rem; font-weight:700; color:var(--mint-strong); }
+    .blog-body { display:flex; flex:1; flex-direction:column; padding:24px 26px 26px; }
+    .blog-category { font-size:.78rem; font-weight:700; color:#1f7a67; }
     .blog-body h3 { font:500 1.3rem/1.35 var(--serif); margin:8px 0 10px; }
-    .blog-body > p { margin:0 0 12px; font-size:.93rem; color:var(--text-muted); }
-    .article-link { margin-top:auto; font-weight:700; color:var(--blue-deep); }
-    .blog-empty { padding:28px; border-radius:28px; background:var(--glass); color:var(--text-muted); }
+    .blog-body > p { margin:0 0 12px; font-size:.93rem; color:#46607a; }
+    .article-link { margin-top:auto; font-weight:700; color:#1f5f9e; }
+    .blog-empty { padding:28px; background:var(--glass); color:var(--text-muted); }
     .notes-all { margin-top:26px; }
+    .notes .button-outline { background:transparent; border-color:var(--c-line); color:var(--c-text); }
 
     /* ---------- Footer ---------- */
-    .site-footer { padding:28px 0 44px; }
+    .site-footer { padding:32px 0 44px; background:var(--abyss); color:#a6bccf; border-top:1px solid rgba(141,189,240,.16); }
     .footer-inner { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
-    .footer-inner p { margin:0; color:var(--text-muted); font-size:.86rem; }
-    .footer-inner a { color:var(--blue-deep); font-weight:700; font-size:.88rem; }
+    .footer-inner p { margin:0; color:#a6bccf; font-size:.86rem; }
+    .footer-inner a { color:var(--blue-hi); font-weight:700; font-size:.88rem; }
+    .footer-privacy { margin-top:14px; max-width:64ch; font-size:.8rem; line-height:1.6; color:#8ea6bb; }
 
     /* ---------- Going up ---------- */
     #top:focus, section[tabindex="-1"]:focus, .form-sent:focus { outline:none; }
-    .to-top { position:fixed; right:calc(16px + env(safe-area-inset-right,0px)); bottom:calc(18px + env(safe-area-inset-bottom,0px)); z-index:80; display:grid; place-items:center; width:52px; height:52px; padding:0; border-radius:50%; border:1px solid var(--glass-stroke); background:var(--glass-bright); color:var(--blue-deep); box-shadow:var(--glass-inner),var(--glass-shadow); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); opacity:0; visibility:hidden; transform:translateY(14px) scale(.92); transition:opacity .5s var(--ease),transform .6s var(--ease),visibility 0s linear .5s; }
+    .to-top { position:fixed; right:calc(16px + env(safe-area-inset-right,0px)); bottom:calc(18px + env(safe-area-inset-bottom,0px)); z-index:80; display:grid; place-items:center; width:48px; height:48px; padding:0; border:1px solid rgba(141,189,240,.4); background:var(--abyss); color:var(--blue-hi); opacity:0; visibility:hidden; transform:translateY(14px); transition:opacity .5s var(--ease),transform .6s var(--ease),visibility 0s linear .5s; }
     .to-top.is-visible { opacity:1; visibility:visible; transform:none; transition-delay:0s; }
-    .to-top.is-visible:hover { transform:translateY(-3px); }
-    .to-top.is-visible:active { transform:scale(.95); transition-duration:.12s; }
     .to-top svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-    /* Endless loops rest while their section is off screen (battery and heat on phones). */
     .is-idle, .is-idle * { animation-play-state:paused!important; }
 
-    /* ---------- Farewell (when "not yet" is chosen) ---------- */
-    .farewell { position:fixed; inset:0; z-index:200; display:grid; place-items:center; padding:24px; background:var(--bg); background:color-mix(in srgb,var(--bg) 80%,transparent); backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px); animation:fadeIn .9s ease both; }
-    .farewell-card { max-width:540px; padding:clamp(32px,6vw,60px); text-align:center; border-radius:56px; }
-    .farewell-card h2 { font:500 clamp(1.8rem,4vw,2.5rem)/1.2 var(--serif); margin-bottom:16px; }
-    .farewell-card p { color:var(--text-muted); margin-bottom:28px; }
-
     /* ---------- Shared with article pages ---------- */
-    .scroll-progress { position:fixed; inset:0 0 auto 0; height:3px; z-index:140; transform:scaleX(var(--p,0)); transform-origin:0 50%; background:linear-gradient(90deg,var(--blue),var(--mint-strong)); border-radius:0 3px 3px 0; pointer-events:none; }
+    .scroll-progress { position:fixed; inset:0 0 auto 0; height:3px; z-index:140; transform:scaleX(var(--p,0)); transform-origin:0 50%; background:linear-gradient(90deg,var(--blue-hi),var(--green-hi)); pointer-events:none; }
     @supports (animation-timeline:scroll()) { .scroll-progress { animation:growBar linear both; animation-timeline:scroll(root block); } }
     @view-transition { navigation:auto; }
     ::view-transition-old(root), ::view-transition-new(root) { animation-duration:.5s; animation-timing-function:var(--ease); }
+    .article-nav { margin-left:auto; }
 
     /* ---------- Motion ---------- */
     @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
     @keyframes riseIn { from { opacity:0; translate:0 26px; } to { opacity:1; translate:0 0; } }
     @keyframes growBar { from { transform:scaleX(0); } to { transform:scaleX(1); } }
-    @keyframes heroIn { from { opacity:0; scale:1.05; } to { opacity:1; scale:1; } }
-    @keyframes morph { from { border-radius:var(--r-hero-a); } to { border-radius:var(--r-hero-b); } }
-    @keyframes morph2 { 0% { border-radius:var(--r-cloud); transform:rotate(0); } 100% { border-radius:var(--r-leaf); transform:rotate(24deg); } }
-    @keyframes drift { 0% { transform:translate3d(-3%,0,0) scale(1); } 50% { transform:translate3d(5%,4%,0) scale(1.08); } 100% { transform:translate3d(-2%,6%,0) scale(1.02); } }
-    @keyframes bob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
-    @keyframes breathe { 0%,100% { transform:scale(.92); opacity:.8; } 50% { transform:scale(1.06); opacity:1; } }
-    @keyframes ripple { 0%,100% { transform:scale(.94); opacity:.5; } 50% { transform:scale(1.04); opacity:1; } }
+    @keyframes heroIn { from { opacity:0; } to { opacity:1; } }
     @keyframes flap { 0%,100% { transform:scaleX(1); } 50% { transform:scaleX(.7); } }
     @keyframes sway { from { transform:rotate(-3deg); } to { transform:rotate(3deg); } }
-    @keyframes spin { to { transform:rotate(360deg); } }
     @keyframes mm1 { 0% { opacity:0; } 6%,24% { opacity:1; } 32%,100% { opacity:0; } }
     @keyframes mm2 { 0%,26% { opacity:0; } 36%,56% { opacity:1; } 64%,100% { opacity:0; } }
     @keyframes mm3 { 0%,58% { opacity:0; transform:scale(.82); } 72%,92% { opacity:1; transform:scale(1); } 100% { opacity:0; transform:scale(1.04); } }
 
-    /* ---------- Articles chrome helpers ---------- */
-    .article-nav { margin-left:auto; }
-
     /* ---------- Responsive ---------- */
     @media (max-width:900px) {
-      .why .container, .fork .container, .change .container, .support .container, .contact-card { grid-template-columns:1fr; }
-      .why-art { width:min(60%,260px); }
-      .eyes { width:min(78%,340px); margin-inline:auto; }
-      .shift { width:min(64%,280px); }
-      .support-art { order:2; }
-      .support-body { margin-left:0; }
-      .story-body { margin-left:0; }
-      .free .container { grid-template-columns:1fr; justify-items:center; text-align:center; }
-      .free .lead { margin-inline:auto; }
-      .c1, .c2, .c3 { grid-template-columns:1fr; padding-left:0; }
-      .c1 .photo { width:min(86%,420px); }
-      .c2 .photo { order:0; width:min(64%,300px); margin-left:auto; }
-      .c3 .photo { width:min(72%,340px); transform:none; }
-      .c3 .chap-text { padding-left:0; }
-      .c4 .photo { width:100%; aspect-ratio:4/3; }
-      .c4 .chap-text { width:92%; margin-top:-48px; justify-self:center; }
-      .paths { grid-template-columns:1fr; }
-      .path-no { margin-top:0; }
-      .thought:nth-child(2), .thought:nth-child(4) { margin-left:8vw; }
+      .hero-grid { grid-template-columns:1fr; min-height:0; }
+      .hero-photo { aspect-ratio:4/5; max-height:72svh; min-height:0; }
+      .hero-quote { padding:clamp(32px,8vw,56px) 24px clamp(44px,9vw,72px); }
+      .split, .intro .split, .sessions .split, .change .split, .about .split, .contact .split, .faq .split { grid-template-columns:1fr; }
+      .sticky { position:static; }
+      .sessions .side-pair { display:contents; }
+      .sessions .eyes { order:1; }
+      .sessions .s-main { order:2; }
+      .sessions .quote-inline { order:3; margin-top:0; }
+      .eyes { aspect-ratio:1; max-width:520px; }
+      .quote-panel { min-height:340px; }
+      .theme-grid { grid-template-columns:1fr 1fr; }
+      .theme:nth-child(3n+2), .theme:nth-child(3n+3) { padding-left:0; border-left:0; }
+      .theme:nth-child(even) { padding-left:clamp(18px,3vw,28px); border-left:1px solid var(--c-line); }
+      .theme:nth-child(odd) { padding-left:0; }
+      .free { grid-template-columns:1fr; }
     }
     @media (max-width:560px) {
-      .container { width:calc(100% - 32px); }
-      .brand { max-width:150px; font-size:.86rem; }
-      .language-select { padding:0 6px; }
-      .hero-photo { height:clamp(420px,72svh,620px); --r-hero-a:46% 40% 44% 42% / 30% 28% 32% 30%; --r-hero-b:40% 46% 40% 46% / 28% 32% 28% 32%; }
-      .quote-card i { filter:blur(36px); }
-      .glass, .site-header, .farewell { -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); }
+      .container, .site-header .header-inner { width:calc(100% - 32px); }
+      .theme-grid { grid-template-columns:1fr; }
+      .theme, .theme:nth-child(even), .theme:nth-child(odd) { padding-left:0; border-left:0; }
+      .theme:last-child { display:block; }
+      .theme:last-child .glyph { margin-bottom:16px; }
+      .mcol:nth-child(2) { margin-top:28px; }
     }
     @media (prefers-reduced-motion:reduce) {
       html { scroll-behavior:auto; }
@@ -405,158 +322,29 @@
       .mm .s3 { opacity:1; }
       .quote-stroke path { stroke-dashoffset:0; }
       .scroll-progress { animation:none!important; }
-    }    /* intuition-update:begin */
-    /* ---------- Intuition update: opening, composition ---------- */
-    .hero-photo::after { content:""; position:absolute; inset:0; z-index:1; pointer-events:none; background:linear-gradient(180deg,rgba(12,28,48,.60),rgba(12,28,48,.16) 44%,rgba(12,28,48,0) 68%); }
-    .hero-photo > img { object-position:50% 58%; }
-    .hero-quote { position:absolute; z-index:2; inset:clamp(22px,4.6vw,60px) clamp(64px,11vw,170px) auto clamp(56px,8vw,112px); display:flex; justify-content:space-between; align-items:flex-start; gap:clamp(20px,4vw,56px); color:#fff; text-shadow:0 2px 26px rgba(8,20,40,.5); pointer-events:none; }
-    .hero-q1 { flex:0 1 54%; font:500 clamp(2rem,4.7vw,4.5rem)/1.06 var(--serif); letter-spacing:-.03em; animation:riseIn 1.8s var(--ease) .9s both; }
-    .hero-q2 { flex:0 1 25%; margin-top:.5em; text-align:right; font:italic 400 clamp(1rem,1.7vw,1.4rem)/1.5 var(--serif); opacity:.94; animation:riseIn 1.8s var(--ease) 1.6s both; }
-    .hero-photo { overflow:hidden; }
-    .eyes img { object-position:84% 36%; }
-
-    /* ---------- The two choices are equal in size, weight and colour ---------- */
-    .paths { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; }
-    .path-yes, .path-no { background:var(--glass-bright); margin-top:0; border-radius:38px; }
-    .path-no:hover, .path-yes:hover { background:linear-gradient(135deg,var(--glass-bright),var(--soft-green)); }
-    .path em { align-self:end; }
-
-    /* ---------- Atmospheric quotation with an optional photograph ---------- */
-    .quote-bg { position:absolute; inset:0; z-index:-2; border-radius:inherit; box-shadow:none; background:none; }
-    .quote-card:has(.quote-bg.has-photo) { color:#fff; }
-    .quote-card:has(.quote-bg.has-photo)::before { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(12,28,48,.32),rgba(12,28,48,.58)); }
-    .quote-card:has(.quote-bg.has-photo) i { display:none; }
-    .quote-card:has(.quote-bg.has-photo) .quote-text { color:#fff; text-shadow:0 2px 24px rgba(8,20,40,.5); }
-    .quote-card:has(.quote-bg.has-photo) .quote-stroke path { stroke:rgba(255,255,255,.8); }
-
-    /* ---------- Intuition in sport ---------- */
-    .story .title { font-size:clamp(1.85rem,3.9vw,3rem); max-width:19em; }
-    .story-body { max-width:700px; }
-    .story-pull { margin:clamp(34px,6vw,76px) 0; font:500 clamp(2rem,4.6vw,3.7rem)/1.12 var(--hand); color:var(--blue-deep); max-width:14em; }
-
-    /* ---------- What we can explore: fragments at uneven offsets ---------- */
-    .client-head { max-width:720px; }
-    .threads { list-style:none; margin:clamp(44px,7vw,96px) 0 0; padding:0; display:grid; gap:clamp(30px,5vw,66px); }
-    .thread { position:relative; max-width:min(540px,100%); padding-left:26px; }
-    .thread::before { content:""; position:absolute; left:0; top:.7em; width:10px; height:10px; border-radius:50%; background:var(--mint); box-shadow:0 0 0 6px var(--soft-green); }
-    .thread strong { display:block; font:500 clamp(1.4rem,2.5vw,2.1rem)/1.2 var(--serif); letter-spacing:-.015em; }
-    .thread span { display:block; margin-top:8px; max-width:44ch; color:var(--text-muted); font-size:clamp(.98rem,1.3vw,1.08rem); line-height:1.75; }
-    .thread:nth-child(2) { margin-left:clamp(0px,18vw,260px); }
-    .thread:nth-child(3) { margin-left:clamp(0px,6vw,80px); }
-    .thread:nth-child(4) { margin-left:clamp(0px,30vw,430px); }
-    .thread:nth-child(5) { margin-left:clamp(0px,12vw,170px); }
-    .thread:nth-child(6) { margin-left:clamp(0px,24vw,340px); }
-    .thread:nth-child(7) { max-width:30em; margin:clamp(20px,4vw,60px) auto 0; padding-left:0; text-align:center; }
-    .thread:nth-child(7)::before { display:none; }
-    .thread:nth-child(7) strong { font:500 clamp(2rem,4.6vw,3.6rem)/1.12 var(--hand); color:var(--blue-deep); }
-    .thread:nth-child(7) span { margin-inline:auto; }
-    .client-note { margin-top:clamp(56px,8vw,110px); font-size:clamp(1.4rem,2.6vw,2rem); }
-
-    /* ---------- My story ---------- */
-    .c1 img { object-position:50% 30%; }
-    .c2 img { object-position:75% 52%; transform:scale(1.5); transform-origin:75% 52%; }
-    .c3 img { object-position:60% 40%; }
-    .c4 { grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); align-items:end; justify-items:stretch; }
-    .c4 .photo { order:2; width:min(100%,440px); aspect-ratio:4/5; justify-self:end; border-radius:var(--r-cloud); }
-    .c4 .chap-text { width:auto; margin:0; padding:clamp(24px,4vw,44px); border-radius:44px; justify-self:start; }
-    .c4 img { object-position:50% 26%; }
-    .about-note { margin:clamp(70px,10vw,140px) auto 0; max-width:19em; text-align:center; font:500 clamp(1.7rem,3.2vw,2.5rem)/1.3 var(--hand); color:var(--blue-deep); }
-
-    /* ---------- Intuition sessions ---------- */
-    .sessions-head { max-width:860px; }
-    .sessions-lead { max-width:24em; font:400 clamp(1.5rem,3vw,2.4rem)/1.35 var(--serif); letter-spacing:-.01em; }
-    .s-flow { display:grid; gap:clamp(56px,9vw,130px); margin-top:clamp(56px,9vw,120px); }
-    .s-block { max-width:540px; }
-    .s-block h3 { font:500 clamp(1.4rem,2.4vw,1.9rem)/1.25 var(--serif); margin-bottom:12px; }
-    .s-block h3::before { content:""; display:block; width:34px; height:34px; margin-bottom:16px; border-radius:var(--r-leaf); background:linear-gradient(135deg,var(--soft-blue),var(--soft-green)); }
-    .s-block p { color:var(--text-muted); line-height:1.9; font-size:clamp(1.02rem,1.4vw,1.14rem); }
-    .s1 { margin-left:clamp(0px,8vw,120px); }
-    .s2 { margin-left:auto; margin-right:clamp(0px,6vw,90px); }
-    .s3 { margin-left:clamp(0px,22vw,320px); }
-    .s-honest { display:grid; gap:16px; max-width:780px; margin:clamp(70px,11vw,150px) auto 0; padding:clamp(28px,5vw,56px); border-radius:56px 28px 56px 28px; }
-    .s-honest h3 { font:500 clamp(1.5rem,2.6vw,2rem)/1.25 var(--serif); }
-    .s-honest p { color:var(--text-muted); line-height:1.85; }
-    .s-honest .s-note { font-size:.92rem; color:var(--text); }
-    .s-bring { max-width:24em; margin:clamp(60px,9vw,120px) auto 0; text-align:center; font:italic 400 clamp(1.3rem,2.5vw,1.9rem)/1.5 var(--serif); color:var(--blue-deep); }
-
-    /* ---------- Transformation: a darker, slower scene ---------- */
-    .change { width:min(1240px,calc(100% - 24px)); margin:clamp(30px,6vw,90px) auto; isolation:isolate; overflow:hidden; color:#eef4fc; background:linear-gradient(165deg,#131f33,#1b2f4a 52%,#1f3a4c); border-radius:clamp(56px,10vw,150px) clamp(40px,6vw,90px); box-shadow:var(--shadow-strong); }
-    .change .container { position:relative; display:block; }
-    .change .title { color:#fff; max-width:12em; }
-    .change .shift { position:absolute; right:-4%; top:2%; width:min(44%,420px); opacity:.55; z-index:-1; }
-    .scene { max-width:540px; margin-top:clamp(56px,9vw,130px); }
-    .scene h3 { margin-bottom:16px; font:500 clamp(1.7rem,3.4vw,2.7rem)/1.15 var(--serif); letter-spacing:-.02em; color:#fff; }
-    .scene p { color:rgba(232,241,252,.84); line-height:1.9; font-size:clamp(1.04rem,1.5vw,1.2rem); }
-    .sc2 { margin-left:auto; }
-    .sc3 { margin-left:clamp(0px,9vw,130px); }
-    .sc4 { margin-left:auto; margin-right:clamp(0px,5vw,70px); }
-    .support .container { display:block; position:relative; }
-    .support .ripple { right:-6%; top:-20%; --s:clamp(240px,40vw,480px); }
-    .support-body { max-width:600px; margin-left:clamp(0px,14vw,200px); }
-    .witness .container { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); gap:clamp(28px,6vw,96px); align-items:center; }
-    .witness-body { max-width:600px; }
-    .witness-note { margin-top:clamp(28px,4vw,44px); font:500 clamp(1.5rem,2.6vw,2rem)/1.35 var(--hand); color:var(--blue-deep); }
-
-    /* ---------- Invitation: quiet, not a funnel ---------- */
-    .invite .title { max-width:16em; margin-inline:auto; }
-    .button-primary { background:linear-gradient(110deg,#5878ad,#6a97a6 58%,#78a896); box-shadow:0 14px 34px -22px rgba(40,90,130,.6); }
-    .footer-privacy { margin-top:14px; max-width:64ch; font-size:.8rem; line-height:1.6; color:var(--text-muted); }
-
-    .field input[aria-invalid="true"] { border-color:#b64c56; box-shadow:0 0 0 3px rgba(182,76,86,.18); }
-
-    /* ---------- Calm farewell ---------- */
-    .farewell-card p { margin-bottom:28px; }
-    .farewell-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; }
-
-    @media (max-width:900px) {
-      .c4 { grid-template-columns:1fr; }
-      .c4 .photo { order:0; width:min(82%,380px); aspect-ratio:4/5; justify-self:end; }
-      .c4 .chap-text { width:92%; margin-top:-44px; justify-self:start; }
-      .witness .container { grid-template-columns:1fr; }
-      .support-body { margin-left:0; }
-      .change .shift { opacity:.35; }
     }
-    @media (max-width:700px) {
-      .hero-photo::after { display:none; }
-      .hero-quote { position:static; display:grid; gap:14px; padding:clamp(20px,6vw,32px) 10px 0; color:var(--text); text-shadow:none; }
-      .hero-tag { position:static; width:max-content; max-width:100%; margin:18px 10px 0; transform:none; }
-      .hero-q1 { font-size:clamp(2rem,9vw,2.7rem); }
-      .hero-q2 { margin:0; text-align:left; font-size:1.1rem; color:var(--text-muted); }
-      .paths { grid-template-columns:1fr; }
-      .change { padding-inline:clamp(8px,4vw,24px); }
-      .thread:nth-child(n+2):nth-child(-n+6) { margin-left:clamp(0px,7vw,28px); }
-      .s1, .s2, .s3 { margin-inline:0; }
-      .sc2, .sc3, .sc4 { margin-inline:0; }
-      .change { border-radius:48px 36px; }
-    }
-    /* intuition-update:end */
   </style>
 </head>
 <body>
   <div id="top" tabindex="-1"></div>
   <div class="scroll-progress" aria-hidden="true"></div>
-  <div class="aura" aria-hidden="true"></div>
   <a class="skip" href="#main" data-i18n="skip"></a>
   <header class="site-header">
     <div class="header-inner">
-      <a class="brand" href="#top" data-i18n-aria="brandAria"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" width="35" height="35" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><rect width="48" height="14" fill="#cfe0f5"/><rect y="14" width="48" height="10" fill="#dce8f8"/><rect y="24" width="48" height="8" fill="#e8ecf9"/><circle cx="37" cy="11" r="4.6" fill="#fff" opacity=".85"/><path d="M-2 31 13 12l8 9 8-12 21 22z" fill="#aab9e4"/><path d="M9.7 16 13 12l3.6 4-1.8-1.1-1.6 1.7-1.6-1.7zM25.9 13.6 29 9l4.6 4.6-2.3-1.2-2.1 2-1.6-1.9z" fill="#fff" opacity=".93"/><path d="M-2 31v-4l8-5 9 9zM19 31l11-9 10 6 10-4v7z" fill="#7f9fd3"/><rect y="31" width="48" height="17" fill="#86c4bc"/><rect y="31" width="48" height="6" fill="#c3e2e0" opacity=".55"/><path d="M12 34.5h9M27 37.5h11M8 40h7" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".6"/><path d="M-2 48v-8c8-4 15-1 22 3 8 4 18 3 30-2v7z" fill="#8ec99b"/><path d="M14 48c10-3 22-2 36-7v7z" fill="#64aa8b"/><path d="M36 46.5l-.6-4.2M39 46.5l.3-5M42 46.5l1.3-4" stroke="#4f9a7a" stroke-width="1" stroke-linecap="round" fill="none"/></svg></span><span data-i18n="brand"></span></a>
+      <a class="brand" href="#top" data-i18n-aria="brandAria"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" width="35" height="35" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><rect width="48" height="14" fill="#cfe0f5"/><rect y="14" width="48" height="10" fill="#dce8f8"/><rect y="24" width="48" height="8" fill="#e8ecf9"/><circle cx="37" cy="11" r="4.6" fill="#fff" opacity=".85"/><path d="M-2 31 13 12l8 9 8-12 21 22z" fill="#aab9e4"/><path d="M9.7 16 13 12l3.6 4-1.8-1.1-1.6 1.7-1.6-1.7zM25.9 13.6 29 9l4.6 4.6-2.3-1.2-2.1 2-1.6-1.9z" fill="#fff" opacity=".93"/><path d="M-2 31v-4l8-5 9 9zM19 31l11-9 10 6 10-4v7z" fill="#7f9fd3"/><rect y="31" width="48" height="17" fill="#86c4bc"/><rect y="31" width="48" height="6" fill="#c3e2e0" opacity=".55"/><path d="M12 34.5h9M27 37.5h11M8 40h7" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".6"/><path d="M-2 48v-8c8-4 15-1 22 3 8 4 18 3 30-2v7z" fill="#8ec99b"/><path d="M14 48c10-3 22-2 36-7v7z" fill="#64aa8b"/><path d="M36 46.5l-.6-4.2M39 46.5l.3-5M42 46.5l1.3-4" stroke="#4f9a7a" stroke-width="1" stroke-linecap="round" fill="none"/></svg></span><span data-i18n="brand" class="sr-only"></span></a>
       <div class="header-actions">
         <label class="sr-only" for="language" data-i18n="languageLabel"></label>
         <select class="language-select" id="language">
           <option value="ru" lang="ru">RU</option><option value="en" lang="en">EN</option><option value="fr" lang="fr">FR</option>
         </select>
-        <button class="icon-button" type="button" id="theme-toggle" data-i18n-aria="themeDark">
-          <svg class="theme-icon-moon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20.6 15.2A8.5 8.5 0 0 1 8.8 3.4 8.5 8.5 0 1 0 20.6 15.2Z"/></svg>
-          <svg class="theme-icon-sun" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
-        </button>
       </div>
     </div>
   </header>
 
   <main id="main" tabindex="-1">
-    <!-- 1. Opening: the encounter. The quotation and the photograph form one composition. -->
-    <section class="hero" id="hero">
-      <div class="hero-stage">
+    <!-- 1. Hero: the author's photograph on one side, the quotation on the other. No labels, no buttons. -->
+    <section class="band band-deep hero" id="hero">
+      <div class="hero-grid">
         <figure class="photo hero-photo">
           <img data-photo="portrait" data-i18n-alt="hero.alt" alt="" fetchpriority="high" decoding="async">
           <div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="32" cy="22" r="10"/><path d="M10 58c1-14 9-22 22-22s21 8 22 22"/></svg><span data-i18n="photoSoon"></span></div>
@@ -565,341 +353,222 @@
           <h1 class="hero-q1" data-i18n="hero.quote1"></h1>
           <p class="hero-q2" data-i18n="hero.quote2"></p>
         </div>
-        <div class="hero-tag glass"><strong data-i18n="portraitName"></strong><span data-i18n="portraitJob"></span></div>
-      </div>
-      <p class="hero-hint"><i aria-hidden="true"></i><span data-i18n="hero.hint"></span></p>
-    </section>
-
-    <!-- 2. Atmospheric pause (optional landscape photo: site.json -> quote_photo) -->
-    <section class="quote q-a">
-      <div class="quote-card"><i></i><i></i><i></i><figure class="photo quote-bg" aria-hidden="true"><img data-photo="quote_photo" alt="" loading="lazy" decoding="async"></figure>
-        <blockquote class="quote-text" data-write data-i18n="quotes.a"></blockquote>
-        <svg class="quote-stroke" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M2 11 C40 2 72 17 112 9 S190 3 232 10 S282 15 298 7"/></svg>
       </div>
     </section>
 
-    <!-- 3. Intuition in sport -->
-    <section class="sec story" id="story" aria-labelledby="story-title">
-      <div class="container">
-        <div class="ripple" aria-hidden="true"><i></i><i></i><i></i></div>
-        <div class="story-body">
-          <h2 class="title" id="story-title" data-fade data-i18n="story.title"></h2>
-          <p class="lead" data-fade style="--d:.15s" data-i18n="story.p1"></p>
-          <p class="mid" data-fade style="--d:.1s" data-i18n="story.p2"></p>
-          <p class="story-pull" data-fade data-i18n="story.p3"></p>
+    <!-- 2. Introduction: why this page is for athletes. Text on one side, photograph and quotation on the other. -->
+    <section class="band band-frost intro" id="intro" aria-labelledby="intro-title">
+      <div class="container split">
+        <div class="intro-body">
+          <h2 class="title" id="intro-title" data-fade data-i18n="story.title"></h2>
+          <p class="lead" data-fade style="--d:.1s" data-i18n="story.p1"></p>
+          <p class="mid" data-fade data-i18n="story.p2"></p>
+          <p class="intro-pull" data-fade data-i18n="story.p3"></p>
           <p class="mid" data-fade data-i18n="story.p4"></p>
-          <p class="lead" data-fade style="--d:.1s" data-i18n="story.p5"></p>
+          <p class="lead" data-fade data-i18n="story.p5"></p>
+        </div>
+        <div class="quote-panel">
+          <figure class="photo quote-bg" aria-hidden="true"><img data-photo="quote_photo" alt="" loading="lazy" decoding="async"></figure>
+          <blockquote class="quote-text" data-write data-i18n="quotes.a"></blockquote>
+          <svg class="quote-stroke" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M2 11 C40 2 72 17 112 9 S190 3 232 10 S282 15 298 7"/></svg>
         </div>
       </div>
     </section>
 
-    <!-- 4. What we can explore: a quiet sequence of fragments, not cards -->
-    <section class="sec client" id="client" aria-labelledby="client-title">
+    <!-- 3. Intuitive sessions: a different background from both neighbours -->
+    <section class="band band-teal sessions" id="sessions" aria-labelledby="sessions-title">
       <div class="container">
-        <div class="client-head">
-          <h2 class="title" id="client-title" data-fade data-i18n="client.title"></h2>
-          <p class="lead" data-fade style="--d:.1s" data-i18n="client.intro"></p>
-        </div>
-        <ul class="threads">
-          <li class="thread" data-fade style="--d:0.12s"><strong data-i18n="client.l1"></strong><span data-i18n="client.l1t"></span></li>
-          <li class="thread" data-fade style="--d:0.24s"><strong data-i18n="client.l2"></strong><span data-i18n="client.l2t"></span></li>
-          <li class="thread" data-fade><strong data-i18n="client.l3"></strong><span data-i18n="client.l3t"></span></li>
-          <li class="thread" data-fade style="--d:0.12s"><strong data-i18n="client.l4"></strong><span data-i18n="client.l4t"></span></li>
-          <li class="thread" data-fade style="--d:0.24s"><strong data-i18n="client.l5"></strong><span data-i18n="client.l5t"></span></li>
-          <li class="thread" data-fade><strong data-i18n="client.l6"></strong><span data-i18n="client.l6t"></span></li>
-          <li class="thread" data-fade style="--d:0.12s"><strong data-i18n="client.l7"></strong><span data-i18n="client.l7t"></span></li>
-        </ul>
-        <p class="client-note" data-fade data-i18n="client.note"></p>
-      </div>
-    </section>
-
-    <!-- 5. Why athletes -->
-    <section class="sec why" id="why" aria-labelledby="why-title">
-      <div class="container">
-        <div class="why-art" aria-hidden="true"><i></i><i></i></div>
-        <div class="why-body">
-          <h2 class="title" id="why-title" data-fade data-i18n="why.title"></h2>
-          <p class="lead" data-fade style="--d:.15s" data-i18n="why.text"></p>
-        </div>
-      </div>
-    </section>
-
-    <section class="quote q-b">
-      <div class="quote-card"><i></i><i></i><i></i>
-        <blockquote class="quote-text" data-write data-i18n="quotes.b"></blockquote>
-        <svg class="quote-stroke" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M2 11 C40 2 72 17 112 9 S190 3 232 10 S282 15 298 7"/></svg>
-      </div>
-    </section>
-
-    <!-- 6. My story: four frames, ongoing -->
-    <section class="sec about" id="about" aria-labelledby="about-title">
-      <div class="container">
-        <div class="about-head"><h2 class="title" id="about-title" data-fade data-i18n="about.title"></h2></div>
-        <article class="chapter c1">
-          <figure class="photo"><img data-photo="story_photo_1" data-i18n-alt="about.c1Alt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
-          <div class="chap-text" data-fade><h3 data-i18n="about.c1Title"></h3><p data-i18n="about.c1Text"></p></div>
-        </article>
-        <article class="chapter c2">
-          <div class="chap-text" data-fade><h3 data-i18n="about.c2Title"></h3><p data-i18n="about.c2Text"></p></div>
-          <figure class="photo"><img data-photo="story_photo_2" data-i18n-alt="about.c2Alt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
-        </article>
-        <article class="chapter c3">
-          <figure class="photo"><img data-photo="story_photo_3" data-i18n-alt="about.c3Alt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
-          <div class="chap-text" data-fade><h3 data-i18n="about.c3Title"></h3><p data-i18n="about.c3Text"></p></div>
-        </article>
-        <article class="chapter c4">
-          <figure class="photo"><img data-photo="story_photo_4" data-i18n-alt="about.c4Alt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
-          <div class="chap-text glass" data-fade><h3 data-i18n="about.c4Title"></h3><p data-i18n="about.c4Text"></p></div>
-        </article>
-        <p class="about-note" data-fade data-i18n="about.note"></p>
-      </div>
-    </section>
-
-    <!-- 7. The intuition moment -->
-    <section class="sec sec--air check" id="check" aria-labelledby="check-title">
-      <div class="container">
-        <div class="ripple" aria-hidden="true"><i></i><i></i><i></i></div>
-        <h2 class="title" id="check-title" data-fade data-i18n="check.title"></h2>
-        <p class="check-line" data-fade data-i18n="check.l1"></p>
-        <p class="check-line" data-fade style="--d:.2s" data-i18n="check.l2"></p>
-        <p class="check-line" data-fade style="--d:.2s" data-i18n="check.l3"></p>
-        <p class="check-note" data-fade data-i18n="check.note1"></p>
-        <p class="check-note" data-fade data-i18n="check.note2"></p>
-      </div>
-    </section>
-
-    <!-- 8. Two equal choices. Nothing is recorded. -->
-    <section class="sec fork" id="fork" aria-labelledby="fork-lead">
-      <div class="container">
-        <figure class="photo eyes"><img data-photo="eyes_photo" data-i18n-alt="fork.photoAlt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="32" cy="22" r="10"/><path d="M10 58c1-14 9-22 22-22s21 8 22 22"/></svg><span data-i18n="photoSoon"></span></div></figure>
-        <div>
-          <h2 class="fork-lead" id="fork-lead" data-fade data-i18n="fork.lead"></h2>
-          <p class="fork-voice" data-fade style="--d:.2s" data-i18n="fork.voice"></p>
-          <p class="fork-voice" data-fade style="--d:.4s" data-i18n="fork.eyes"></p>
-          <div class="paths">
-            <a class="path path-yes" href="#sessions"><strong data-i18n="fork.yesTitle"></strong><span data-i18n="fork.yesText"></span><em data-i18n="fork.yesButton"></em></a>
-            <button class="path path-no" type="button" id="close-page"><strong data-i18n="fork.noTitle"></strong><span data-i18n="fork.noText"></span><em data-i18n="fork.noButton"></em></button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 9. Intuition sessions -->
-    <section class="sec sessions" id="sessions" aria-labelledby="sessions-title">
-      <div class="container">
-        <div class="sessions-head">
-          <h2 class="title" id="sessions-title" data-fade data-i18n="sessions.title"></h2>
-          <p class="sessions-lead" data-fade style="--d:.1s" data-i18n="sessions.lead"></p>
-        </div>
-        <div class="s-flow">
-          <article class="s-block s1" data-fade><h3 data-i18n="sessions.h1"></h3><p data-i18n="sessions.p1"></p></article>
-          <article class="s-block s2" data-fade><h3 data-i18n="sessions.h2"></h3><p data-i18n="sessions.p2"></p></article>
-          <article class="s-block s3" data-fade><h3 data-i18n="sessions.h3"></h3><p data-i18n="sessions.p3"></p></article>
-        </div>
-        <div class="s-honest glass" data-fade>
-          <h3 data-i18n="sessions.h4"></h3>
-          <p data-i18n="sessions.p4"></p>
-          <p data-i18n="sessions.p5"></p>
-          <p class="s-note" data-i18n="sessions.note"></p>
-        </div>
-        <p class="s-bring" data-fade data-i18n="sessions.bring"></p>
-      </div>
-    </section>
-
-    <!-- 10. Transformation: the emotional centre. A darker, slower scene. -->
-    <section class="sec change" id="change" aria-labelledby="change-title-1">
-      <div class="container">
-        <div class="shift" aria-hidden="true"><i></i><i></i></div>
-        <h2 class="title" id="change-title-1" data-fade data-i18n="change.title"></h2>
-        <article class="scene sc1"><h3 data-fade data-i18n="change.s1Title"></h3><p data-fade style="--d:.15s" data-i18n="change.s1Text"></p></article>
-        <article class="scene sc2"><h3 data-fade data-i18n="change.s2Title"></h3><p data-fade style="--d:.15s" data-i18n="change.s2Text"></p></article>
-        <article class="scene sc3"><h3 data-fade data-i18n="change.s3Title"></h3><p data-fade style="--d:.15s" data-i18n="change.s3Text"></p></article>
-        <article class="scene sc4"><h3 data-fade data-i18n="change.s4Title"></h3><p data-fade style="--d:.15s" data-i18n="change.s4Text"></p></article>
-      </div>
-    </section>
-
-    <section class="quote q-c">
-      <div class="quote-card"><i></i><i></i><i></i>
-        <blockquote class="quote-text" data-write data-i18n="quotes.c"></blockquote>
-        <svg class="quote-stroke" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M2 11 C40 2 72 17 112 9 S190 3 232 10 S282 15 298 7"/></svg>
-      </div>
-    </section>
-
-    <!-- The butterfly appears once, here -->
-    <section class="sec change2" aria-labelledby="change-title-2">
-      <div class="container">
-        <svg class="mm" viewBox="0 0 360 250" aria-hidden="true">
-          <defs>
-            <linearGradient id="gc" x1="0" x2="1"><stop offset="0" stop-color="#8fd1bb"/><stop offset="1" stop-color="#7fa6e0"/></linearGradient>
-            <linearGradient id="gp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9e0d0"/><stop offset="1" stop-color="#b8a9e6"/></linearGradient>
-            <linearGradient id="gw1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b8a9e6"/><stop offset="1" stop-color="#7fa6e0"/></linearGradient>
-            <linearGradient id="gw2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8fd1bb"/><stop offset="1" stop-color="#7fa6e0"/></linearGradient>
-            <g id="wingR">
-              <path d="M182 120 C198 64 262 40 294 66 C322 90 298 140 242 146 C214 148 192 134 182 126Z" fill="url(#gw1)"/>
-              <path d="M182 130 C208 134 248 152 254 186 C258 210 220 214 202 192 C190 176 184 152 182 130Z" fill="url(#gw2)"/>
-              <path d="M190 118 C214 96 246 82 278 80" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
-              <circle cx="262" cy="100" r="9" fill="#fff" fill-opacity=".45"/><circle cx="226" cy="172" r="7" fill="#fff" fill-opacity=".4"/>
-            </g>
-          </defs>
-          <g class="s1">
-            <path d="M60 206 C110 176 250 176 300 206 C250 226 110 226 60 206Z" fill="#9fd3bd" opacity=".55"/>
-            <g fill="url(#gc)" stroke="#fff" stroke-opacity=".7" stroke-width="2">
-              <circle cx="96" cy="178" r="15"/><circle cx="123" cy="169.5" r="15"/><circle cx="150" cy="163.3" r="15.5"/><circle cx="177" cy="161" r="16"/><circle cx="204" cy="163.3" r="15.5"/><circle cx="231" cy="169.5" r="15"/><circle cx="258" cy="178" r="15"/>
-              <circle cx="289" cy="172" r="19"/>
-            </g>
-            <circle cx="296" cy="168" r="2.6" fill="#1b3452"/>
-            <path d="M284 154 C282 144 276 138 270 136 M295 154 C297 144 303 138 309 137" fill="none" stroke="#5d6fa8" stroke-width="2.2" stroke-linecap="round"/>
-          </g>
-          <g class="s2">
-            <path d="M96 34 C140 24 220 24 264 38" fill="none" stroke="#8fae95" stroke-width="5" stroke-linecap="round"/>
-            <path d="M232 36 C250 22 276 26 284 40 C268 48 246 46 232 36Z" fill="#9fd3bd" opacity=".7"/>
-            <g class="sway">
-              <path d="M180 30 V74" stroke="#8fae95" stroke-width="2.4" stroke-linecap="round"/>
-              <path d="M180 70 C154 96 150 150 180 206 C210 150 206 96 180 70Z" fill="url(#gp)"/>
-              <path d="M163 110 Q180 120 197 110 M159 134 Q180 146 201 134 M162 160 Q180 172 198 160" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/>
-            </g>
-          </g>
-          <g class="s3">
-            <use href="#wingR" class="wing"/>
-            <g transform="translate(360 0) scale(-1 1)"><use href="#wingR" class="wing"/></g>
-            <ellipse cx="180" cy="142" rx="5.5" ry="30" fill="#5d6fa8"/><circle cx="180" cy="108" r="7" fill="#5d6fa8"/>
-            <path d="M177 103 C170 88 160 82 153 80 M183 103 C190 88 200 82 207 80" fill="none" stroke="#5d6fa8" stroke-width="2" stroke-linecap="round"/>
-          </g>
-        </svg>
-        <h2 class="title" id="change-title-2" data-fade data-i18n="change.bTitle"></h2>
-        <p class="lead" data-fade style="--d:.15s" data-i18n="change.bText"></p>
-      </div>
-    </section>
-
-    <section class="sec support" aria-labelledby="change-title-3">
-      <div class="container">
-        <div class="ripple" aria-hidden="true"><i></i><i></i><i></i></div>
-        <div class="support-body">
-          <h2 class="title" id="change-title-3" data-fade data-i18n="change.mTitle"></h2>
-          <p class="lead" data-fade style="--d:.15s" data-i18n="change.mText"></p>
-        </div>
-      </div>
-    </section>
-
-    <section class="sec witness" aria-labelledby="change-title-4">
-      <div class="container">
-        <div class="witness-body">
-          <h2 class="title" id="change-title-4" data-fade data-i18n="change.wTitle"></h2>
-          <p class="lead" data-fade style="--d:.15s" data-i18n="change.wText"></p>
-          <p class="witness-note" data-fade data-i18n="change.wNote"></p>
-        </div>
-        <svg class="hold support-art" viewBox="0 0 360 280" aria-hidden="true">
-          <defs>
-            <radialGradient id="go" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#cfd9f6"/><stop offset="1" stop-color="#b8a9e6"/></radialGradient>
-            <linearGradient id="gh" x1="0" x2="1"><stop offset="0" stop-color="#8fd1bb"/><stop offset="1" stop-color="#7fa6e0"/></linearGradient>
-          </defs>
-          <circle class="core" cx="180" cy="110" r="76" fill="url(#go)" opacity=".4"/>
-          <circle cx="180" cy="110" r="46" fill="url(#go)"/>
-          <g class="orbit"><circle cx="180" cy="110" r="90" fill="none" stroke="#7fa6e0" stroke-opacity=".5" stroke-dasharray="2 9" stroke-linecap="round"/><circle cx="180" cy="20" r="5" fill="#8fd1bb"/><circle cx="268" cy="150" r="4" fill="#b8a9e6"/><circle cx="92" cy="150" r="4.5" fill="#7fa6e0"/></g>
-          <path d="M64 168 C84 258 276 258 296 168" fill="none" stroke="url(#gh)" stroke-width="5" stroke-linecap="round"/>
-          <path d="M98 180 C114 238 246 238 262 180" fill="none" stroke="url(#gh)" stroke-width="3" stroke-linecap="round" opacity=".55"/>
-        </svg>
-      </div>
-    </section>
-
-    <!-- 11. A quiet invitation -->
-    <section class="sec invite" id="invite" aria-labelledby="invite-title">
-      <div class="container">
-        <h2 class="title" id="invite-title" data-fade data-i18n="invite.title"></h2>
-        <a class="button button-outline" href="#contact" data-i18n="invite.button"></a>
-      </div>
-    </section>
-
-    <section class="sec free" aria-labelledby="free-title">
-      <div class="container">
-        <div class="coin" aria-hidden="true"><b data-i18n="free.number"></b><span data-i18n="free.unit"></span></div>
-        <div>
-          <h2 class="title" id="free-title" data-fade data-i18n="free.title"></h2>
-          <p class="lead" data-fade style="--d:.15s" data-i18n="free.text"></p>
-        </div>
-      </div>
-    </section>
-
-    <!-- 12. Contacts and the form -->
-    <section class="sec contact" id="contact" aria-labelledby="contact-title">
-      <div class="container">
-        <div class="contact-card glass">
-          <div>
-            <h2 id="contact-title" data-i18n="contact.title"></h2>
-            <p class="lead" data-i18n="contact.lead"></p>
-            <div class="contact-links">
-              <h3 data-i18n="contact.linksTitle"></h3>
-              <a id="contact-email" href="" hidden><span data-i18n="contactEmail"></span></a>
-              <a id="contact-telegram" href="" target="_blank" rel="noopener noreferrer" hidden><span>Telegram</span></a>
-              <a id="contact-whatsapp" href="" target="_blank" rel="noopener noreferrer" hidden><span>WhatsApp</span></a>
-              <a id="contact-booking" href="" target="_blank" rel="noopener noreferrer" hidden><span data-i18n="contactBooking"></span></a>
+        <div class="split">
+          <div class="sticky side-pair">
+            <figure class="photo eyes"><img data-photo="eyes_photo" data-i18n-alt="sessions.photoAlt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="32" cy="22" r="10"/><path d="M10 58c1-14 9-22 22-22s21 8 22 22"/></svg><span data-i18n="photoSoon"></span></div></figure>
+            <div class="quote-inline">
+              <blockquote class="quote-text" data-write data-i18n="quotes.b"></blockquote>
+              <svg class="quote-stroke" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M2 11 C40 2 72 17 112 9 S190 3 232 10 S282 15 298 7"/></svg>
             </div>
           </div>
-          <div>
-            <form id="contact-form" novalidate>
-              <label class="field"><span data-i18n="contact.formName"></span><input type="text" name="name" autocomplete="name" required aria-required="true" aria-describedby="form-status" maxlength="120"></label>
-              <label class="field"><span data-i18n="contact.formReach"></span><input type="text" name="contact" autocomplete="email" required aria-required="true" aria-describedby="form-status" maxlength="160"></label>
-              <label class="field"><span data-i18n="contact.formMessage"></span><textarea name="message" rows="4" maxlength="4000"></textarea></label>
-              <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
-              <button class="button button-primary" type="submit" id="form-send" data-i18n="contact.formSend"></button>
-              <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
-              <p class="form-note" data-i18n="contact.formNote"></p>
-            </form>
-            <p class="form-sent" id="form-sent" role="status" tabindex="-1" hidden data-i18n="contact.formSent"></p>
+          <div class="s-main">
+            <h2 class="title" id="sessions-title" data-fade data-i18n="sessions.title"></h2>
+            <p class="sessions-lead" data-fade style="--d:.1s" data-i18n="sessions.lead"></p>
+            <article class="s-block" data-fade><h3 data-i18n="sessions.h1"></h3><p data-i18n="sessions.p1"></p></article>
+            <article class="s-block" data-fade><h3 data-i18n="sessions.h2"></h3><p data-i18n="sessions.p2"></p></article>
+            <article class="s-block" data-fade><h3 data-i18n="sessions.h3"></h3><p data-i18n="sessions.p3"></p></article>
+            <div class="s-honest" data-fade>
+              <h3 data-i18n="sessions.h4"></h3>
+              <p data-i18n="sessions.p4"></p>
+              <p data-i18n="sessions.p5"></p>
+              <p class="s-note" data-i18n="sessions.note"></p>
+            </div>
+            <p class="s-bring" data-fade data-i18n="sessions.bring"></p>
+          </div>
+        </div>
+        <div class="themes">
+          <h3 class="themes-title" data-fade data-i18n="client.title"></h3>
+          <p class="lead" data-fade data-i18n="client.intro"></p>
+          <ul class="theme-grid">
+            <li class="theme" data-fade><svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><path d="M4 9h24M8 16h16M12 23h8"/></svg><strong data-i18n="client.l1"></strong><span data-i18n="client.l1t"></span></li>
+            <li class="theme" data-fade><svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="2.6"/><path d="M10.5 10.5a7.8 7.8 0 0 0 0 11M21.5 10.5a7.8 7.8 0 0 1 0 11M6 6a14 14 0 0 0 0 20M26 6a14 14 0 0 1 0 20"/></svg><strong data-i18n="client.l2"></strong><span data-i18n="client.l2t"></span></li>
+            <li class="theme" data-fade><svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="6.5" r="3"/><path d="M16 11v10M8.5 15.5h15M16 21l-5 8M16 21l5 8"/></svg><strong data-i18n="client.l3"></strong><span data-i18n="client.l3t"></span></li>
+            <li class="theme" data-fade><svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 24c5 0 5-8 10-8s5 6 9 0 4-12 7-13" stroke-dasharray="1.5 3.5"/></svg><strong data-i18n="client.l4"></strong><span data-i18n="client.l4t"></span></li>
+            <li class="theme" data-fade><svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3l11 13-11 13L5 16z"/><circle cx="16" cy="16" r="2.6"/></svg><strong data-i18n="client.l5"></strong><span data-i18n="client.l5t"></span></li>
+            <li class="theme" data-fade><svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 23h26M9 23a7 7 0 0 1 14 0M16 8v4M7.5 12l2.5 2.5M24.5 12L22 14.5"/></svg><strong data-i18n="client.l6"></strong><span data-i18n="client.l6t"></span></li>
+            <li class="theme" data-fade><svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12"/><path d="M16 8l3.2 8L16 24l-3.2-8z"/></svg><strong data-i18n="client.l7"></strong><span data-i18n="client.l7t"></span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Transformation: the butterfly graphic and the quotation stay beside the text -->
+    <section class="band band-ice change" id="change" aria-labelledby="change-title">
+      <div class="container split">
+        <div class="sticky">
+          <h2 class="title" id="change-title" data-fade data-i18n="change.title"></h2>
+          <svg class="mm" viewBox="0 0 360 250" aria-hidden="true">
+            <defs>
+              <linearGradient id="gc" x1="0" x2="1"><stop offset="0" stop-color="#4fb89d"/><stop offset="1" stop-color="#3f86c9"/></linearGradient>
+              <linearGradient id="gp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fcdb8"/><stop offset="1" stop-color="#4f86c4"/></linearGradient>
+              <linearGradient id="gw1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6fa8e0"/><stop offset="1" stop-color="#1f5f9e"/></linearGradient>
+              <linearGradient id="gw2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4fb89d"/><stop offset="1" stop-color="#2f6fb3"/></linearGradient>
+              <g id="wingR">
+                <path d="M182 120 C198 64 262 40 294 66 C322 90 298 140 242 146 C214 148 192 134 182 126Z" fill="url(#gw1)"/>
+                <path d="M182 130 C208 134 248 152 254 186 C258 210 220 214 202 192 C190 176 184 152 182 130Z" fill="url(#gw2)"/>
+                <path d="M190 118 C214 96 246 82 278 80" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="262" cy="100" r="9" fill="#fff" fill-opacity=".45"/><circle cx="226" cy="172" r="7" fill="#fff" fill-opacity=".4"/>
+              </g>
+            </defs>
+            <g class="s1">
+              <path d="M60 206 C110 176 250 176 300 206 C250 226 110 226 60 206Z" fill="#5fb3a2" opacity=".4"/>
+              <g fill="url(#gc)" stroke="#fff" stroke-opacity=".7" stroke-width="2">
+                <circle cx="96" cy="178" r="15"/><circle cx="123" cy="169.5" r="15"/><circle cx="150" cy="163.3" r="15.5"/><circle cx="177" cy="161" r="16"/><circle cx="204" cy="163.3" r="15.5"/><circle cx="231" cy="169.5" r="15"/><circle cx="258" cy="178" r="15"/>
+                <circle cx="289" cy="172" r="19"/>
+              </g>
+              <circle cx="296" cy="168" r="2.6" fill="#10243a"/>
+              <path d="M284 154 C282 144 276 138 270 136 M295 154 C297 144 303 138 309 137" fill="none" stroke="#1f5f9e" stroke-width="2.2" stroke-linecap="round"/>
+            </g>
+            <g class="s2">
+              <path d="M96 34 C140 24 220 24 264 38" fill="none" stroke="#3f7f93" stroke-width="5" stroke-linecap="round"/>
+              <path d="M232 36 C250 22 276 26 284 40 C268 48 246 46 232 36Z" fill="#5fb3a2" opacity=".7"/>
+              <g class="sway">
+                <path d="M180 30 V74" stroke="#3f7f93" stroke-width="2.4" stroke-linecap="round"/>
+                <path d="M180 70 C154 96 150 150 180 206 C210 150 206 96 180 70Z" fill="url(#gp)"/>
+                <path d="M163 110 Q180 120 197 110 M159 134 Q180 146 201 134 M162 160 Q180 172 198 160" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/>
+              </g>
+            </g>
+            <g class="s3">
+              <use href="#wingR" class="wing"/>
+              <g transform="translate(360 0) scale(-1 1)"><use href="#wingR" class="wing"/></g>
+              <ellipse cx="180" cy="142" rx="5.5" ry="30" fill="#10243a"/><circle cx="180" cy="108" r="7" fill="#10243a"/>
+              <path d="M177 103 C170 88 160 82 153 80 M183 103 C190 88 200 82 207 80" fill="none" stroke="#10243a" stroke-width="2" stroke-linecap="round"/>
+            </g>
+          </svg>
+          <div class="quote-inline">
+            <blockquote class="quote-text" data-write data-i18n="quotes.c"></blockquote>
+            <svg class="quote-stroke" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M2 11 C40 2 72 17 112 9 S190 3 232 10 S282 15 298 7"/></svg>
+          </div>
+        </div>
+        <div class="scenes">
+          <article class="scene"><h3 data-fade data-i18n="change.s1Title"></h3><p data-fade style="--d:.1s" data-i18n="change.s1Text"></p></article>
+          <article class="scene"><h3 data-fade data-i18n="change.s2Title"></h3><p data-fade style="--d:.1s" data-i18n="change.s2Text"></p></article>
+          <article class="scene"><h3 data-fade data-i18n="change.s3Title"></h3><p data-fade style="--d:.1s" data-i18n="change.s3Text"></p></article>
+          <article class="scene"><h3 data-fade data-i18n="change.s4Title"></h3><p data-fade style="--d:.1s" data-i18n="change.s4Text"></p></article>
+          <article class="scene"><h3 data-fade data-i18n="change.bTitle"></h3><p data-fade style="--d:.1s" data-i18n="change.bText"></p></article>
+          <article class="scene"><h3 data-fade data-i18n="change.mTitle"></h3><p data-fade style="--d:.1s" data-i18n="change.mText"></p></article>
+          <article class="scene"><h3 data-fade data-i18n="change.wTitle"></h3><p data-fade style="--d:.1s" data-i18n="change.wText"></p><p class="scene-note" data-fade data-i18n="change.wNote"></p></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. About me: short, with several photographs -->
+    <section class="band band-deep about" id="about" aria-labelledby="about-title">
+      <div class="container split">
+        <div class="about-text">
+          <h2 class="title" id="about-title" data-fade data-i18n="about.title"></h2>
+          <p class="about-lead" data-fade data-i18n="about.lead"></p>
+          <p class="chap" data-fade><strong data-i18n="about.c1Title"></strong> <span data-i18n="about.c1Text"></span></p>
+          <p class="chap" data-fade><strong data-i18n="about.c2Title"></strong> <span data-i18n="about.c2Text"></span></p>
+          <p class="chap" data-fade><strong data-i18n="about.c3Title"></strong> <span data-i18n="about.c3Text"></span></p>
+          <p class="chap" data-fade><strong data-i18n="about.c4Title"></strong> <span data-i18n="about.c4Text"></span></p>
+          <p class="about-note" data-fade data-i18n="about.note"></p>
+        </div>
+        <div class="mosaic">
+          <div class="mcol">
+            <figure class="photo m-tall"><img data-photo="story_photo_1" data-i18n-alt="about.c1Alt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
+            <figure class="photo m-square"><img data-photo="story_photo_3" data-i18n-alt="about.c3Alt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
+          </div>
+          <div class="mcol">
+            <figure class="photo m-square"><img data-photo="story_photo_2" data-i18n-alt="about.c2Alt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
+            <figure class="photo m-tall"><img data-photo="story_photo_4" data-i18n-alt="about.c4Alt" alt="" loading="lazy" decoding="async"><div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div></figure>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 13. Questions and answers (blank question = hidden slot) -->
-    <section class="sec faq" id="faq" aria-labelledby="faq-title">
+    <!-- 6. Contact form, straight after "About me" -->
+    <section class="band band-frost contact" id="contact" aria-labelledby="contact-title">
+      <div class="container split">
+        <div>
+          <h2 class="title" id="contact-title" data-i18n="contact.title"></h2>
+          <p class="lead" data-i18n="contact.lead"></p>
+          <div class="contact-links">
+            <a id="contact-email" href="" hidden><span data-i18n="contactEmail"></span></a>
+            <a id="contact-telegram" href="" target="_blank" rel="noopener noreferrer" hidden><span>Telegram</span></a>
+            <a id="contact-whatsapp" href="" target="_blank" rel="noopener noreferrer" hidden><span>WhatsApp</span></a>
+          </div>
+        </div>
+        <div>
+          <form id="contact-form" novalidate>
+            <label class="field"><span data-i18n="contact.formName"></span><input type="text" name="name" autocomplete="name" required aria-required="true" aria-describedby="form-status" maxlength="120"></label>
+            <label class="field"><span data-i18n="contact.formReach"></span><input type="text" name="contact" autocomplete="email" required aria-required="true" aria-describedby="form-status" maxlength="160"></label>
+            <label class="field"><span data-i18n="contact.formMessage"></span><textarea name="message" rows="4" maxlength="4000"></textarea></label>
+            <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <button class="button button-primary" type="submit" id="form-send" data-i18n="contact.formSend"></button>
+            <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+            <p class="form-note" data-i18n="contact.formNote"></p>
+          </form>
+          <p class="form-sent" id="form-sent" role="status" tabindex="-1" hidden data-i18n="contact.formSent"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Questions and answers (blank question = hidden slot). The free first meeting closes the section. -->
+    <section class="band band-teal faq" id="faq" aria-labelledby="faq-title">
       <div class="container">
-        <h2 class="title" id="faq-title" data-i18n="faq.title"></h2>
-        <p class="lead" data-i18n="faq.lead"></p>
-        <div class="faq-list">
-          <details data-faq="1"><summary data-i18n="faq.q1"></summary><p data-i18n="faq.a1"></p></details>
-          <details data-faq="2"><summary data-i18n="faq.q2"></summary><p data-i18n="faq.a2"></p></details>
-          <details data-faq="3"><summary data-i18n="faq.q3"></summary><p data-i18n="faq.a3"></p></details>
-          <details data-faq="4"><summary data-i18n="faq.q4"></summary><p data-i18n="faq.a4"></p></details>
-          <details data-faq="5"><summary data-i18n="faq.q5"></summary><p data-i18n="faq.a5"></p></details>
-          <details data-faq="6"><summary data-i18n="faq.q6"></summary><p data-i18n="faq.a6"></p></details>
-          <details data-faq="7"><summary data-i18n="faq.q7"></summary><p data-i18n="faq.a7"></p></details>
-          <details data-faq="8"><summary data-i18n="faq.q8"></summary><p data-i18n="faq.a8"></p></details>
+        <div class="split">
+          <div class="sticky">
+            <h2 class="title" id="faq-title" data-i18n="faq.title"></h2>
+            <p class="lead" data-i18n="faq.lead"></p>
+          </div>
+          <div class="faq-list">
+            <details data-faq="1"><summary data-i18n="faq.q1"></summary><p data-i18n="faq.a1"></p></details>
+            <details data-faq="2"><summary data-i18n="faq.q2"></summary><p data-i18n="faq.a2"></p></details>
+            <details data-faq="3"><summary data-i18n="faq.q3"></summary><p data-i18n="faq.a3"></p></details>
+            <details data-faq="4"><summary data-i18n="faq.q4"></summary><p data-i18n="faq.a4"></p></details>
+            <details data-faq="5"><summary data-i18n="faq.q5"></summary><p data-i18n="faq.a5"></p></details>
+            <details data-faq="6"><summary data-i18n="faq.q6"></summary><p data-i18n="faq.a6"></p></details>
+            <details data-faq="7"><summary data-i18n="faq.q7"></summary><p data-i18n="faq.a7"></p></details>
+            <details data-faq="8"><summary data-i18n="faq.q8"></summary><p data-i18n="faq.a8"></p></details>
+          </div>
+        </div>
+        <div class="free" id="free">
+          <div class="free-num" aria-hidden="true"><b data-i18n="free.number"></b><span data-i18n="free.unit"></span></div>
+          <div>
+            <h3 data-i18n="free.title"></h3>
+            <p data-i18n="free.text"></p>
+          </div>
         </div>
       </div>
     </section>
 
     <!--@@NOTES@@-->
-
-    <!-- 14. The closing phrase -->
-    <section class="quote q-d">
-      <div class="quote-card"><i></i><i></i><i></i>
-        <blockquote class="quote-text" data-write data-i18n="quotes.d"></blockquote>
-        <svg class="quote-stroke" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M2 11 C40 2 72 17 112 9 S190 3 232 10 S282 15 298 7"/></svg>
-      </div>
-    </section>
   </main>
 
   <footer class="site-footer"><div class="container footer-inner"><p>© <span id="year">2026</span> <span data-i18n="footerName"></span> · <span data-i18n="footer.line"></span></p><a href="#top" data-i18n="backToTop"></a></div><div class="container"><p class="footer-privacy" data-i18n="footer.privacy"></p></div></footer>
 
   <button class="to-top" id="to-top" type="button" data-i18n-aria="backToTop"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg></button>
 
-  <div class="farewell" id="farewell" role="dialog" aria-modal="true" aria-labelledby="farewell-title" tabindex="-1" hidden>
-    <div class="farewell-card glass">
-      <h2 id="farewell-title" data-i18n="fork.farewellTitle"></h2>
-      <p class="farewell-ask" data-i18n="fork.farewellText"></p>
-      <p class="farewell-done" data-i18n="fork.farewellDone" hidden></p>
-      <div class="farewell-actions">
-        <button class="button button-outline" type="button" id="farewell-end" data-i18n="fork.farewellEnd"></button>
-        <button class="button button-outline" type="button" id="farewell-back" data-i18n="fork.farewellBack"></button>
-      </div>
-    </div>
-  </div>
-
   <script>
     'use strict';
     // Contact channels and the form endpoint are injected by scripts/build.py from content/site.json.
-    const SETTINGS = { email:'', whatsapp:'', telegram:'', bookingUrl:'', formEndpoint:'' };
+    const SETTINGS = { email:'', whatsapp:'', telegram:'', formEndpoint:'' };
     const translations = { ru:{}, en:{}, fr:{} };
     // @@CMS_INJECTION@@
 
@@ -909,7 +578,6 @@
     const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const hasObserver = 'IntersectionObserver' in window;
     const langSelect = $('#language');
-    const themeButton = $('#theme-toggle');
     const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     let lang = 'ru';
 
@@ -921,24 +589,6 @@
       const fallback = translations.ru[key];
       return typeof fallback === 'string' ? fallback : '';
     }
-
-    /* ---------- Theme ---------- */
-    function syncTheme() {
-      const dark = root.dataset.theme === 'dark';
-      themeButton.setAttribute('aria-label', t(dark ? 'themeLight' : 'themeDark'));
-      themeButton.title = t(dark ? 'themeLight' : 'themeDark');
-      themeButton.setAttribute('aria-pressed', String(dark));
-      $('#theme-color').content = dark ? '#0e1f34' : '#f5f9fc';
-    }
-    themeButton.addEventListener('click', () => {
-      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-      root.dataset.theme = next;
-      store('sport-site-theme', next);
-      syncTheme();
-    });
-    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-      if (retrieve('sport-site-theme') === null) { root.dataset.theme = event.matches ? 'dark' : 'light'; syncTheme(); }
-    });
 
     /* ---------- Handwriting: each quote is written letter by letter ---------- */
     function splitWrite(element) {
@@ -1002,7 +652,6 @@
       const allLink = $('#notes-all');
       if (allLink) allLink.href = lang + '/articles/';
       $('#form-status').textContent = '';
-      syncTheme();
       $$('[data-write]').forEach(splitWrite);
     }
     const savedLang = retrieve('sport-site-lang');
@@ -1023,21 +672,6 @@
       image.addEventListener('error', () => frame.classList.remove('has-photo'));
       if (image.complete) loaded();
     });
-
-    /* ---------- A soft light that follows the pointer ---------- */
-    if (!reduceMotion && matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      const aura = $('.aura');
-      let x = innerWidth / 2, y = innerHeight / 3, targetX = x, targetY = y, frame = 0;
-      const follow = () => {
-        x += (targetX - x) * .08; y += (targetY - y) * .08;
-        aura.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0)';
-        frame = Math.abs(targetX - x) + Math.abs(targetY - y) > .5 ? requestAnimationFrame(follow) : 0;
-      };
-      addEventListener('pointermove', event => {
-        targetX = event.clientX; targetY = event.clientY; aura.style.opacity = '1';
-        if (!frame) frame = requestAnimationFrame(follow);
-      }, { passive: true });
-    }
 
     /* ---------- Going up and jumping between sections ---------- */
     const toTop = $('#to-top');
@@ -1079,49 +713,11 @@
       $$('main > section').forEach(section => rest.observe(section));
     }
 
-    /* ---------- The fork: "not now" opens a calm message. Nothing is recorded; the tab is never force-closed ---------- */
-    const farewell = $('#farewell');
-    const frozen = ['header', 'main', 'footer', '#to-top'].map(selector => $(selector));
-    const farewellAsk = $('.farewell-ask');
-    const farewellDone = $('.farewell-done');
-    const farewellEnd = $('#farewell-end');
-    let farewellEntry = false;                           // true while the message owns a history entry
-    let ignoreNextPop = false;
-    function showFarewell(open) {
-      farewell.hidden = !open;
-      root.classList.toggle('farewell-open', open);
-      frozen.forEach(node => { if (node) node.inert = open; });
-      if (open) farewell.focus(); else $('#close-page').focus({ preventScroll: true });
-    }
-    function openFarewell() {
-      if (!farewell.hidden) return;
-      farewellAsk.hidden = false; farewellDone.hidden = true; farewellEnd.hidden = false;
-      try { history.pushState({ farewell: true }, ''); farewellEntry = true; } catch (_) { farewellEntry = false; }
-      showFarewell(true);
-    }
-    function closeFarewell() {
-      if (farewell.hidden) return;
-      showFarewell(false);
-      if (farewellEntry) { farewellEntry = false; ignoreNextPop = true; history.back(); }
-    }
-    addEventListener('popstate', () => {                 // the system Back button closes the message, not the site
-      if (ignoreNextPop) { ignoreNextPop = false; return; }
-      if (!farewell.hidden) { farewellEntry = false; showFarewell(false); }
-    });
-    $('#close-page').addEventListener('click', openFarewell);
-    farewellEnd.addEventListener('click', () => {        // an honest goodbye: a page cannot reliably close the tab itself
-      farewellAsk.hidden = true; farewellDone.hidden = false; farewellEnd.hidden = true;
-      $('#farewell-back').focus();
-    });
-    $('#farewell-back').addEventListener('click', closeFarewell);
-    addEventListener('keydown', event => { if (event.key === 'Escape') closeFarewell(); });
-
     /* ---------- Contact links: only genuinely configured channels are shown ---------- */
     const links = {
       email: EMAIL_RE.test(SETTINGS.email.trim()) ? 'mailto:' + SETTINGS.email.trim() : '',
       whatsapp: /^\d{7,15}$/.test(SETTINGS.whatsapp.trim()) ? 'https://wa.me/' + SETTINGS.whatsapp.trim() : '',
-      telegram: /^[A-Za-z0-9_]{5,32}$/.test(SETTINGS.telegram.trim()) ? 'https://t.me/' + SETTINGS.telegram.trim() : '',
-      booking: /^https:\/\//i.test(SETTINGS.bookingUrl.trim()) ? SETTINGS.bookingUrl.trim() : ''
+      telegram: /^[A-Za-z0-9_]{5,32}$/.test(SETTINGS.telegram.trim()) ? 'https://t.me/' + SETTINGS.telegram.trim() : ''
     };
     Object.entries(links).forEach(([key, url]) => {
       const link = $('#contact-' + key);

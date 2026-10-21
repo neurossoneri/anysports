@@ -12,7 +12,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 LANGS = ('ru', 'en', 'fr')
-SECTION_IDS = ('hero', 'story', 'client', 'why', 'about', 'check', 'fork', 'sessions', 'change', 'invite', 'contact', 'faq')
+SECTION_IDS = ('hero', 'intro', 'sessions', 'change', 'about', 'contact', 'faq')   # page order, top to bottom
 
 
 def load_builder():
@@ -62,17 +62,28 @@ def check_static(destination):
     assert '@@' not in home and 'data-photo=' not in home, 'unresolved template marker'
     for section in SECTION_IDS:
         assert f'id="{section}"' in home, f'section missing: {section}'
-    assert home.count('<blockquote class="quote-text" data-write ') == 4, 'expected four handwritten quote blocks'
+    positions = [home.index(f'id="{section}"') for section in SECTION_IDS]
+    assert positions == sorted(positions), 'sections are out of the agreed order'
+    assert home.index('id="faq"') < home.index('id="free"') < home.index('class="site-footer"'), 'the free 30 minutes must close the Q&A'
+    assert home.index('id="contact"') > home.index('id="about"') and home.index('id="contact"') < home.index('id="faq"'), 'the form goes right after "About me"'
+    for band in ('band-deep', 'band-frost', 'band-teal', 'band-ice'):
+        assert band in home, f'background band missing: {band}'
+    assert home.count('<blockquote class="quote-text" data-write ') == 3, 'expected three handwritten quote blocks'
     assert 'id="contact-form"' in home and 'name="_gotcha"' in home
-    assert 'id="close-page"' in home and 'id="farewell"' in home
+    assert 'id="close-page"' not in home and 'farewell' not in home, 'no forced choice and no farewell dialog'
     assert 'id="to-top"' in home and 'class="scroll-progress"' in home, 'back-to-top button or progress line is missing'
     assert re.search(r'<div id="top"', home) and not re.search(r'<header[^>]*\bid="top"', home), '#top must be a plain anchor at the very top, not the sticky header'
     assert 'Интуиция нужна каждому' in home and 'Ты можешь контролировать только себя' in home
     assert 'id="notes"' not in home, 'notes must stay hidden until an article is published'
-    for gone in ('review-grid', 'quiz', 'credential', 'mobile-cta', 'hero-floating'):
+    for gone in ('review-grid', 'quiz', 'credential', 'mobile-cta', 'hero-floating', 'hero-tag', 'hero-hint', 'contact-booking', 'id="check"', 'id="fork"', 'id="invite"'):
         assert gone not in home, f'old template block is back: {gone}'
     assert 'prefers-reduced-motion' in home and '[hidden] { display:none!important; }' in home
-    assert not re.search(r'border-radius\s*:\s*0(?:px)?\s*[;}]', css), 'sharp corners are against the concept'
+    articles_css = (destination / 'assets/articles.css').read_text(encoding='utf-8')
+    for sheet in (css, articles_css):
+        rounded = re.findall(r'border-radius\s*:\s*(?!0(?:px)?\s*[;}])[^;}]+', sheet)
+        assert not rounded, f'rounded corners are against the cold redesign: {rounded[:3]}'
+    for phrase in ('book online', 'choose a timezone', 'choose a time', 'conversation with'):
+        assert phrase not in home.lower(), f'call to action must not return: {phrase}'
     assert '@view-transition' in css and 'scroll-progress' in css
     assert 'rel="icon"' in home and 'class="brand-mark"' in home and 'viewBox="0 0 48 48"' in home
     for lang in LANGS:
@@ -86,7 +97,7 @@ def check_integrity(builder):
     assert 'window.close' not in template, 'a web page must not pretend it can close the tab'
     assert builder.FAQ_SLOTS == 8 and template.count('<details data-faq=') == 8, 'FAQ must have 8 editable slots'
     assert 'quote_photo' in builder.PHOTO_FIELDS and 'id="sessions"' in template
-    assert 'id="farewell-end"' in template and 'aria-describedby="form-status"' in template
+    assert 'aria-describedby="form-status"' in template and 'data-write' in template
     assert template.count('<h1') == 1, 'exactly one h1 (the opening quotation)'
     banned = {
         'en': [r'risk of (?:physical )?injur', r'\bprevent', r'burn-?out', r'guarantee', r'\bcures?\b', r'\btreat(?:s|ment)?\b'],
@@ -99,7 +110,8 @@ def check_integrity(builder):
             assert not re.search(pattern, text), f'{lang}: promise-like wording must not return: {pattern}'
     for lang in LANGS:
         data = json.loads((ROOT / f'content/home_{lang}.json').read_text(encoding='utf-8'))
-        assert data['faq']['q1'].strip() and data['fork']['farewellEnd'].strip() and data['fork']['farewellBack'].strip()
+        assert data['faq']['q1'].strip() and data['about']['lead'].strip() and data['sessions']['photoAlt'].strip()
+        assert 'fork' not in data and 'check' not in data and 'invite' not in data and 'why' not in data, 'removed blocks must stay removed'
 
 
 def write_post(work, lang, body, name='published'):
@@ -182,7 +194,7 @@ def main():
         assert '"formEndpoint":""' in home and 'insecure.example' not in home
         assert 'id="notes"' not in home and 'noindex,nofollow' in home
         assert 'Disallow: /' in (work / '_site/robots.txt').read_text(encoding='utf-8')
-    print('OK: copy and CMS in sync, three languages, handwritten quotes, photos, form, notes, safety and publish mode')
+    print('OK: copy and CMS in sync, three languages, cold bands, handwritten quotes, photos, form, notes, safety and publish mode')
 
 
 if __name__ == '__main__':

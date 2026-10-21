@@ -4,16 +4,9 @@
     "description": "A conversation about intuition, change and the path in sport. The first 30-minute consultation is free and carries no obligation."
   },
   "hero": {
-    "hint": "scroll slowly",
     "alt": "A smiling woman standing by the sea at dusk with her arms open wide",
     "quote1": "Intuition is a different kind of intelligence.",
     "quote2": "There are things you can only know by listening inwardly."
-  },
-  "quotes": {
-    "a": "You can only control yourself.\nThe rest is out of your control.",
-    "b": "Not everything in life can be understood through logic,\nnor does everything need to be.",
-    "c": "Often, transformation doesn’t lead us to something new;\nit leads us back to ourselves.",
-    "d": "Intuition is a different kind of intelligence."
   },
   "story": {
     "title": "Intuition is for everyone, so why is this page created specifically for athletes?",
@@ -22,6 +15,27 @@
     "p3": "The momentum, instinct, feel for the game — whatever you call it.",
     "p4": "They bring an immediate sense of flow and clarity — an inner shift that changes the outer reality.",
     "p5": "How long and deep this connection goes often determines an athlete’s ability to turn a difficult situation in their favour, stay present and creative, and enjoy their performance."
+  },
+  "quotes": {
+    "a": "You can only control yourself.\nThe rest is out of your control.",
+    "b": "Not everything in life can be understood through logic,\nnor does everything need to be.",
+    "c": "Often, transformation doesn’t lead us to something new;\nit leads us back to ourselves."
+  },
+  "sessions": {
+    "title": "Intuition sessions",
+    "lead": "A space to develop the ability to connect with yourself, listen to your inner voice and recognise what it is saying.",
+    "h1": "It speaks differently to everyone",
+    "p1": "For some, intuition comes as a gut feeling or a sensation in the heart; for others, as a voice, an image, a sudden flash of insight, or even something that appears in a dream. Sometimes it arrives instantly and clearly; at other times it is subtle and needs silence, patience and attention to notice.",
+    "h2": "Where we begin",
+    "p2": "Our work begins with exploring what intuition means to you: how you naturally perceive it, how it shows up in different situations, and what helps you recognise its signals. You learn to notice, distinguish and interpret these messages, while developing the confidence to trust your own perceptions.",
+    "h3": "Not only answers",
+    "p3": "Intuition can reconnect us with our inner truth: our values, what makes us happy, what we want from life and how we wish to move through it. Yet this journey is not only about understanding and answers. It is also about learning to accept the unknown, the unpredictable and the uncontrollable. Letting go of the boundaries that stand in the way of your inner alignment and contentment is one of the few skills we practise.",
+    "h4": "How the sessions work",
+    "p4": "These sessions are led intuitively and individually. There is no predefined programme designed for everyone. My approach is not based on scientific studies or established concepts, but neither does it seek to deny or exclude any particular perspective.",
+    "p5": "It is not psychological counselling or conventional mental training, though we may touch on some elements of those methods. Sessions normally unfold naturally, instinctively: your intuition will lead us to where your attention and awareness are most needed.",
+    "note": "Sessions are not a substitute for medical care or psychological therapy.",
+    "bring": "As with any new experience, curiosity, courage, openness and trust are essential. Above all, bring a willingness to explore, to experience something new, and to discover your beautiful self.",
+    "photoAlt": "Close-up portrait: part of a woman’s face, looking at the camera"
   },
   "client": {
     "title": "What we can explore together",
@@ -39,68 +53,7 @@
     "l6": "Life beyond sport",
     "l6t": "Shifting attention and energy towards other meaningful aspects of life, and developing an identity beyond sport.",
     "l7": "Trusting yourself first",
-    "l7t": "Listening to the advice of family, friends, coaches, doctors and other experts — and checking it with yourself too.",
-    "note": "If one of these sounds familiar, you are welcome to read on."
-  },
-  "why": {
-    "title": "I am not an athlete myself — but sport has always been part of my life",
-    "text": "From joining grassroots sports clubs as a child, to becoming a passionate sports fan, and eventually working as a Competition Manager at the world’s largest sports organisations, my journey has taken me through many different sides of sport.\n\nAlong the way I met athletes at different stages of their careers, with different backgrounds, experiences and levels of achievement. I believe this is where I began to relate to them on a deeper level — and to want to direct my energy towards supporting them."
-  },
-  "about": {
-    "title": "My story",
-    "c1Title": "Sport, always",
-    "c1Text": "Sport has been part of my life since childhood: grassroots clubs, then a passionate fan. For ten years at FIFA I contributed to the organisation of football World Cups and numerous related events.",
-    "c1Alt": "A smiling woman in a pink top standing by the sea",
-    "c2Title": "“Enough”",
-    "c2Text": "A few years ago I decided to change direction — not by plan, and with no other plan in hand. Something inside simply said “enough”. I paused, and my focus shifted from external validation and having a cool job towards inner reflection and exploration.",
-    "c2Alt": "A woman standing by a wooden fence among dune grass, looking aside",
-    "c3Title": "Exploring",
-    "c3Text": "I explored psychology, body and energy practices, alternative healing approaches and ancient philosophies. I went deeper into my own experiences, experimented, and gradually discovered new ways of understanding myself.",
-    "c3Alt": "A woman sitting in dry grass in warm evening light",
-    "c4Title": "Learning to trust",
-    "c4Text": "I have always been intuitive, even as a child, but my sensitivity was often dismissed or seen as weakness in my family, so I never learnt to trust it. Over recent years I have cleared my inner voice from layers of family conditioning and social expectations. I trust myself more deeply, and rely less on external validation and the need for constant control and security. It has made my life feel lighter and happier.",
-    "c4Alt": "A smiling woman in a white top by the sea",
-    "note": "This journey continues — and I want to support others in their own search for fulfilment and happiness."
-  },
-  "check": {
-    "title": "And now, listen",
-    "l1": "You have seen my photographs. You have read my story.",
-    "l2": "Now, take a moment to listen to yourself.",
-    "l3": "Does something resonate? Would you like to talk?",
-    "note1": "If not, that is completely fine, too.",
-    "note2": "Think of it as a first small test of your intuition."
-  },
-  "fork": {
-    "lead": "Take a moment.",
-    "voice": "Look at the photograph. Notice what comes up.",
-    "eyes": "There is no right answer.",
-    "yesTitle": "Something resonates.",
-    "yesText": "I’d like to explore further.",
-    "yesButton": "Continue",
-    "noTitle": "I’m not feeling a connection right now.",
-    "noText": "That is completely fine.",
-    "noButton": "Not now",
-    "photoAlt": "Close-up portrait: part of a woman’s face, looking at the camera",
-    "farewellTitle": "Thank you for stopping by",
-    "farewellText": "Trust what you felt. You are welcome to finish your visit here, or to keep exploring the site.",
-    "farewellEnd": "Finish my visit",
-    "farewellDone": "Thank you for your time. You can close this tab whenever you like.",
-    "farewellBack": "Keep exploring"
-  },
-  "sessions": {
-    "title": "Intuition sessions",
-    "lead": "A space to develop the ability to connect with yourself, listen to your inner voice and recognise what it is saying.",
-    "h1": "It speaks differently to everyone",
-    "p1": "For some, intuition comes as a gut feeling or a sensation in the heart; for others, as a voice, an image, a sudden flash of insight, or even something that appears in a dream. Sometimes it arrives instantly and clearly; at other times it is subtle and needs silence, patience and attention to notice.",
-    "h2": "Where we begin",
-    "p2": "Our work begins with exploring what intuition means to you: how you naturally perceive it, how it shows up in different situations, and what helps you recognise its signals. You learn to notice, distinguish and interpret these messages, while developing the confidence to trust your own perceptions.",
-    "h3": "Not only answers",
-    "p3": "Intuition can reconnect us with our inner truth: our values, what makes us happy, what we want from life and how we wish to move through it. Yet this journey is not only about understanding and answers. It is also about learning to accept the unknown, the unpredictable and the uncontrollable. Letting go of the boundaries that stand in the way of your inner alignment and contentment is one of the few skills we practise.",
-    "h4": "How the sessions work",
-    "p4": "These sessions are led intuitively and individually. There is no predefined programme designed for everyone. My approach is not based on scientific studies or established concepts, but neither does it seek to deny or exclude any particular perspective.",
-    "p5": "It is not psychological counselling or conventional mental training, though we may touch on some elements of those methods. Sessions normally unfold naturally, instinctively: your intuition will lead us to where your attention and awareness are most needed.",
-    "note": "Sessions are not a substitute for medical care or psychological therapy.",
-    "bring": "As with any new experience, curiosity, courage, openness and trust are essential. Above all, bring a willingness to explore, to experience something new, and to discover your beautiful self."
+    "l7t": "Listening to the advice of family, friends, coaches, doctors and other experts — and checking it with yourself too."
   },
   "change": {
     "title": "Transformation",
@@ -120,20 +73,26 @@
     "wText": "What I offer is simply to be a witness — a steady presence as you navigate these shifts, to normalise what you’re feeling. This is deep and individual work, but everyone sometimes needs a hand to hold in these moments. Of course, it’s not a hand you rely on forever. Much of the journey you walk alone, but a friend, a witness, a guide — someone who can name your experience as valid — can make all the difference.\n\nI speak from my own journey, and what I offer is to be that hand, that witness, perhaps even that guide, whenever you need it.",
     "wNote": "If you are walking this path and don’t have that support, you can reach out."
   },
-  "invite": {
-    "title": "If something here resonates, we can start with a conversation.",
-    "button": "Write to me"
-  },
-  "free": {
-    "number": "30",
-    "unit": "minutes",
-    "title": "The first 30 minutes are free",
-    "text": "We can simply meet, talk and listen.\n\nThere is no obligation to continue. We can both decide whether it feels right to work together."
+  "about": {
+    "title": "My story",
+    "lead": "I am not an athlete myself — but sport has always been part of my life",
+    "c1Title": "Sport, always",
+    "c1Text": "Sport has been part of my life since childhood: grassroots clubs, then a passionate fan. For ten years at FIFA I contributed to the organisation of football World Cups and numerous related events.",
+    "c1Alt": "A smiling woman in a pink top standing by the sea",
+    "c2Title": "“Enough”",
+    "c2Text": "A few years ago I decided to change direction — not by plan, and with no other plan in hand. Something inside simply said “enough”. I paused, and my focus shifted from external validation and having a cool job towards inner reflection and exploration.",
+    "c2Alt": "A woman standing by a wooden fence among dune grass, looking aside",
+    "c3Title": "Exploring",
+    "c3Text": "I explored psychology, body and energy practices, alternative healing approaches and ancient philosophies. I went deeper into my own experiences, experimented, and gradually discovered new ways of understanding myself.",
+    "c3Alt": "A woman sitting in dry grass in warm evening light",
+    "c4Title": "Learning to trust",
+    "c4Text": "I have always been intuitive, even as a child, but my sensitivity was often dismissed or seen as weakness in my family, so I never learnt to trust it. Over recent years I have cleared my inner voice from layers of family conditioning and social expectations. I trust myself more deeply, and rely less on external validation and the need for constant control and security. It has made my life feel lighter and happier.",
+    "c4Alt": "A smiling woman in a white top by the sea",
+    "note": "This journey continues — and I want to support others in their own search for fulfilment and happiness."
   },
   "contact": {
     "title": "Write to me",
     "lead": "A few words about you are enough. The details can wait for our conversation.",
-    "linksTitle": "Or reach out directly",
     "formName": "Your name",
     "formReach": "How to reach you (email, Telegram or WhatsApp)",
     "formMessage": "What brought you here? (optional)",
@@ -156,10 +115,16 @@
     "a5": "Intuition sessions are about learning to notice, distinguish and trust your own intuition. Transformation support is about having a steady presence — a witness, and perhaps a guide — while something inside you is changing. Which of the two is closer to what you need is something we can explore in the first conversation.",
     "q6": "What should I bring?",
     "a6": "Curiosity, courage, openness and trust. Above all, a willingness to explore, to experience something new, and to discover your beautiful self.",
-    "q7": "",
-    "a7": "",
+    "q7": "Why do you work with athletes?",
+    "a7": "From joining grassroots sports clubs as a child, to becoming a passionate sports fan, and eventually working as a Competition Manager at the world’s largest sports organisations, my journey has taken me through many different sides of sport.\n\nAlong the way I met athletes at different stages of their careers, with different backgrounds, experiences and levels of achievement. I believe this is where I began to relate to them on a deeper level — and to want to direct my energy towards supporting them.",
     "q8": "",
     "a8": ""
+  },
+  "free": {
+    "number": "30",
+    "unit": "minutes",
+    "title": "The first 30 minutes are free",
+    "text": "We can simply meet, talk and listen.\n\nThere is no obligation to continue. We can both decide whether it feels right to work together."
   },
   "notes": {
     "title": "Notes",

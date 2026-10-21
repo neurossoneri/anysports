@@ -4,16 +4,9 @@
     "description": "Une conversation sur l’intuition, le changement et le chemin dans le sport. La première consultation de 30 minutes est gratuite et sans engagement."
   },
   "hero": {
-    "hint": "faites défiler doucement",
     "alt": "Une femme souriante au bord de la mer au crépuscule, les bras grands ouverts",
     "quote1": "L’intuition est une autre forme d’intelligence.",
     "quote2": "Il y a des choses que l’on ne peut connaître qu’en s’écoutant de l’intérieur."
-  },
-  "quotes": {
-    "a": "Tu ne peux contrôler que toi-même.\nLe reste ne dépend pas de toi.",
-    "b": "Tout ne se comprend pas par la logique,\net il n’est pas nécessaire que tout se comprenne.",
-    "c": "Souvent, la transformation ne nous mène pas vers quelque chose de nouveau :\nelle nous ramène à nous-mêmes.",
-    "d": "L’intuition est une autre forme d’intelligence."
   },
   "story": {
     "title": "L’intuition est pour tout le monde, alors pourquoi cette page est-elle créée spécialement pour les sportifs ?",
@@ -22,6 +15,27 @@
     "p3": "L’élan, l’instinct, le sens du jeu — peu importe le nom qu’on lui donne.",
     "p4": "Ils apportent un sentiment immédiat de fluidité et de clarté — un basculement intérieur qui change la réalité extérieure.",
     "p5": "La durée et la profondeur de ce lien déterminent souvent la capacité d’un sportif à retourner une situation difficile en sa faveur, à rester présent et créatif, et à prendre plaisir à sa performance."
+  },
+  "quotes": {
+    "a": "Tu ne peux contrôler que toi-même.\nLe reste ne dépend pas de toi.",
+    "b": "Tout ne se comprend pas par la logique,\net il n’est pas nécessaire que tout se comprenne.",
+    "c": "Souvent, la transformation ne nous mène pas vers quelque chose de nouveau :\nelle nous ramène à nous-mêmes."
+  },
+  "sessions": {
+    "title": "Séances d’intuition",
+    "lead": "Un espace pour développer la capacité de se relier à soi, d’écouter sa voix intérieure et de reconnaître ce qu’elle dit.",
+    "h1": "Elle parle différemment à chacun",
+    "p1": "Pour certains, l’intuition vient comme une sensation au ventre ou dans le cœur ; pour d’autres, comme une voix, une image, un éclair soudain de compréhension, ou même quelque chose qui apparaît en rêve. Parfois elle arrive instantanément et clairement ; d’autres fois elle est subtile et demande du silence, de la patience et de l’attention pour être remarquée.",
+    "h2": "Là où nous commençons",
+    "p2": "Notre travail commence par explorer ce que l’intuition signifie pour vous : comment vous la percevez naturellement, comment elle se manifeste dans différentes situations, et ce qui vous aide à reconnaître ses signaux. Vous apprenez à remarquer, distinguer et interpréter ces messages, tout en développant la confiance nécessaire pour vous fier à vos propres perceptions.",
+    "h3": "Pas seulement des réponses",
+    "p3": "L’intuition peut nous reconnecter à notre vérité intérieure : nos valeurs, ce qui nous rend heureux, ce que nous voulons de la vie et la façon dont nous souhaitons la traverser. Pourtant, ce chemin ne consiste pas seulement à comprendre et à trouver des réponses. Il s’agit aussi d’apprendre à accepter l’inconnu, l’imprévisible et l’incontrôlable. Lâcher les limites qui empêchent votre alignement intérieur et votre contentement est l’une des rares compétences que nous pratiquons.",
+    "h4": "Comment se déroulent les séances",
+    "p4": "Ces séances sont menées de façon intuitive et individuelle. Il n’existe pas de programme prédéfini conçu pour tout le monde. Mon approche ne repose pas sur des études scientifiques ni sur des concepts établis, mais elle ne cherche pas non plus à nier ou à exclure un point de vue particulier.",
+    "p5": "Ce n’est ni du conseil psychologique ni du mental training classique, même si nous pouvons toucher à certains éléments de ces méthodes. Les séances se déroulent en général naturellement, instinctivement : votre intuition nous conduira là où votre attention et votre conscience sont le plus nécessaires.",
+    "note": "Les séances ne remplacent ni les soins médicaux ni une thérapie psychologique.",
+    "bring": "Comme pour toute nouvelle expérience, la curiosité, le courage, l’ouverture et la confiance sont essentiels. Apportez surtout l’envie d’explorer, de vivre quelque chose de nouveau et de découvrir votre beauté intérieure.",
+    "photoAlt": "Portrait en gros plan : une partie du visage d’une femme, regardant l’objectif"
   },
   "client": {
     "title": "Ce que nous pouvons explorer ensemble",
@@ -39,68 +53,7 @@
     "l6": "Une vie au-delà du sport",
     "l6t": "Tourner son attention et son énergie vers d’autres aspects importants de la vie et développer une identité qui ne se réduit pas au sport.",
     "l7": "D’abord se faire confiance",
-    "l7t": "Écouter les conseils de la famille, des amis, des entraîneurs, des médecins et d’autres experts — et les confronter aussi à soi-même.",
-    "note": "Si l’un de ces thèmes vous parle, vous pouvez poursuivre la lecture."
-  },
-  "why": {
-    "title": "Je ne suis pas sportive moi-même, mais le sport a toujours fait partie de ma vie",
-    "text": "Des clubs sportifs amateurs de mon enfance au statut de fan passionnée, puis au poste de Competition Manager dans les plus grandes organisations sportives du monde, mon parcours m’a fait traverser de nombreuses facettes du sport.\n\nEn chemin, j’ai rencontré des sportifs à différents stades de leur carrière, d’horizons, d’expériences et de niveaux de réussite très divers. C’est là, je crois, que j’ai commencé à les comprendre plus profondément — et à vouloir mettre mon énergie au service de leur accompagnement."
-  },
-  "about": {
-    "title": "Mon histoire",
-    "c1Title": "Le sport, depuis toujours",
-    "c1Text": "Le sport fait partie de ma vie depuis l’enfance : les clubs amateurs, puis la fan passionnée. Pendant dix ans à la FIFA, j’ai contribué à l’organisation des Coupes du monde de football et de nombreux événements associés.",
-    "c1Alt": "Une femme souriante en haut rose au bord de la mer",
-    "c2Title": "« Assez »",
-    "c2Text": "Il y a quelques années, j’ai décidé de changer de direction — sans plan, et sans autre plan en main. Quelque chose en moi a simplement dit « assez ». J’ai fait une pause, et mon attention s’est déplacée de la validation extérieure et d’un « super travail » vers la réflexion et l’exploration intérieures.",
-    "c2Alt": "Une femme près d’une clôture en bois, parmi les herbes des dunes, regardant sur le côté",
-    "c3Title": "Explorer",
-    "c3Text": "J’ai exploré la psychologie, les pratiques corporelles et énergétiques, des approches alternatives de soin et les philosophies anciennes. Je suis allée plus loin dans ma propre expérience, j’ai expérimenté, et peu à peu découvert de nouvelles façons de me comprendre.",
-    "c3Alt": "Une femme assise dans l’herbe sèche, dans la lumière chaude du soir",
-    "c4Title": "Apprendre à me faire confiance",
-    "c4Text": "J’ai toujours été intuitive, déjà enfant, mais ma sensibilité était souvent écartée ou vue comme une faiblesse dans ma famille ; je n’ai donc pas appris à lui faire confiance. Ces dernières années, j’ai dégagé ma voix intérieure des couches de conditionnement familial et d’attentes sociales. Je me fais plus profondément confiance et dépends moins de la validation extérieure et du besoin constant de contrôle et de sécurité. Ma vie en est devenue plus légère et plus heureuse.",
-    "c4Alt": "Une femme souriante en haut blanc au bord de la mer",
-    "note": "Ce chemin continue — et je veux soutenir les autres dans leur propre quête d’épanouissement et de bonheur."
-  },
-  "check": {
-    "title": "Maintenant, écoutez-vous",
-    "l1": "Vous avez vu mes photographies. Vous avez lu mon histoire.",
-    "l2": "Prenez maintenant un instant pour vous écouter.",
-    "l3": "Quelque chose résonne-t-il ? Avez-vous envie d’échanger ?",
-    "note1": "Sinon, c’est tout à fait normal aussi.",
-    "note2": "Voyez-y un premier petit test de votre intuition."
-  },
-  "fork": {
-    "lead": "Prenez un instant.",
-    "voice": "Regardez la photographie. Remarquez ce qui monte en vous.",
-    "eyes": "Il n’y a pas de bonne réponse.",
-    "yesTitle": "Quelque chose résonne.",
-    "yesText": "J’aimerais en savoir plus.",
-    "yesButton": "Continuer",
-    "noTitle": "Je ne ressens pas de lien pour l’instant.",
-    "noText": "C’est tout à fait normal.",
-    "noButton": "Pas maintenant",
-    "photoAlt": "Portrait en gros plan : une partie du visage d’une femme, regardant l’objectif",
-    "farewellTitle": "Merci de votre visite",
-    "farewellText": "Faites confiance à ce que vous avez ressenti. Vous pouvez terminer votre visite ici, ou continuer à explorer le site.",
-    "farewellEnd": "Terminer ma visite",
-    "farewellDone": "Merci pour votre temps. Vous pouvez fermer cet onglet quand vous le souhaitez.",
-    "farewellBack": "Continuer à explorer"
-  },
-  "sessions": {
-    "title": "Séances d’intuition",
-    "lead": "Un espace pour développer la capacité de se relier à soi, d’écouter sa voix intérieure et de reconnaître ce qu’elle dit.",
-    "h1": "Elle parle différemment à chacun",
-    "p1": "Pour certains, l’intuition vient comme une sensation au ventre ou dans le cœur ; pour d’autres, comme une voix, une image, un éclair soudain de compréhension, ou même quelque chose qui apparaît en rêve. Parfois elle arrive instantanément et clairement ; d’autres fois elle est subtile et demande du silence, de la patience et de l’attention pour être remarquée.",
-    "h2": "Là où nous commençons",
-    "p2": "Notre travail commence par explorer ce que l’intuition signifie pour vous : comment vous la percevez naturellement, comment elle se manifeste dans différentes situations, et ce qui vous aide à reconnaître ses signaux. Vous apprenez à remarquer, distinguer et interpréter ces messages, tout en développant la confiance nécessaire pour vous fier à vos propres perceptions.",
-    "h3": "Pas seulement des réponses",
-    "p3": "L’intuition peut nous reconnecter à notre vérité intérieure : nos valeurs, ce qui nous rend heureux, ce que nous voulons de la vie et la façon dont nous souhaitons la traverser. Pourtant, ce chemin ne consiste pas seulement à comprendre et à trouver des réponses. Il s’agit aussi d’apprendre à accepter l’inconnu, l’imprévisible et l’incontrôlable. Lâcher les limites qui empêchent votre alignement intérieur et votre contentement est l’une des rares compétences que nous pratiquons.",
-    "h4": "Comment se déroulent les séances",
-    "p4": "Ces séances sont menées de façon intuitive et individuelle. Il n’existe pas de programme prédéfini conçu pour tout le monde. Mon approche ne repose pas sur des études scientifiques ni sur des concepts établis, mais elle ne cherche pas non plus à nier ou à exclure un point de vue particulier.",
-    "p5": "Ce n’est ni du conseil psychologique ni du mental training classique, même si nous pouvons toucher à certains éléments de ces méthodes. Les séances se déroulent en général naturellement, instinctivement : votre intuition nous conduira là où votre attention et votre conscience sont le plus nécessaires.",
-    "note": "Les séances ne remplacent ni les soins médicaux ni une thérapie psychologique.",
-    "bring": "Comme pour toute nouvelle expérience, la curiosité, le courage, l’ouverture et la confiance sont essentiels. Apportez surtout l’envie d’explorer, de vivre quelque chose de nouveau et de découvrir votre beauté intérieure."
+    "l7t": "Écouter les conseils de la famille, des amis, des entraîneurs, des médecins et d’autres experts — et les confronter aussi à soi-même."
   },
   "change": {
     "title": "Transformation",
@@ -120,20 +73,26 @@
     "wText": "Ce que je propose, c’est simplement d’être un témoin — une présence stable pendant que vous traversez ces changements, pour normaliser ce que vous ressentez. C’est un travail profond et individuel, mais chacun a parfois besoin d’une main à tenir dans ces moments. Bien sûr, ce n’est pas une main sur laquelle on s’appuie pour toujours. Une grande partie du chemin se fait seul, mais un ami, un témoin, un guide — quelqu’un qui peut nommer votre expérience comme légitime — peut faire toute la différence.\n\nJe parle depuis mon propre chemin, et ce que je propose, c’est d’être cette main, ce témoin, peut-être même ce guide, quand vous en avez besoin.",
     "wNote": "Si vous marchez sur ce chemin sans avoir ce soutien, vous pouvez me contacter."
   },
-  "invite": {
-    "title": "Si quelque chose ici résonne, nous pouvons commencer par une conversation.",
-    "button": "M’écrire"
-  },
-  "free": {
-    "number": "30",
-    "unit": "minutes",
-    "title": "Les 30 premières minutes sont gratuites",
-    "text": "Nous pouvons simplement nous rencontrer, parler et écouter.\n\nIl n’y a aucune obligation de poursuivre. Nous déciderons tous les deux si cela nous convient de travailler ensemble."
+  "about": {
+    "title": "Mon histoire",
+    "lead": "Je ne suis pas sportive moi-même, mais le sport a toujours fait partie de ma vie",
+    "c1Title": "Le sport, depuis toujours",
+    "c1Text": "Le sport fait partie de ma vie depuis l’enfance : les clubs amateurs, puis la fan passionnée. Pendant dix ans à la FIFA, j’ai contribué à l’organisation des Coupes du monde de football et de nombreux événements associés.",
+    "c1Alt": "Une femme souriante en haut rose au bord de la mer",
+    "c2Title": "« Assez »",
+    "c2Text": "Il y a quelques années, j’ai décidé de changer de direction — sans plan, et sans autre plan en main. Quelque chose en moi a simplement dit « assez ». J’ai fait une pause, et mon attention s’est déplacée de la validation extérieure et d’un « super travail » vers la réflexion et l’exploration intérieures.",
+    "c2Alt": "Une femme près d’une clôture en bois, parmi les herbes des dunes, regardant sur le côté",
+    "c3Title": "Explorer",
+    "c3Text": "J’ai exploré la psychologie, les pratiques corporelles et énergétiques, des approches alternatives de soin et les philosophies anciennes. Je suis allée plus loin dans ma propre expérience, j’ai expérimenté, et peu à peu découvert de nouvelles façons de me comprendre.",
+    "c3Alt": "Une femme assise dans l’herbe sèche, dans la lumière chaude du soir",
+    "c4Title": "Apprendre à me faire confiance",
+    "c4Text": "J’ai toujours été intuitive, déjà enfant, mais ma sensibilité était souvent écartée ou vue comme une faiblesse dans ma famille ; je n’ai donc pas appris à lui faire confiance. Ces dernières années, j’ai dégagé ma voix intérieure des couches de conditionnement familial et d’attentes sociales. Je me fais plus profondément confiance et dépends moins de la validation extérieure et du besoin constant de contrôle et de sécurité. Ma vie en est devenue plus légère et plus heureuse.",
+    "c4Alt": "Une femme souriante en haut blanc au bord de la mer",
+    "note": "Ce chemin continue — et je veux soutenir les autres dans leur propre quête d’épanouissement et de bonheur."
   },
   "contact": {
     "title": "Écrivez-moi",
     "lead": "Quelques mots sur vous suffisent. Les détails peuvent attendre notre conversation.",
-    "linksTitle": "Ou directement",
     "formName": "Votre prénom",
     "formReach": "Comment vous joindre (e-mail, Telegram ou WhatsApp)",
     "formMessage": "Qu’est-ce qui vous a amené ici ? (facultatif)",
@@ -156,10 +115,16 @@
     "a5": "Les séances d’intuition consistent à apprendre à remarquer, distinguer et faire confiance à sa propre intuition. L’accompagnement de transformation consiste à offrir une présence stable — un témoin, et peut-être un guide — pendant que quelque chose change en vous. Ce qui correspond le mieux à vos besoins, nous pouvons l’explorer lors du premier échange.",
     "q6": "Que dois-je apporter ?",
     "a6": "De la curiosité, du courage, de l’ouverture et de la confiance. Surtout l’envie d’explorer, de vivre quelque chose de nouveau et de découvrir votre beauté intérieure.",
-    "q7": "",
-    "a7": "",
+    "q7": "Pourquoi travaillez-vous avec des sportifs ?",
+    "a7": "Des clubs sportifs amateurs de mon enfance au statut de fan passionnée, puis au poste de Competition Manager dans les plus grandes organisations sportives du monde, mon parcours m’a fait traverser de nombreuses facettes du sport.\n\nEn chemin, j’ai rencontré des sportifs à différents stades de leur carrière, d’horizons, d’expériences et de niveaux de réussite très divers. C’est là, je crois, que j’ai commencé à les comprendre plus profondément — et à vouloir mettre mon énergie au service de leur accompagnement.",
     "q8": "",
     "a8": ""
+  },
+  "free": {
+    "number": "30",
+    "unit": "minutes",
+    "title": "Les 30 premières minutes sont gratuites",
+    "text": "Nous pouvons simplement nous rencontrer, parler et écouter.\n\nIl n’y a aucune obligation de poursuivre. Nous déciderons tous les deux si cela nous convient de travailler ensemble."
   },
   "notes": {
     "title": "Notes",

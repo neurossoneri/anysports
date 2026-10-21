@@ -110,9 +110,6 @@ content:
   - name: telegram
     label: Telegram (@ without symbol)
     type: string
-  - name: booking_url
-    label: Booking URL (https://...)
-    type: string
   - name: form_endpoint
     label: Адрес формы связи / Contact form endpoint (https://...)
     description: Адрес из сервиса форм (например Formspree), который пересылает сообщения на вашу почту. Подробности в README.
@@ -121,25 +118,25 @@ content:
     label: Public site URL (optional, https://...)
     type: string
   - name: portrait
-    label: Главное фото (широкий кадр, на нём лежит первая цитата)
+    label: Главное фото (крупное, слева на первом экране)
     type: image
   - name: eyes_photo
-    label: Фото крупным планом («посмотрите на фотографию»)
+    label: Фото крупным планом («Интуитивные сессии»; если пусто — главное фото)
     type: image
   - name: quote_photo
-    label: Атмосферное фото за цитатой А (необязательно; если пусто — мягкий цвет)
+    label: Атмосферное фото рядом с цитатой А (необязательно; если пусто — холодный градиент)
     type: image
   - name: story_photo_1
-    label: История · кадр 1 (спорт с детства и FIFA)
+    label: Обо мне · фото 1 (слева сверху)
     type: image
   - name: story_photo_2
-    label: История · кадр 2 («хватит» — смена пути)
+    label: Обо мне · фото 2 (справа сверху)
     type: image
   - name: story_photo_3
-    label: История · кадр 3 (поиск)
+    label: Обо мне · фото 3 (слева снизу)
     type: image
   - name: story_photo_4
-    label: История · кадр 4 (доверие к себе)
+    label: Обо мне · фото 4 (справа снизу)
     type: image
   - name: publish_ready
     label: Готов к индексации / Allow search indexing
@@ -164,12 +161,9 @@ content:
       label: Описание для поисковиков и соцсетей
       type: text
   - name: hero
-    label: '1 · Главный экран: фото и первая цитата'
+    label: '1 · Главный экран: фото и цитата'
     type: object
     fields:
-    - name: hint
-      label: Тихая подпись под фото
-      type: string
     - name: alt
       label: Описание фото для скринридеров
       type: string
@@ -179,24 +173,8 @@ content:
     - name: quote2
       label: Цитата, строка 2 (меньше, рядом)
       type: text
-  - name: quotes
-    label: 2 · Цитаты (проявляются «от руки»)
-    type: object
-    fields:
-    - name: a
-      label: Цитата А — атмосферная пауза после главного экрана
-      type: text
-    - name: b
-      label: Цитата Б — после блока «Почему я работаю со спортсменами»
-      type: text
-    - name: c
-      label: Цитата В — поворот внутри «Трансформации»
-      type: text
-    - name: d
-      label: Финальная цитата внизу страницы
-      type: text
   - name: story
-    label: 3 · Интуиция в спорте
+    label: '2 · Введение: почему страница для спортсменов'
     type: object
     fields:
     - name: title
@@ -217,8 +195,67 @@ content:
     - name: p5
       label: Абзац 5
       type: text
+  - name: quotes
+    label: Цитаты рядом с фото (проявляются «от руки»)
+    type: object
+    fields:
+    - name: a
+      label: Цитата А — введение, рядом с фото
+      type: text
+    - name: b
+      label: Цитата Б — интуитивные сессии
+      type: text
+    - name: c
+      label: Цитата В — трансформация
+      type: text
+  - name: sessions
+    label: 3 · Интуитивные сессии
+    type: object
+    fields:
+    - name: title
+      label: Заголовок
+      type: string
+    - name: lead
+      label: Вводная фраза
+      type: text
+    - name: h1
+      label: Блок 1 · заголовок
+      type: string
+    - name: p1
+      label: Блок 1 · текст
+      type: text
+    - name: h2
+      label: Блок 2 · заголовок
+      type: string
+    - name: p2
+      label: Блок 2 · текст
+      type: text
+    - name: h3
+      label: Блок 3 · заголовок
+      type: string
+    - name: p3
+      label: Блок 3 · текст
+      type: text
+    - name: h4
+      label: Блок «Как проходят сессии» · заголовок
+      type: string
+    - name: p4
+      label: Блок «Как проходят сессии» · абзац 1
+      type: text
+    - name: p5
+      label: Блок «Как проходят сессии» · абзац 2
+      type: text
+    - name: note
+      label: Мелкая оговорка про медицину и терапию
+      type: text
+    - name: bring
+      label: Что принести с собой
+      type: text
+    - name: photoAlt
+      label: Описание фото крупным планом (для скринридеров)
+      type: string
   - name: client
-    label: 4 · Для кого это (семь тем из презентации)
+    label: '3 · Интуитивные сессии: темы для исследования (семь символов)'
     type: object
     fields:
     - name: title
@@ -269,181 +306,8 @@ content:
     - name: l7t
       label: Тема 7 · пояснение
       type: text
-    - name: note
-      label: Тихая строка в конце
-      type: text
-  - name: why
-    label: 5 · Почему я работаю со спортсменами
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: text
-    - name: text
-      label: Текст (пустая строка = новый абзац)
-      type: text
-  - name: about
-    label: 6 · Моя история (четыре кадра; фото — в «Контакты, фото, имя»)
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: c1Title
-      label: Кадр 1 · заголовок
-      type: string
-    - name: c1Text
-      label: Кадр 1 · текст
-      type: text
-    - name: c1Alt
-      label: Кадр 1 · описание фото
-      type: string
-    - name: c2Title
-      label: Кадр 2 · заголовок
-      type: string
-    - name: c2Text
-      label: Кадр 2 · текст
-      type: text
-    - name: c2Alt
-      label: Кадр 2 · описание фото
-      type: string
-    - name: c3Title
-      label: Кадр 3 · заголовок
-      type: string
-    - name: c3Text
-      label: Кадр 3 · текст
-      type: text
-    - name: c3Alt
-      label: Кадр 3 · описание фото
-      type: string
-    - name: c4Title
-      label: Кадр 4 · заголовок
-      type: string
-    - name: c4Text
-      label: Кадр 4 · текст
-      type: text
-    - name: c4Alt
-      label: Кадр 4 · описание фото
-      type: string
-    - name: note
-      label: Рукописная строка после истории
-      type: text
-  - name: check
-    label: 7 · Момент интуиции
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: l1
-      label: Строка 1
-      type: text
-    - name: l2
-      label: Строка 2
-      type: text
-    - name: l3
-      label: Строка 3
-      type: text
-    - name: note1
-      label: Рукописная строка 1
-      type: text
-    - name: note2
-      label: Рукописная строка 2
-      type: text
-  - name: fork
-    label: '8 · Выбор: откликается / сейчас нет'
-    type: object
-    fields:
-    - name: lead
-      label: Первая фраза
-      type: text
-    - name: voice
-      label: Рукописная строка 1
-      type: string
-    - name: eyes
-      label: Рукописная строка 2
-      type: string
-    - name: yesTitle
-      label: Вариант «откликается» · заголовок
-      type: string
-    - name: yesText
-      label: Вариант «откликается» · текст
-      type: string
-    - name: yesButton
-      label: Вариант «откликается» · подпись (ведёт к сессиям)
-      type: string
-    - name: noTitle
-      label: Вариант «сейчас нет» · заголовок
-      type: string
-    - name: noText
-      label: Вариант «сейчас нет» · текст
-      type: string
-    - name: noButton
-      label: Вариант «сейчас нет» · подпись
-      type: string
-    - name: photoAlt
-      label: Описание фото крупным планом
-      type: string
-    - name: farewellTitle
-      label: Спокойное окно · заголовок
-      type: string
-    - name: farewellText
-      label: Спокойное окно · текст
-      type: text
-    - name: farewellEnd
-      label: Спокойное окно · кнопка «завершить визит»
-      type: string
-    - name: farewellDone
-      label: Спокойное окно · текст после «завершить»
-      type: text
-    - name: farewellBack
-      label: Спокойное окно · кнопка «продолжить»
-      type: string
-  - name: sessions
-    label: 9 · Интуитивные сессии
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Вводная фраза
-      type: text
-    - name: h1
-      label: Блок 1 · заголовок
-      type: string
-    - name: p1
-      label: Блок 1 · текст
-      type: text
-    - name: h2
-      label: Блок 2 · заголовок
-      type: string
-    - name: p2
-      label: Блок 2 · текст
-      type: text
-    - name: h3
-      label: Блок 3 · заголовок
-      type: string
-    - name: p3
-      label: Блок 3 · текст
-      type: text
-    - name: h4
-      label: Блок «Как проходят сессии» · заголовок
-      type: string
-    - name: p4
-      label: Блок «Как проходят сессии» · абзац 1
-      type: text
-    - name: p5
-      label: Блок «Как проходят сессии» · абзац 2
-      type: text
-    - name: note
-      label: Мелкая оговорка про медицину и терапию
-      type: text
-    - name: bring
-      label: Что принести с собой
-      type: text
   - name: change
-    label: 10 · Трансформация
+    label: 4 · Трансформация
     type: object
     fields:
     - name: title
@@ -494,34 +358,57 @@ content:
     - name: wNote
       label: Рукописная строка в конце
       type: text
-  - name: invite
-    label: 11 · Приглашение
+  - name: about
+    label: 5 · Обо мне (четыре фото — в «Контакты, фото, имя»)
     type: object
     fields:
     - name: title
       label: Заголовок
+      type: string
+    - name: lead
+      label: Вводная фраза (крупно, под заголовком)
       type: text
-    - name: button
-      label: Кнопка (ведёт к форме)
+    - name: c1Title
+      label: Абзац 1 · начальные слова (жирным)
       type: string
-  - name: free
-    label: 12 · Первые 30 минут
-    type: object
-    fields:
-    - name: number
-      label: Число в круге
+    - name: c1Text
+      label: Абзац 1 · текст
+      type: text
+    - name: c1Alt
+      label: Фото 1 · описание для скринридеров
       type: string
-    - name: unit
-      label: Единица
+    - name: c2Title
+      label: Абзац 2 · начальные слова (жирным)
       type: string
-    - name: title
-      label: Заголовок
+    - name: c2Text
+      label: Абзац 2 · текст
+      type: text
+    - name: c2Alt
+      label: Фото 2 · описание для скринридеров
       type: string
-    - name: text
-      label: Текст
+    - name: c3Title
+      label: Абзац 3 · начальные слова (жирным)
+      type: string
+    - name: c3Text
+      label: Абзац 3 · текст
+      type: text
+    - name: c3Alt
+      label: Фото 3 · описание для скринридеров
+      type: string
+    - name: c4Title
+      label: Абзац 4 · начальные слова (жирным)
+      type: string
+    - name: c4Text
+      label: Абзац 4 · текст
+      type: text
+    - name: c4Alt
+      label: Фото 4 · описание для скринридеров
+      type: string
+    - name: note
+      label: Рукописная строка в конце
       type: text
   - name: contact
-    label: 13 · Контакты и форма
+    label: 6 · Контакты и форма (сразу после «Обо мне»)
     type: object
     fields:
     - name: title
@@ -530,9 +417,6 @@ content:
     - name: lead
       label: Текст под заголовком
       type: text
-    - name: linksTitle
-      label: Подзаголовок над прямыми контактами
-      type: string
     - name: formName
       label: Поле «имя»
       type: string
@@ -552,7 +436,7 @@ content:
       label: Мелкая пометка под формой
       type: text
   - name: faq
-    label: 14 · Вопросы и ответы (пустой вопрос скрывает слот)
+    label: 7 · Вопросы и ответы (пустой вопрос скрывает слот)
     type: object
     fields:
     - name: title
@@ -617,8 +501,24 @@ content:
     - name: a8
       label: Ответ 8
       type: text
+  - name: free
+    label: '7 · Вопросы и ответы: блок «30 минут бесплатно» (в конце раздела)'
+    type: object
+    fields:
+    - name: number
+      label: Число в круге
+      type: string
+    - name: unit
+      label: Единица
+      type: string
+    - name: title
+      label: Заголовок
+      type: string
+    - name: text
+      label: Текст
+      type: text
   - name: notes
-    label: 15 · Заметки (раздел виден, только если есть опубликованные статьи)
+    label: Заметки (раздел виден, только если есть опубликованные статьи)
     type: object
     fields:
     - name: title
@@ -628,7 +528,7 @@ content:
       label: Текст под заголовком
       type: text
   - name: footer
-    label: 16 · Подвал
+    label: Подвал
     type: object
     fields:
     - name: line
@@ -656,12 +556,9 @@ content:
       label: Описание для поисковиков и соцсетей
       type: text
   - name: hero
-    label: '1 · Главный экран: фото и первая цитата'
+    label: '1 · Главный экран: фото и цитата'
     type: object
     fields:
-    - name: hint
-      label: Тихая подпись под фото
-      type: string
     - name: alt
       label: Описание фото для скринридеров
       type: string
@@ -671,24 +568,8 @@ content:
     - name: quote2
       label: Цитата, строка 2 (меньше, рядом)
       type: text
-  - name: quotes
-    label: 2 · Цитаты (проявляются «от руки»)
-    type: object
-    fields:
-    - name: a
-      label: Цитата А — атмосферная пауза после главного экрана
-      type: text
-    - name: b
-      label: Цитата Б — после блока «Почему я работаю со спортсменами»
-      type: text
-    - name: c
-      label: Цитата В — поворот внутри «Трансформации»
-      type: text
-    - name: d
-      label: Финальная цитата внизу страницы
-      type: text
   - name: story
-    label: 3 · Интуиция в спорте
+    label: '2 · Введение: почему страница для спортсменов'
     type: object
     fields:
     - name: title
@@ -709,8 +590,67 @@ content:
     - name: p5
       label: Абзац 5
       type: text
+  - name: quotes
+    label: Цитаты рядом с фото (проявляются «от руки»)
+    type: object
+    fields:
+    - name: a
+      label: Цитата А — введение, рядом с фото
+      type: text
+    - name: b
+      label: Цитата Б — интуитивные сессии
+      type: text
+    - name: c
+      label: Цитата В — трансформация
+      type: text
+  - name: sessions
+    label: 3 · Интуитивные сессии
+    type: object
+    fields:
+    - name: title
+      label: Заголовок
+      type: string
+    - name: lead
+      label: Вводная фраза
+      type: text
+    - name: h1
+      label: Блок 1 · заголовок
+      type: string
+    - name: p1
+      label: Блок 1 · текст
+      type: text
+    - name: h2
+      label: Блок 2 · заголовок
+      type: string
+    - name: p2
+      label: Блок 2 · текст
+      type: text
+    - name: h3
+      label: Блок 3 · заголовок
+      type: string
+    - name: p3
+      label: Блок 3 · текст
+      type: text
+    - name: h4
+      label: Блок «Как проходят сессии» · заголовок
+      type: string
+    - name: p4
+      label: Блок «Как проходят сессии» · абзац 1
+      type: text
+    - name: p5
+      label: Блок «Как проходят сессии» · абзац 2
+      type: text
+    - name: note
+      label: Мелкая оговорка про медицину и терапию
+      type: text
+    - name: bring
+      label: Что принести с собой
+      type: text
+    - name: photoAlt
+      label: Описание фото крупным планом (для скринридеров)
+      type: string
   - name: client
-    label: 4 · Для кого это (семь тем из презентации)
+    label: '3 · Интуитивные сессии: темы для исследования (семь символов)'
     type: object
     fields:
     - name: title
@@ -761,181 +701,8 @@ content:
     - name: l7t
       label: Тема 7 · пояснение
       type: text
-    - name: note
-      label: Тихая строка в конце
-      type: text
-  - name: why
-    label: 5 · Почему я работаю со спортсменами
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: text
-    - name: text
-      label: Текст (пустая строка = новый абзац)
-      type: text
-  - name: about
-    label: 6 · Моя история (четыре кадра; фото — в «Контакты, фото, имя»)
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: c1Title
-      label: Кадр 1 · заголовок
-      type: string
-    - name: c1Text
-      label: Кадр 1 · текст
-      type: text
-    - name: c1Alt
-      label: Кадр 1 · описание фото
-      type: string
-    - name: c2Title
-      label: Кадр 2 · заголовок
-      type: string
-    - name: c2Text
-      label: Кадр 2 · текст
-      type: text
-    - name: c2Alt
-      label: Кадр 2 · описание фото
-      type: string
-    - name: c3Title
-      label: Кадр 3 · заголовок
-      type: string
-    - name: c3Text
-      label: Кадр 3 · текст
-      type: text
-    - name: c3Alt
-      label: Кадр 3 · описание фото
-      type: string
-    - name: c4Title
-      label: Кадр 4 · заголовок
-      type: string
-    - name: c4Text
-      label: Кадр 4 · текст
-      type: text
-    - name: c4Alt
-      label: Кадр 4 · описание фото
-      type: string
-    - name: note
-      label: Рукописная строка после истории
-      type: text
-  - name: check
-    label: 7 · Момент интуиции
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: l1
-      label: Строка 1
-      type: text
-    - name: l2
-      label: Строка 2
-      type: text
-    - name: l3
-      label: Строка 3
-      type: text
-    - name: note1
-      label: Рукописная строка 1
-      type: text
-    - name: note2
-      label: Рукописная строка 2
-      type: text
-  - name: fork
-    label: '8 · Выбор: откликается / сейчас нет'
-    type: object
-    fields:
-    - name: lead
-      label: Первая фраза
-      type: text
-    - name: voice
-      label: Рукописная строка 1
-      type: string
-    - name: eyes
-      label: Рукописная строка 2
-      type: string
-    - name: yesTitle
-      label: Вариант «откликается» · заголовок
-      type: string
-    - name: yesText
-      label: Вариант «откликается» · текст
-      type: string
-    - name: yesButton
-      label: Вариант «откликается» · подпись (ведёт к сессиям)
-      type: string
-    - name: noTitle
-      label: Вариант «сейчас нет» · заголовок
-      type: string
-    - name: noText
-      label: Вариант «сейчас нет» · текст
-      type: string
-    - name: noButton
-      label: Вариант «сейчас нет» · подпись
-      type: string
-    - name: photoAlt
-      label: Описание фото крупным планом
-      type: string
-    - name: farewellTitle
-      label: Спокойное окно · заголовок
-      type: string
-    - name: farewellText
-      label: Спокойное окно · текст
-      type: text
-    - name: farewellEnd
-      label: Спокойное окно · кнопка «завершить визит»
-      type: string
-    - name: farewellDone
-      label: Спокойное окно · текст после «завершить»
-      type: text
-    - name: farewellBack
-      label: Спокойное окно · кнопка «продолжить»
-      type: string
-  - name: sessions
-    label: 9 · Интуитивные сессии
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Вводная фраза
-      type: text
-    - name: h1
-      label: Блок 1 · заголовок
-      type: string
-    - name: p1
-      label: Блок 1 · текст
-      type: text
-    - name: h2
-      label: Блок 2 · заголовок
-      type: string
-    - name: p2
-      label: Блок 2 · текст
-      type: text
-    - name: h3
-      label: Блок 3 · заголовок
-      type: string
-    - name: p3
-      label: Блок 3 · текст
-      type: text
-    - name: h4
-      label: Блок «Как проходят сессии» · заголовок
-      type: string
-    - name: p4
-      label: Блок «Как проходят сессии» · абзац 1
-      type: text
-    - name: p5
-      label: Блок «Как проходят сессии» · абзац 2
-      type: text
-    - name: note
-      label: Мелкая оговорка про медицину и терапию
-      type: text
-    - name: bring
-      label: Что принести с собой
-      type: text
   - name: change
-    label: 10 · Трансформация
+    label: 4 · Трансформация
     type: object
     fields:
     - name: title
@@ -986,34 +753,57 @@ content:
     - name: wNote
       label: Рукописная строка в конце
       type: text
-  - name: invite
-    label: 11 · Приглашение
+  - name: about
+    label: 5 · Обо мне (четыре фото — в «Контакты, фото, имя»)
     type: object
     fields:
     - name: title
       label: Заголовок
+      type: string
+    - name: lead
+      label: Вводная фраза (крупно, под заголовком)
       type: text
-    - name: button
-      label: Кнопка (ведёт к форме)
+    - name: c1Title
+      label: Абзац 1 · начальные слова (жирным)
       type: string
-  - name: free
-    label: 12 · Первые 30 минут
-    type: object
-    fields:
-    - name: number
-      label: Число в круге
+    - name: c1Text
+      label: Абзац 1 · текст
+      type: text
+    - name: c1Alt
+      label: Фото 1 · описание для скринридеров
       type: string
-    - name: unit
-      label: Единица
+    - name: c2Title
+      label: Абзац 2 · начальные слова (жирным)
       type: string
-    - name: title
-      label: Заголовок
+    - name: c2Text
+      label: Абзац 2 · текст
+      type: text
+    - name: c2Alt
+      label: Фото 2 · описание для скринридеров
       type: string
-    - name: text
-      label: Текст
+    - name: c3Title
+      label: Абзац 3 · начальные слова (жирным)
+      type: string
+    - name: c3Text
+      label: Абзац 3 · текст
+      type: text
+    - name: c3Alt
+      label: Фото 3 · описание для скринридеров
+      type: string
+    - name: c4Title
+      label: Абзац 4 · начальные слова (жирным)
+      type: string
+    - name: c4Text
+      label: Абзац 4 · текст
+      type: text
+    - name: c4Alt
+      label: Фото 4 · описание для скринридеров
+      type: string
+    - name: note
+      label: Рукописная строка в конце
       type: text
   - name: contact
-    label: 13 · Контакты и форма
+    label: 6 · Контакты и форма (сразу после «Обо мне»)
     type: object
     fields:
     - name: title
@@ -1022,9 +812,6 @@ content:
     - name: lead
       label: Текст под заголовком
       type: text
-    - name: linksTitle
-      label: Подзаголовок над прямыми контактами
-      type: string
     - name: formName
       label: Поле «имя»
       type: string
@@ -1044,7 +831,7 @@ content:
       label: Мелкая пометка под формой
       type: text
   - name: faq
-    label: 14 · Вопросы и ответы (пустой вопрос скрывает слот)
+    label: 7 · Вопросы и ответы (пустой вопрос скрывает слот)
     type: object
     fields:
     - name: title
@@ -1109,8 +896,24 @@ content:
     - name: a8
       label: Ответ 8
       type: text
+  - name: free
+    label: '7 · Вопросы и ответы: блок «30 минут бесплатно» (в конце раздела)'
+    type: object
+    fields:
+    - name: number
+      label: Число в круге
+      type: string
+    - name: unit
+      label: Единица
+      type: string
+    - name: title
+      label: Заголовок
+      type: string
+    - name: text
+      label: Текст
+      type: text
   - name: notes
-    label: 15 · Заметки (раздел виден, только если есть опубликованные статьи)
+    label: Заметки (раздел виден, только если есть опубликованные статьи)
     type: object
     fields:
     - name: title
@@ -1120,7 +923,7 @@ content:
       label: Текст под заголовком
       type: text
   - name: footer
-    label: 16 · Подвал
+    label: Подвал
     type: object
     fields:
     - name: line
@@ -1148,12 +951,9 @@ content:
       label: Описание для поисковиков и соцсетей
       type: text
   - name: hero
-    label: '1 · Главный экран: фото и первая цитата'
+    label: '1 · Главный экран: фото и цитата'
     type: object
     fields:
-    - name: hint
-      label: Тихая подпись под фото
-      type: string
     - name: alt
       label: Описание фото для скринридеров
       type: string
@@ -1163,24 +963,8 @@ content:
     - name: quote2
       label: Цитата, строка 2 (меньше, рядом)
       type: text
-  - name: quotes
-    label: 2 · Цитаты (проявляются «от руки»)
-    type: object
-    fields:
-    - name: a
-      label: Цитата А — атмосферная пауза после главного экрана
-      type: text
-    - name: b
-      label: Цитата Б — после блока «Почему я работаю со спортсменами»
-      type: text
-    - name: c
-      label: Цитата В — поворот внутри «Трансформации»
-      type: text
-    - name: d
-      label: Финальная цитата внизу страницы
-      type: text
   - name: story
-    label: 3 · Интуиция в спорте
+    label: '2 · Введение: почему страница для спортсменов'
     type: object
     fields:
     - name: title
@@ -1201,8 +985,67 @@ content:
     - name: p5
       label: Абзац 5
       type: text
+  - name: quotes
+    label: Цитаты рядом с фото (проявляются «от руки»)
+    type: object
+    fields:
+    - name: a
+      label: Цитата А — введение, рядом с фото
+      type: text
+    - name: b
+      label: Цитата Б — интуитивные сессии
+      type: text
+    - name: c
+      label: Цитата В — трансформация
+      type: text
+  - name: sessions
+    label: 3 · Интуитивные сессии
+    type: object
+    fields:
+    - name: title
+      label: Заголовок
+      type: string
+    - name: lead
+      label: Вводная фраза
+      type: text
+    - name: h1
+      label: Блок 1 · заголовок
+      type: string
+    - name: p1
+      label: Блок 1 · текст
+      type: text
+    - name: h2
+      label: Блок 2 · заголовок
+      type: string
+    - name: p2
+      label: Блок 2 · текст
+      type: text
+    - name: h3
+      label: Блок 3 · заголовок
+      type: string
+    - name: p3
+      label: Блок 3 · текст
+      type: text
+    - name: h4
+      label: Блок «Как проходят сессии» · заголовок
+      type: string
+    - name: p4
+      label: Блок «Как проходят сессии» · абзац 1
+      type: text
+    - name: p5
+      label: Блок «Как проходят сессии» · абзац 2
+      type: text
+    - name: note
+      label: Мелкая оговорка про медицину и терапию
+      type: text
+    - name: bring
+      label: Что принести с собой
+      type: text
+    - name: photoAlt
+      label: Описание фото крупным планом (для скринридеров)
+      type: string
   - name: client
-    label: 4 · Для кого это (семь тем из презентации)
+    label: '3 · Интуитивные сессии: темы для исследования (семь символов)'
     type: object
     fields:
     - name: title
@@ -1253,181 +1096,8 @@ content:
     - name: l7t
       label: Тема 7 · пояснение
       type: text
-    - name: note
-      label: Тихая строка в конце
-      type: text
-  - name: why
-    label: 5 · Почему я работаю со спортсменами
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: text
-    - name: text
-      label: Текст (пустая строка = новый абзац)
-      type: text
-  - name: about
-    label: 6 · Моя история (четыре кадра; фото — в «Контакты, фото, имя»)
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: c1Title
-      label: Кадр 1 · заголовок
-      type: string
-    - name: c1Text
-      label: Кадр 1 · текст
-      type: text
-    - name: c1Alt
-      label: Кадр 1 · описание фото
-      type: string
-    - name: c2Title
-      label: Кадр 2 · заголовок
-      type: string
-    - name: c2Text
-      label: Кадр 2 · текст
-      type: text
-    - name: c2Alt
-      label: Кадр 2 · описание фото
-      type: string
-    - name: c3Title
-      label: Кадр 3 · заголовок
-      type: string
-    - name: c3Text
-      label: Кадр 3 · текст
-      type: text
-    - name: c3Alt
-      label: Кадр 3 · описание фото
-      type: string
-    - name: c4Title
-      label: Кадр 4 · заголовок
-      type: string
-    - name: c4Text
-      label: Кадр 4 · текст
-      type: text
-    - name: c4Alt
-      label: Кадр 4 · описание фото
-      type: string
-    - name: note
-      label: Рукописная строка после истории
-      type: text
-  - name: check
-    label: 7 · Момент интуиции
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: l1
-      label: Строка 1
-      type: text
-    - name: l2
-      label: Строка 2
-      type: text
-    - name: l3
-      label: Строка 3
-      type: text
-    - name: note1
-      label: Рукописная строка 1
-      type: text
-    - name: note2
-      label: Рукописная строка 2
-      type: text
-  - name: fork
-    label: '8 · Выбор: откликается / сейчас нет'
-    type: object
-    fields:
-    - name: lead
-      label: Первая фраза
-      type: text
-    - name: voice
-      label: Рукописная строка 1
-      type: string
-    - name: eyes
-      label: Рукописная строка 2
-      type: string
-    - name: yesTitle
-      label: Вариант «откликается» · заголовок
-      type: string
-    - name: yesText
-      label: Вариант «откликается» · текст
-      type: string
-    - name: yesButton
-      label: Вариант «откликается» · подпись (ведёт к сессиям)
-      type: string
-    - name: noTitle
-      label: Вариант «сейчас нет» · заголовок
-      type: string
-    - name: noText
-      label: Вариант «сейчас нет» · текст
-      type: string
-    - name: noButton
-      label: Вариант «сейчас нет» · подпись
-      type: string
-    - name: photoAlt
-      label: Описание фото крупным планом
-      type: string
-    - name: farewellTitle
-      label: Спокойное окно · заголовок
-      type: string
-    - name: farewellText
-      label: Спокойное окно · текст
-      type: text
-    - name: farewellEnd
-      label: Спокойное окно · кнопка «завершить визит»
-      type: string
-    - name: farewellDone
-      label: Спокойное окно · текст после «завершить»
-      type: text
-    - name: farewellBack
-      label: Спокойное окно · кнопка «продолжить»
-      type: string
-  - name: sessions
-    label: 9 · Интуитивные сессии
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Вводная фраза
-      type: text
-    - name: h1
-      label: Блок 1 · заголовок
-      type: string
-    - name: p1
-      label: Блок 1 · текст
-      type: text
-    - name: h2
-      label: Блок 2 · заголовок
-      type: string
-    - name: p2
-      label: Блок 2 · текст
-      type: text
-    - name: h3
-      label: Блок 3 · заголовок
-      type: string
-    - name: p3
-      label: Блок 3 · текст
-      type: text
-    - name: h4
-      label: Блок «Как проходят сессии» · заголовок
-      type: string
-    - name: p4
-      label: Блок «Как проходят сессии» · абзац 1
-      type: text
-    - name: p5
-      label: Блок «Как проходят сессии» · абзац 2
-      type: text
-    - name: note
-      label: Мелкая оговорка про медицину и терапию
-      type: text
-    - name: bring
-      label: Что принести с собой
-      type: text
   - name: change
-    label: 10 · Трансформация
+    label: 4 · Трансформация
     type: object
     fields:
     - name: title
@@ -1478,34 +1148,57 @@ content:
     - name: wNote
       label: Рукописная строка в конце
       type: text
-  - name: invite
-    label: 11 · Приглашение
+  - name: about
+    label: 5 · Обо мне (четыре фото — в «Контакты, фото, имя»)
     type: object
     fields:
     - name: title
       label: Заголовок
+      type: string
+    - name: lead
+      label: Вводная фраза (крупно, под заголовком)
       type: text
-    - name: button
-      label: Кнопка (ведёт к форме)
+    - name: c1Title
+      label: Абзац 1 · начальные слова (жирным)
       type: string
-  - name: free
-    label: 12 · Первые 30 минут
-    type: object
-    fields:
-    - name: number
-      label: Число в круге
+    - name: c1Text
+      label: Абзац 1 · текст
+      type: text
+    - name: c1Alt
+      label: Фото 1 · описание для скринридеров
       type: string
-    - name: unit
-      label: Единица
+    - name: c2Title
+      label: Абзац 2 · начальные слова (жирным)
       type: string
-    - name: title
-      label: Заголовок
+    - name: c2Text
+      label: Абзац 2 · текст
+      type: text
+    - name: c2Alt
+      label: Фото 2 · описание для скринридеров
       type: string
-    - name: text
-      label: Текст
+    - name: c3Title
+      label: Абзац 3 · начальные слова (жирным)
+      type: string
+    - name: c3Text
+      label: Абзац 3 · текст
+      type: text
+    - name: c3Alt
+      label: Фото 3 · описание для скринридеров
+      type: string
+    - name: c4Title
+      label: Абзац 4 · начальные слова (жирным)
+      type: string
+    - name: c4Text
+      label: Абзац 4 · текст
+      type: text
+    - name: c4Alt
+      label: Фото 4 · описание для скринридеров
+      type: string
+    - name: note
+      label: Рукописная строка в конце
       type: text
   - name: contact
-    label: 13 · Контакты и форма
+    label: 6 · Контакты и форма (сразу после «Обо мне»)
     type: object
     fields:
     - name: title
@@ -1514,9 +1207,6 @@ content:
     - name: lead
       label: Текст под заголовком
       type: text
-    - name: linksTitle
-      label: Подзаголовок над прямыми контактами
-      type: string
     - name: formName
       label: Поле «имя»
       type: string
@@ -1536,7 +1226,7 @@ content:
       label: Мелкая пометка под формой
       type: text
   - name: faq
-    label: 14 · Вопросы и ответы (пустой вопрос скрывает слот)
+    label: 7 · Вопросы и ответы (пустой вопрос скрывает слот)
     type: object
     fields:
     - name: title
@@ -1601,8 +1291,24 @@ content:
     - name: a8
       label: Ответ 8
       type: text
+  - name: free
+    label: '7 · Вопросы и ответы: блок «30 минут бесплатно» (в конце раздела)'
+    type: object
+    fields:
+    - name: number
+      label: Число в круге
+      type: string
+    - name: unit
+      label: Единица
+      type: string
+    - name: title
+      label: Заголовок
+      type: string
+    - name: text
+      label: Текст
+      type: text
   - name: notes
-    label: 15 · Заметки (раздел виден, только если есть опубликованные статьи)
+    label: Заметки (раздел виден, только если есть опубликованные статьи)
     type: object
     fields:
     - name: title
@@ -1612,7 +1318,7 @@ content:
       label: Текст под заголовком
       type: text
   - name: footer
-    label: 16 · Подвал
+    label: Подвал
     type: object
     fields:
     - name: line
