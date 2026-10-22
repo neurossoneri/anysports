@@ -242,6 +242,35 @@
     .free h3 { font:500 clamp(1.6rem,3vw,2.4rem)/1.2 var(--serif); letter-spacing:-.015em; margin-bottom:14px; }
     .free p { color:rgba(255,255,255,.9); line-height:1.8; max-width:52ch; }
 
+    /* ---------- 8. Q&A: numbered accordion, three groups ---------- */
+    .qa { --qa-pad:clamp(8px,1.6vw,20px); --qa-gap:clamp(14px,2.4vw,28px); --qa-num:2.2rem; interpolate-size:allow-keywords; }
+    .qa .split { grid-template-columns:minmax(0,.62fr) minmax(0,1.38fr); }
+    .qa-ask { display:inline-flex; align-items:center; gap:12px; margin-top:clamp(20px,3vw,32px); padding:12px 0; font-weight:650; color:var(--c-a); border-bottom:1px solid currentColor; }
+    .qa-ask::after { content:"\2192"; transition:transform .5s var(--ease); }
+    .qa-ask:hover::after, .qa-ask:focus-visible::after { transform:translateX(6px); }
+    .qa-body { counter-reset:qa; display:grid; gap:clamp(36px,5vw,60px); }
+    .qa-group-title { display:flex; align-items:center; gap:18px; margin-bottom:6px; font:700 .76rem/1.2 var(--sans); letter-spacing:.16em; text-transform:uppercase; color:var(--c-a); }
+    .qa-group-title::after { content:""; flex:1; height:1px; background:var(--c-line); }
+    .qa-group-title:empty { display:none; }
+    .qa-group:not(:has(details:not([hidden]))) { display:none; }
+    .qa details { counter-increment:qa; border-bottom:1px solid var(--c-line); transition:background-color .5s var(--ease),box-shadow .5s var(--ease); }
+    .qa-group-title:empty + details { border-top:1px solid var(--c-line); }
+    .qa details[open] { background:var(--c-panel); box-shadow:inset 3px 0 0 var(--c-b); }
+    .qa summary { display:grid; grid-template-columns:var(--qa-num) minmax(0,1fr) auto; align-items:center; gap:var(--qa-gap); padding:clamp(20px,2.6vw,28px) var(--qa-pad); cursor:pointer; list-style:none; }
+    .qa summary::-webkit-details-marker { display:none; }
+    .qa-n::before { content:counter(qa,decimal-leading-zero); font:500 .95rem/1 var(--serif); letter-spacing:.06em; font-variant-numeric:tabular-nums; color:var(--c-a); }
+    .qa-q { font:500 clamp(1.1rem,1.7vw,1.4rem)/1.35 var(--serif); letter-spacing:-.01em; color:var(--c-text); text-wrap:balance; }
+    .qa summary::after { content:""; flex:none; width:36px; height:36px; border:1px solid var(--c-line); color:var(--c-a); background:linear-gradient(currentColor,currentColor) center/13px 1.8px no-repeat,linear-gradient(currentColor,currentColor) center/1.8px 13px no-repeat; transition:transform .5s var(--ease),border-color .3s ease,background-size .4s var(--ease); }
+    .qa summary:hover::after, .qa details[open] summary::after { border-color:var(--c-a); }
+    .qa details[open] summary::after { background-size:13px 1.8px,1.8px 0; transform:rotate(180deg); }
+    .qa-a { padding:0 var(--qa-pad) clamp(24px,3vw,34px) calc(var(--qa-pad) + var(--qa-num) + var(--qa-gap)); }
+    .qa-a p { max-width:62ch; color:var(--c-muted); line-height:1.85; }
+    .qa details[open] .qa-a p { animation:fadeIn .6s ease both; }
+    @supports (interpolate-size:allow-keywords) {
+      .qa details::details-content { block-size:0; overflow:hidden; transition:block-size .55s var(--ease),content-visibility .55s allow-discrete; }
+      .qa details[open]::details-content { block-size:auto; }
+    }
+
     /* ---------- Notes (appear only when an article is published) ---------- */
     .notes-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:22px; margin-top:clamp(28px,4vw,48px); }
     .blog-card { display:flex; flex-direction:column; overflow:hidden; background:#fff; border:1px solid rgba(16,36,58,.14); color:#10243a; }
@@ -296,7 +325,7 @@
       .hero-grid { grid-template-columns:1fr; min-height:0; }
       .hero-photo { aspect-ratio:4/5; max-height:72svh; min-height:0; }
       .hero-quote { padding:clamp(32px,8vw,56px) 24px clamp(44px,9vw,72px); }
-      .split, .intro .split, .sessions .split, .change .split, .about .split, .contact .split, .faq .split { grid-template-columns:1fr; }
+      .split, .intro .split, .sessions .split, .change .split, .about .split, .contact .split, .faq .split, .qa .split { grid-template-columns:1fr; }
       .sticky { position:static; }
       .sessions .side-pair { display:contents; }
       .sessions .eyes { order:1; }
@@ -317,6 +346,9 @@
       .theme:last-child { display:block; }
       .theme:last-child .glyph { margin-bottom:16px; }
       .mcol:nth-child(2) { margin-top:28px; }
+      .qa { --qa-num:1.7rem; }
+      .qa summary::after { width:32px; height:32px; }
+      .qa-a { padding-left:var(--qa-pad); }
     }
     @media (prefers-reduced-motion:reduce) {
       html { scroll-behavior:auto; }
@@ -561,6 +593,38 @@
       </div>
     </section>
 
+    <!-- 8. Q&A: numbered accordion in three groups (blank question = hidden slot, blank label = no label) -->
+    <section class="band band-ice qa" id="qa" aria-labelledby="qa-title">
+      <div class="container">
+        <div class="split">
+          <div class="sticky">
+            <h2 class="title" id="qa-title" data-i18n="qa.title"></h2>
+            <p class="lead" data-i18n="qa.lead"></p>
+            <a class="qa-ask" href="#contact" data-i18n="qa.ask"></a>
+          </div>
+          <div class="qa-body">
+          <div class="qa-group">
+            <h3 class="qa-group-title" data-i18n="qa.g1"></h3>
+            <details name="qa" data-qa="1"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q1"></span></summary><div class="qa-a"><p data-i18n="qa.a1"></p></div></details>
+            <details name="qa" data-qa="2"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q2"></span></summary><div class="qa-a"><p data-i18n="qa.a2"></p></div></details>
+            <details name="qa" data-qa="3"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q3"></span></summary><div class="qa-a"><p data-i18n="qa.a3"></p></div></details>
+            <details name="qa" data-qa="4"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q4"></span></summary><div class="qa-a"><p data-i18n="qa.a4"></p></div></details>
+          </div>
+          <div class="qa-group">
+            <h3 class="qa-group-title" data-i18n="qa.g2"></h3>
+            <details name="qa" data-qa="5"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q5"></span></summary><div class="qa-a"><p data-i18n="qa.a5"></p></div></details>
+            <details name="qa" data-qa="6"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q6"></span></summary><div class="qa-a"><p data-i18n="qa.a6"></p></div></details>
+          </div>
+          <div class="qa-group">
+            <h3 class="qa-group-title" data-i18n="qa.g3"></h3>
+            <details name="qa" data-qa="7"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q7"></span></summary><div class="qa-a"><p data-i18n="qa.a7"></p></div></details>
+            <details name="qa" data-qa="8"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q8"></span></summary><div class="qa-a"><p data-i18n="qa.a8"></p></div></details>
+          </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!--@@NOTES@@-->
   </main>
 
@@ -649,6 +713,7 @@
       $$('[data-i18n-aria]').forEach(node => node.setAttribute('aria-label', t(node.dataset.i18nAria)));
       $$('[data-i18n-alt]').forEach(node => { node.alt = t(node.dataset.i18nAlt); });
       $$('[data-faq]').forEach(node => { node.hidden = !t('faq.q' + node.dataset.faq).trim(); });
+      $$('[data-qa]').forEach(node => { node.hidden = !t('qa.q' + node.dataset.qa).trim(); });
       $$('[data-post-lang]').forEach(node => { node.hidden = node.dataset.postLang !== lang; });
       const notes = $('#notes');
       if (notes) notes.hidden = !(CMS_VISIBLE_POSTS[lang] > 0);

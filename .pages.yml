@@ -521,6 +521,87 @@ content:
     - name: text
       label: Текст
       type: text
+  - name: qa
+    label: 8 · Q&A внизу страницы (пустой вопрос скрывает слот)
+    type: object
+    fields:
+    - name: title
+      label: Заголовок
+      type: string
+    - name: lead
+      label: Текст под заголовком
+      type: text
+    - name: ask
+      label: Ссылка под текстом (ведёт к форме контактов)
+      type: string
+    - name: g1
+      label: Подпись группы 1 (над вопросами 1–4)
+      type: string
+      description: Оставьте пустым, чтобы убрать подпись.
+    - name: q1
+      label: Вопрос 1
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a1
+      label: Ответ 1
+      type: text
+    - name: q2
+      label: Вопрос 2
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a2
+      label: Ответ 2
+      type: text
+    - name: q3
+      label: Вопрос 3
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a3
+      label: Ответ 3
+      type: text
+    - name: q4
+      label: Вопрос 4
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a4
+      label: Ответ 4
+      type: text
+    - name: g2
+      label: Подпись группы 2 (над вопросами 5–6)
+      type: string
+      description: Оставьте пустым, чтобы убрать подпись.
+    - name: q5
+      label: Вопрос 5
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a5
+      label: Ответ 5
+      type: text
+    - name: q6
+      label: Вопрос 6
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a6
+      label: Ответ 6
+      type: text
+    - name: g3
+      label: Подпись группы 3 (над вопросами 7–8)
+      type: string
+      description: Оставьте пустым, чтобы убрать подпись.
+    - name: q7
+      label: Вопрос 7
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a7
+      label: Ответ 7
+      type: text
+    - name: q8
+      label: Вопрос 8
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a8
+      label: Ответ 8
+      type: text
   - name: notes
     label: Заметки (раздел виден, только если есть опубликованные статьи)
     type: object
@@ -916,6 +997,87 @@ content:
     - name: text
       label: Текст
       type: text
+  - name: qa
+    label: 8 · Q&A внизу страницы (пустой вопрос скрывает слот)
+    type: object
+    fields:
+    - name: title
+      label: Заголовок
+      type: string
+    - name: lead
+      label: Текст под заголовком
+      type: text
+    - name: ask
+      label: Ссылка под текстом (ведёт к форме контактов)
+      type: string
+    - name: g1
+      label: Подпись группы 1 (над вопросами 1–4)
+      type: string
+      description: Оставьте пустым, чтобы убрать подпись.
+    - name: q1
+      label: Вопрос 1
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a1
+      label: Ответ 1
+      type: text
+    - name: q2
+      label: Вопрос 2
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a2
+      label: Ответ 2
+      type: text
+    - name: q3
+      label: Вопрос 3
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a3
+      label: Ответ 3
+      type: text
+    - name: q4
+      label: Вопрос 4
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a4
+      label: Ответ 4
+      type: text
+    - name: g2
+      label: Подпись группы 2 (над вопросами 5–6)
+      type: string
+      description: Оставьте пустым, чтобы убрать подпись.
+    - name: q5
+      label: Вопрос 5
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a5
+      label: Ответ 5
+      type: text
+    - name: q6
+      label: Вопрос 6
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a6
+      label: Ответ 6
+      type: text
+    - name: g3
+      label: Подпись группы 3 (над вопросами 7–8)
+      type: string
+      description: Оставьте пустым, чтобы убрать подпись.
+    - name: q7
+      label: Вопрос 7
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a7
+      label: Ответ 7
+      type: text
+    - name: q8
+      label: Вопрос 8
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a8
+      label: Ответ 8
+      type: text
   - name: notes
     label: Заметки (раздел виден, только если есть опубликованные статьи)
     type: object
@@ -1310,6 +1472,87 @@ content:
       type: string
     - name: text
       label: Текст
+      type: text
+  - name: qa
+    label: 8 · Q&A внизу страницы (пустой вопрос скрывает слот)
+    type: object
+    fields:
+    - name: title
+      label: Заголовок
+      type: string
+    - name: lead
+      label: Текст под заголовком
+      type: text
+    - name: ask
+      label: Ссылка под текстом (ведёт к форме контактов)
+      type: string
+    - name: g1
+      label: Подпись группы 1 (над вопросами 1–4)
+      type: string
+      description: Оставьте пустым, чтобы убрать подпись.
+    - name: q1
+      label: Вопрос 1
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a1
+      label: Ответ 1
+      type: text
+    - name: q2
+      label: Вопрос 2
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a2
+      label: Ответ 2
+      type: text
+    - name: q3
+      label: Вопрос 3
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a3
+      label: Ответ 3
+      type: text
+    - name: q4
+      label: Вопрос 4
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a4
+      label: Ответ 4
+      type: text
+    - name: g2
+      label: Подпись группы 2 (над вопросами 5–6)
+      type: string
+      description: Оставьте пустым, чтобы убрать подпись.
+    - name: q5
+      label: Вопрос 5
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a5
+      label: Ответ 5
+      type: text
+    - name: q6
+      label: Вопрос 6
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a6
+      label: Ответ 6
+      type: text
+    - name: g3
+      label: Подпись группы 3 (над вопросами 7–8)
+      type: string
+      description: Оставьте пустым, чтобы убрать подпись.
+    - name: q7
+      label: Вопрос 7
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a7
+      label: Ответ 7
+      type: text
+    - name: q8
+      label: Вопрос 8
+      type: string
+      description: Оставьте пустым, чтобы скрыть этот вопрос.
+    - name: a8
+      label: Ответ 8
       type: text
   - name: notes
     label: Заметки (раздел виден, только если есть опубликованные статьи)

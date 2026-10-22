@@ -7,3 +7,4 @@ __pycache__/
 repomix-output.xml
 .backup-intuition/
 .backup-cold-redesign/
+.backup-qa/

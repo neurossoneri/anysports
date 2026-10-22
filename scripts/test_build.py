@@ -14,7 +14,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 esc = lambda v: html.escape(v, quote=True)
 LANGS = ('ru', 'en', 'fr')
-SECTION_IDS = ('hero', 'intro', 'sessions', 'change', 'about', 'contact', 'faq')   # page order, top to bottom
+SECTION_IDS = ('hero', 'intro', 'sessions', 'change', 'about', 'contact', 'faq', 'qa')   # page order, top to bottom
 
 
 def load_builder():
@@ -99,6 +99,7 @@ def check_integrity(builder):
     template = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
     assert 'window.close' not in template, 'a web page must not pretend it can close the tab'
     assert builder.FAQ_SLOTS == 8 and template.count('<details data-faq=') == 8, 'FAQ must have 8 editable slots'
+    assert builder.QA_SLOTS == 8 and template.count('<details name="qa" data-qa=') == 8, 'Q&A must have 8 editable slots'
     assert 'quote_photo' in builder.PHOTO_FIELDS and 'id="sessions"' in template
     assert 'aria-describedby="form-status"' in template and 'data-write' in template
     assert template.count('<h1') == 1, 'exactly one h1 (the opening quotation)'
@@ -187,6 +188,7 @@ def main():
                      'story_photo_2': 'media/test-cover.webp', 'eyes_photo': '', 'quote_photo': '', 'story_photo_1': '', 'story_photo_3': '', 'story_photo_4': '', 'form_endpoint': 'https://formspree.io/f/abc123', 'publish_ready': True})
         ru = json.loads((work / 'content/home_ru.json').read_text(encoding='utf-8'))
         ru['faq']['q5'] = ''
+        ru['qa']['q3'] = ''
         ru['story']['title'] = '</script><b>x</b>'
         (work / 'content/home_ru.json').write_text(json.dumps(ru, ensure_ascii=False), encoding='utf-8')
     temporary, work = build_fixture(builder, full, posts=True)
@@ -200,6 +202,7 @@ def main():
         assert 'id="notes"' in home and 'CMS_VISIBLE_POSTS = {"ru":1,"en":1,"fr":1}' in home
         assert 'data-post-lang="ru"' in home and 'data-post-lang="en" hidden' in home and 'data-post-lang="fr" hidden' in home
         assert '<details data-faq="5" hidden>' in home and '<details data-faq="4">' in home
+        assert '<details name="qa" data-qa="3" hidden>' in home and '<details name="qa" data-qa="2">' in home
         assert '</script><b>x</b>' not in home and '\\u003c/script' in home and '&lt;/script&gt;' in home
         assert 'https://demo.github.io/athlete-support/' in home and 'index,follow' in home
         assert 'application/ld+json' in home and 'og:image' in home

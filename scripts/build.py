@@ -93,10 +93,11 @@ PHOTO_SLOTS = (
 )
 PHOTO_FIELDS = tuple(slot['field'] for slot in PHOTO_SLOTS)
 FAQ_SLOTS = 8
+QA_SLOTS = 8
 BRAND_DEFAULT = 'Sport Intuitive'
 # Dashboard: which page section a group of copy lives in (for the "show on the site" link).
 SECTION_ANCHORS = {'hero': 'hero', 'story': 'intro', 'quotes': 'intro', 'sessions': 'sessions', 'client': 'sessions',
-                   'change': 'change', 'about': 'about', 'contact': 'contact', 'faq': 'faq', 'free': 'free'}
+                   'change': 'change', 'about': 'about', 'contact': 'contact', 'faq': 'faq', 'free': 'free', 'qa': 'qa'}
 # Copy that must never be blank (tests check it; the dashboard enforces it before saving).
 REQUIRED_COPY = ('faq.q1', 'about.lead', 'sessions.photoAlt')
 # Promise-like wording the site must never carry (checked by the tests and, before saving, by the dashboard).
@@ -331,6 +332,9 @@ def build_home(site, posts, public_url, ready):
     for slot in range(1, FAQ_SLOTS + 1):
         if not ru.get(f'faq.q{slot}', '').strip():
             template = replace_required(template, f'<details data-faq="{slot}">', f'<details data-faq="{slot}" hidden>', f'faq slot {slot}')
+    for slot in range(1, QA_SLOTS + 1):
+        if not ru.get(f'qa.q{slot}', '').strip():
+            template = replace_required(template, f'<details name="qa" data-qa="{slot}">', f'<details name="qa" data-qa="{slot}" hidden>', f'qa slot {slot}')
 
     doc_title = ru['meta.fullTitle']
     template = re.sub(r'<title>.*?</title>', lambda m: f'<title>{esc(doc_title)}</title>', template, count=1)
