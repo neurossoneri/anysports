@@ -76,16 +76,18 @@
   },
   "about": {
     "title": "My story",
-    "lead": "I am not an athlete myself — but sport has always been part of my life",
-    "c1Text": "Sport has been part of my life since childhood: grassroots clubs, then a passionate fan. For ten years at FIFA I contributed to the organisation of football World Cups and numerous related events.",
+    "lead": "Although I am not an athlete myself, sport has always been part of my life.",
+    "c1Text": "From joining grassroots sports clubs as a child to becoming a passionate sports fan and eventually working as a Competition Manager at one of the world’s largest sports organisations, my journey has taken me through many different sides of sport.",
     "c1Alt": "A smiling woman in a pink top standing by the sea",
-    "c2Text": "A few years ago I decided to change direction — not by plan, and with no other plan in hand. Something inside simply said “enough”. I paused, and my focus shifted from external validation and having a cool job towards inner reflection and exploration.",
+    "c2Text": "During my ten years at FIFA, I contributed to the organisation of football World Cups, as well as numerous related events. Along the way, I met athletes at different stages of their careers, each with their own backgrounds, experiences, ambitions, and challenges. Through these encounters, I gradually developed a deeper interest in the person behind the athlete — their individual journey, their inner world, and the challenges that may remain unseen from the outside.",
+    "pull": "Over time, I began to envision a space where athletes could find support beyond their sporting achievements.",
     "c2Alt": "A woman standing by a wooden fence among dune grass, looking aside",
-    "c3Text": "I explored psychology, body and energy practices, alternative healing approaches and ancient philosophies. I went deeper into my own experiences, experimented, and gradually discovered new ways of understanding myself.",
+    "c3Text": "A few years ago, my own life took a turn that had been brewing within me for some time. I left a successful career without knowing what would come next. This gave me space to pause and look inward, to reflect on who I really am and what I want. I delved into psychology, body and energy practices, alternative healing approaches, and ancient philosophies. I explored my own perceptions and senses, experimented, and gradually discovered new ways of understanding myself and, most importantly, enjoying my life.",
     "c3Alt": "A woman sitting in dry grass in warm evening light",
-    "c4Text": "I have always been intuitive, even as a child, but my sensitivity was often dismissed or seen as weakness in my family, so I never learnt to trust it. Over recent years I have cleared my inner voice from layers of family conditioning and social expectations. I trust myself more deeply, and rely less on external validation and the need for constant control and security. It has made my life feel lighter and happier.",
+    "c4Text": "I have always been intuitive, even as a child. Unfortunately, my sensitivity was often dismissed or not taken seriously by my family, so I never learned to trust it. Over the past few years, however, I have managed to find my own voice beneath layers of family conditioning and social expectations. I have learned to trust myself more deeply and rely less on external validation or the need for constant control and security. This journey continues to this day.",
     "c4Alt": "A smiling woman in a white top by the sea",
-    "note": "This journey continues — and I want to support others in their own search for fulfilment and happiness."
+    "c5Text": "Today, through the individual sessions I offer, I am bringing this idea of creating a supportive space for athletes to life.",
+    "note": "Guiding others in their search for self-trust, fulfilment, and happiness has become a meaningful part of my own journey, too."
   },
   "contact": {
     "title": "Write to me",
@@ -96,26 +98,6 @@
     "formSend": "Send",
     "formSent": "Thank you. Your message has been sent.",
     "formNote": "By sending this form you agree that I may use your name, contact details and message to reply to you, as described in the"
-  },
-  "faq": {
-    "title": "Questions and answers",
-    "lead": "If something is still unclear, the answer may be here.",
-    "q1": "How does the first conversation work?",
-    "a1": "An introductory conversation costs you nothing. We can simply meet, talk and listen. There is no obligation to continue — we can both decide whether it feels right to work together.",
-    "q2": "What is an intuition session?",
-    "a2": "It is a space to develop the ability to connect with yourself, listen to your inner voice and recognise what it is saying. Our work begins with exploring what intuition means to you: how you naturally perceive it, and what helps you recognise its signals.",
-    "q3": "Is there a programme or a method?",
-    "a3": "There is no predefined programme designed for everyone. Sessions are led intuitively and individually. My approach is not based on scientific studies or established concepts, but neither does it seek to deny or exclude any particular perspective.",
-    "q4": "Is this psychological counselling?",
-    "a4": "No. It is not psychological counselling or conventional mental training, though we may touch on some elements of those methods. Sessions are not a substitute for medical care or psychological therapy.",
-    "q5": "What is the difference between an intuition session and transformation support?",
-    "a5": "Intuition sessions are about learning to notice, distinguish and trust your own intuition. Transformation support is about having a steady presence — a witness, and perhaps a guide — while something inside you is changing. Which of the two is closer to what you need is something we can explore in the first conversation.",
-    "q6": "What should I bring?",
-    "a6": "Curiosity, courage, openness and trust. Above all, a willingness to explore, to experience something new, and to discover your beautiful self.",
-    "q7": "Why do you work with athletes?",
-    "a7": "From joining grassroots sports clubs as a child, to becoming a passionate sports fan, and eventually working as a Competition Manager at the world’s largest sports organisations, my journey has taken me through many different sides of sport.\n\nAlong the way I met athletes at different stages of their careers, with different backgrounds, experiences and levels of achievement. I believe this is where I began to relate to them on a deeper level — and to want to direct my energy towards supporting them.",
-    "q8": "",
-    "a8": ""
   },
   "free": {
     "title": "An introductory conversation costs you nothing",

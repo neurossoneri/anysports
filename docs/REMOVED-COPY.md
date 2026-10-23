@@ -339,3 +339,83 @@
 
 > What brought you here? (optional)
 > Your message will arrive in my inbox. Please do not share medical or other sensitive information here.
+
+## Убрано: старый блок «Questions and answers» и прежний текст «Моей истории» (23 октября 2026)
+
+Остался один блок вопросов (Q&A). Плашка «вводная беседа бесплатно» осталась и стоит в конце Q&A.
+
+**about.lead** (прежний текст)
+
+> I am not an athlete myself — but sport has always been part of my life
+
+**about.c1Text** (прежний текст)
+
+> Sport has been part of my life since childhood: grassroots clubs, then a passionate fan. For ten years at FIFA I contributed to the organisation of football World Cups and numerous related events.
+
+**about.c2Text** (прежний текст)
+
+> A few years ago I decided to change direction — not by plan, and with no other plan in hand. Something inside simply said “enough”. I paused, and my focus shifted from external validation and having a cool job towards inner reflection and exploration.
+
+**about.c3Text** (прежний текст)
+
+> I explored psychology, body and energy practices, alternative healing approaches and ancient philosophies. I went deeper into my own experiences, experimented, and gradually discovered new ways of understanding myself.
+
+**about.c4Text** (прежний текст)
+
+> I have always been intuitive, even as a child, but my sensitivity was often dismissed or seen as weakness in my family, so I never learnt to trust it. Over recent years I have cleared my inner voice from layers of family conditioning and social expectations. I trust myself more deeply, and rely less on external validation and the need for constant control and security. It has made my life feel lighter and happier.
+
+**about.note** (прежний текст)
+
+> This journey continues — and I want to support others in their own search for fulfilment and happiness.
+
+**faq.title**
+
+> Questions and answers
+
+**faq.lead**
+
+> If something is still unclear, the answer may be here.
+
+**faq.q1 / faq.a1**
+
+> How does the first conversation work?
+>
+> An introductory conversation costs you nothing. We can simply meet, talk and listen. There is no obligation to continue — we can both decide whether it feels right to work together.
+
+**faq.q2 / faq.a2**
+
+> What is an intuition session?
+>
+> It is a space to develop the ability to connect with yourself, listen to your inner voice and recognise what it is saying. Our work begins with exploring what intuition means to you: how you naturally perceive it, and what helps you recognise its signals.
+
+**faq.q3 / faq.a3**
+
+> Is there a programme or a method?
+>
+> There is no predefined programme designed for everyone. Sessions are led intuitively and individually. My approach is not based on scientific studies or established concepts, but neither does it seek to deny or exclude any particular perspective.
+
+**faq.q4 / faq.a4**
+
+> Is this psychological counselling?
+>
+> No. It is not psychological counselling or conventional mental training, though we may touch on some elements of those methods. Sessions are not a substitute for medical care or psychological therapy.
+
+**faq.q5 / faq.a5**
+
+> What is the difference between an intuition session and transformation support?
+>
+> Intuition sessions are about learning to notice, distinguish and trust your own intuition. Transformation support is about having a steady presence — a witness, and perhaps a guide — while something inside you is changing. Which of the two is closer to what you need is something we can explore in the first conversation.
+
+**faq.q6 / faq.a6**
+
+> What should I bring?
+>
+> Curiosity, courage, openness and trust. Above all, a willingness to explore, to experience something new, and to discover your beautiful self.
+
+**faq.q7 / faq.a7**
+
+> Why do you work with athletes?
+>
+> From joining grassroots sports clubs as a child, to becoming a passionate sports fan, and eventually working as a Competition Manager at the world’s largest sports organisations, my journey has taken me through many different sides of sport.
+>
+> Along the way I met athletes at different stages of their careers, with different backgrounds, experiences and levels of achievement. I believe this is where I began to relate to them on a deeper level — and to want to direct my energy towards supporting them.

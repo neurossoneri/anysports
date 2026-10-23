@@ -48,7 +48,10 @@ UI = {
     },
 }
 
-FONT_LINKS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=Source+Serif+4:opsz,wght@8..60,400..700&display=swap" rel="stylesheet">'
+# Fonts are stored on this site (fonts/ is copied to assets/fonts/), so a visitor's browser never contacts a font provider.
+FONT_CSS = 'assets/fonts/fonts.css'
+FONT_PRELOAD = ('inter-normal-latin', 'source-serif-4-normal-latin', 'source-serif-4-italic-latin')   # used above the fold
+FONT_LINKS = ''.join(f'<link rel="preload" href="assets/fonts/{name}.woff2" as="font" type="font/woff2" crossorigin>' for name in FONT_PRELOAD) + f'<link rel="stylesheet" href="{FONT_CSS}">'
 PROGRESS_JS = "<script>(function(){if(window.CSS&&CSS.supports&&CSS.supports('animation-timeline','scroll()')&&!matchMedia('(prefers-reduced-motion: reduce)').matches)return;var b=document.querySelector('.scroll-progress');function u(){var m=document.documentElement.scrollHeight-innerHeight;b.style.setProperty('--p',m>0?Math.min(1,scrollY/m).toFixed(4):0)}addEventListener('scroll',u,{passive:true});u()})()</script>"
 VALID_SLUG = re.compile(r'^[a-z0-9]+(?:-[a-z0-9]+)*$')
 SAFE_IMAGE = re.compile(r'^(?:media/|images/)[\w\-/%.]+\.(?:jpe?g|png|gif|webp|avif)$', re.I)
@@ -58,25 +61,24 @@ ALLOWED_ATTRS = {'a': ['href', 'title'], 'img': ['src', 'alt', 'title', 'loading
 # Numbered in page order, top to bottom. The same numbers appear on the live site (open it with ?photos)
 # and in the dashboard, so the owner always knows which photo she is replacing.
 PHOTO_SLOTS = (
-    {'field': 'portrait', 'num': 1, 'title': 'Главное фото', 'where': 'Первый экран, справа от текста', 'anchor': 'hero', 'shape': 'вертикаль или горизонталь, обрезка по центру'},
+    {'field': 'portrait', 'num': 1, 'title': 'Главное фото', 'where': 'Первый экран: правая половина экрана (и на компьютере, и на телефоне)', 'anchor': 'hero', 'shape': 'вертикаль, например половина лица; по краям кадр обрежется по центру'},
     {'field': 'quote_photo', 'num': 2, 'title': 'Атмосферное фото', 'where': 'Фон за цитатой А «You can only control yourself» (необязательно)', 'anchor': 'intro', 'shape': 'пейзаж, горизонталь'},
     {'field': 'eyes_photo', 'num': 3, 'title': 'Крупный план', 'where': 'Рядом с «Intuition sessions» (если пусто — берётся фото 1)', 'anchor': 'sessions', 'shape': 'вертикаль 3:4'},
     {'field': 'story_photo_1', 'num': 4, 'title': 'Моя история', 'where': 'Справа, после первого абзаца', 'anchor': 'about', 'shape': 'вертикаль 4:5'},
-    {'field': 'story_photo_2', 'num': 5, 'title': 'Моя история', 'where': 'Слева, после второго абзаца', 'anchor': 'about', 'shape': 'вертикаль 4:5'},
+    {'field': 'story_photo_2', 'num': 5, 'title': 'Моя история', 'where': 'Слева, после второго абзаца и выделенной фразы', 'anchor': 'about', 'shape': 'вертикаль 4:5'},
     {'field': 'story_photo_3', 'num': 6, 'title': 'Моя история', 'where': 'Справа, после третьего абзаца', 'anchor': 'about', 'shape': 'вертикаль 4:5'},
     {'field': 'story_photo_4', 'num': 7, 'title': 'Моя история', 'where': 'Слева, после четвёртого абзаца', 'anchor': 'about', 'shape': 'вертикаль 4:5'},
 )
 PHOTO_FIELDS = tuple(slot['field'] for slot in PHOTO_SLOTS)
-FAQ_SLOTS = 8
 QA_SLOTS = 8
 BRAND_DEFAULT = 'Sport Intuitive'
 # The logo (also the favicon design) for article pages. The home page has no top bar any more.
 BRAND_MARK_SVG = '''<svg viewBox="0 0 48 48" width="35" height="35" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><rect width="48" height="14" fill="#cfe0f5"/><rect y="14" width="48" height="10" fill="#dce8f8"/><rect y="24" width="48" height="8" fill="#e8ecf9"/><circle cx="37" cy="11" r="4.6" fill="#fff" opacity=".85"/><path d="M-2 31 13 12l8 9 8-12 21 22z" fill="#aab9e4"/><path d="M9.7 16 13 12l3.6 4-1.8-1.1-1.6 1.7-1.6-1.7zM25.9 13.6 29 9l4.6 4.6-2.3-1.2-2.1 2-1.6-1.9z" fill="#fff" opacity=".93"/><path d="M-2 31v-4l8-5 9 9zM19 31l11-9 10 6 10-4v7z" fill="#7f9fd3"/><rect y="31" width="48" height="17" fill="#86c4bc"/><rect y="31" width="48" height="6" fill="#c3e2e0" opacity=".55"/><path d="M12 34.5h9M27 37.5h11M8 40h7" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".6"/><path d="M-2 48v-8c8-4 15-1 22 3 8 4 18 3 30-2v7z" fill="#8ec99b"/><path d="M14 48c10-3 22-2 36-7v7z" fill="#64aa8b"/><path d="M36 46.5l-.6-4.2M39 46.5l.3-5M42 46.5l1.3-4" stroke="#4f9a7a" stroke-width="1" stroke-linecap="round" fill="none"/></svg>'''
 # Dashboard: which page section a group of copy lives in (for the "show on the site" link).
 SECTION_ANCHORS = {'hero': 'hero', 'story': 'intro', 'quotes': 'intro', 'sessions': 'sessions', 'client': 'sessions',
-                   'change': 'change', 'about': 'about', 'contact': 'contact', 'faq': 'faq', 'free': 'free', 'qa': 'qa'}
+                   'change': 'change', 'about': 'about', 'contact': 'contact', 'qa': 'qa', 'free': 'free'}
 # Copy that must never be blank (tests check it; the dashboard enforces it before saving).
-REQUIRED_COPY = ('faq.q1', 'about.lead', 'sessions.photoAlt')
+REQUIRED_COPY = ('qa.q1', 'about.lead', 'sessions.photoAlt')
 # Promise-like wording the site must never carry (checked by the tests and, before saving, by the dashboard).
 BANNED_PHRASES = {
     'en': [r'risk of (?:physical )?injur', r'\bprevent', r'burn-?out', r'guarantee', r'\bcures?\b', r'\btreat(?:s|ment)?\b'],
@@ -274,8 +276,9 @@ def build_home(site, posts, public_url, ready):
     copy = values['en']
 
     template = replace_required(template, '<!--@@NOTES@@-->', notes_section(posts), 'notes marker')
-    if posts:   # the notes band is light sand and sits last, so the footer fades from sand instead of from dune
-        template = replace_required(template, 'site-footer after-dune', 'site-footer after-sand', 'footer tone')
+    template = replace_required(template, '<!--@@FONTS@@-->', FONT_LINKS, 'fonts marker')
+    if posts:   # the notes band is light sand and sits last, so the footer fades from sand instead of from teal
+        template = replace_required(template, 'site-footer after-teal', 'site-footer after-sand', 'footer tone')
     # Builder-managed image src attributes; a missing photo keeps its soft placeholder.
     paths = {field: photo_path(site.get(field)) for field in PHOTO_FIELDS}
     paths['eyes_photo'] = paths['eyes_photo'] or paths['portrait']
@@ -306,9 +309,6 @@ def build_home(site, posts, public_url, ready):
         template = text_pat.sub(lambda m, v=value: m.group(1) + esc(v) + m.group(4), template)
         template = template.replace(f'data-i18n-alt="{key}" alt=""', f'data-i18n-alt="{key}" alt="{esc(value)}"')
         template = template.replace(f'data-i18n-aria="{key}"', f'data-i18n-aria="{key}" aria-label="{esc(value)}"')
-    for slot in range(1, FAQ_SLOTS + 1):
-        if not copy.get(f'faq.q{slot}', '').strip():
-            template = replace_required(template, f'<details data-faq="{slot}">', f'<details data-faq="{slot}" hidden>', f'faq slot {slot}')
     for slot in range(1, QA_SLOTS + 1):
         if not copy.get(f'qa.q{slot}', '').strip():
             template = replace_required(template, f'<details name="qa" data-qa="{slot}">', f'<details name="qa" data-qa="{slot}" hidden>', f'qa slot {slot}')
@@ -324,6 +324,14 @@ def build_home(site, posts, public_url, ready):
     css = re.search(r'<style>(.*?)</style>', template, re.S).group(1)
     (OUT / 'assets').mkdir(parents=True, exist_ok=True)
     (OUT / 'assets/site.css').write_text(css + '\n', encoding='utf-8')
+
+
+def build_fonts():
+    """Copy the self-hosted fonts next to the site (assets/fonts/): no request to any font provider."""
+    source = ROOT / 'fonts'
+    if not (source / 'fonts.css').exists():
+        raise RuntimeError('fonts/fonts.css is missing: the self-hosted fonts are not installed')
+    shutil.copytree(source, OUT / 'assets/fonts', dirs_exist_ok=True, ignore=shutil.ignore_patterns('*.md'))
 
 
 def site_chrome():
@@ -532,6 +540,7 @@ def main():
         shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
     build_home(site, posts, public_url, ready)
+    build_fonts()
     build_articles(site, posts, public_url, ready)
     has_privacy = privacy_page(site, public_url, ready)
     has_admin = build_admin(site)

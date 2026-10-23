@@ -1,7 +1,7 @@
 ---
 title: Privacy notice
 description: How personal data is handled on this website, in line with the Swiss Federal Act on Data Protection (FADP).
-updated: 2026-10-22
+updated: 2026-10-23
 ---
 
 *Last updated: {{updated}}*
@@ -18,7 +18,7 @@ This notice explains what happens to personal data on this website. It is short 
 
 **Technical data.** When you open the website, the servers that deliver it process technical data such as your IP address, the date and time, and the pages requested. This is needed to show you the page and to keep it secure.
 
-**Fonts.** The website loads its typefaces from Google Fonts. When a page opens, your browser connects to Google's servers, and Google receives your IP address.
+**Fonts.** The typefaces are stored on this website and delivered together with the page. Your browser does not connect to Google or any other font provider.
 
 I do not use analytics, advertising tools or tracking cookies.
 
@@ -27,7 +27,6 @@ I do not use analytics, advertising tools or tracking cookies.
 - {{form_service}}
 - Email providers that carry and store your message and my reply.
 - The hosting provider of this website (GitHub Pages, operated by GitHub, Inc. in the USA).
-- Google (Google Fonts), as described above.
 
 I do not sell your data and do not pass it on for advertising.
 

@@ -15,7 +15,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 esc = lambda v: html.escape(v, quote=True)
 LANGS = ('en',)
-SECTION_IDS = ('hero', 'intro', 'sessions', 'change', 'about', 'contact', 'faq', 'qa')   # page order, top to bottom
+SECTION_IDS = ('hero', 'intro', 'sessions', 'change', 'about', 'contact', 'qa')   # page order, top to bottom
 
 
 def load_builder():
@@ -69,8 +69,8 @@ def check_static(builder, destination):
         assert f'id="{section}"' in home, f'section missing: {section}'
     positions = [home.index(f'id="{section}"') for section in SECTION_IDS]
     assert positions == sorted(positions), 'sections are out of the agreed order'
-    assert home.index('id="faq"') < home.index('id="free"') < home.index('class="site-footer'), 'the introductory-conversation card closes the first Q&A'
-    assert home.index('id="contact"') > home.index('id="about"') and home.index('id="contact"') < home.index('id="faq"'), 'the form goes right after "My story"'
+    assert home.index('id="qa"') < home.index('id="free"') < home.index('class="site-footer'), 'the introductory-conversation card closes the Q&A'
+    assert home.index('id="contact"') > home.index('id="about"') and home.index('id="contact"') < home.index('id="qa"'), 'the form goes right after "My story"'
 
     # one language, no top bar, favicon stays
     assert 'id="language"' not in home and '<header class="site-header">' not in home and 'langSelect' not in home, 'language switch / top bar must stay removed'
@@ -78,16 +78,18 @@ def check_static(builder, destination):
 
     # hero: text on the left, photograph on the right
     assert home.index('<div class="hero-quote">') < home.index('<figure class="photo hero-photo">'), 'hero: quotation first, photograph second'
-    assert re.search(r'\.hero-grid \{[^}]*grid-template-columns:minmax\(0,\.8fr\) minmax\(0,1\.2fr\)', css), 'hero: narrow text column, wide photo column'
+    assert re.search(r'\.hero-grid \{[^}]*grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)', css), 'hero: the vertical photograph fills exactly half of the first screen'
+    assert not re.search(r'\.hero-grid \{[^}]*grid-template-columns:1fr[;\s]', css), 'hero: two halves also on phones, no stacking'
 
     # soft light bands and soft transitions
     for band in ('band-deep', 'band-sand', 'band-teal', 'band-dune'):
         assert band in home, f'background band missing: {band}'
     assert 'band-frost' not in home and 'band-ice' not in home
     assert '#edf3f7' not in css and '#dae7f0' not in css, 'near-white blue must not return'
-    assert '--sand:#e6e3d8' in css and '--dune:#d9dfd6' in css
+    assert '--sand:#e5dac4' in css and '--dune:#dccfb4' in css, 'warm sand tokens'
+    assert not any(old in css for old in ('#e6e3d8', '#d9dfd6', '#f4f2ea', '#f2f0e7', '#e8e5da')), 'the cool near-white greys must not return'
     for pair in ('.band-deep + .band-sand::before', '.band-sand + .band-teal::before', '.band-teal + .band-dune::before',
-                 '.band-dune + .band-deep::before', '.band-dune + .band-sand::before', '.site-footer.after-dune::before'):
+                 '.band-dune + .band-deep::before', '.band-teal + .band-sand::before', '.site-footer.after-teal::before', '.site-footer.after-sand::before'):
         assert pair in css, f'transition missing: {pair}'
 
     # copy changes
@@ -141,9 +143,11 @@ def check_privacy(destination):
     """The Swiss FADP (art. 19) asks for: who is responsible, why, who receives the data, which countries."""
     page = (destination / 'privacy/index.html').read_text(encoding='utf-8')
     for needle in ('Privacy notice', 'Swiss Federal Act on Data Protection', 'Who is responsible', 'What data I process', 'Who receives your data',
-                   'Disclosure abroad', 'Your consent', 'Your rights', 'FDPIC', 'Google Fonts', '<base href="../">'):
+                   'Disclosure abroad', 'Your consent', 'Your rights', 'FDPIC', '<base href="../">'):
         assert needle in page, f'privacy notice lacks: {needle}'
     assert '{{' not in page, 'unresolved placeholder in the privacy notice'
+    assert 'Google Fonts' not in page and not re.search(r'<li>[^<]*Google', page), 'fonts are self-hosted: Google is not a recipient'
+    assert 'stored on this website' in page, 'the notice says where the fonts come from'
     assert 'rel="icon"' in page and 'viewBox="0 0 48 48"' in page, 'privacy page keeps the logo and favicon'
 
 
@@ -151,7 +155,6 @@ def check_integrity(builder):
     """Honesty of copy, editable FAQ, accessible form."""
     template = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
     assert 'window.close' not in template, 'a web page must not pretend it can close the tab'
-    assert builder.FAQ_SLOTS == 8 and template.count('<details data-faq=') == 8, 'FAQ must have 8 editable slots'
     assert builder.QA_SLOTS == 8 and template.count('<details name="qa" data-qa=') == 8, 'Q&A must have 8 editable slots'
     assert 'quote_photo' in builder.PHOTO_FIELDS and 'id="sessions"' in template
     assert 'aria-describedby="form-status"' in template and 'data-write' in template
@@ -165,6 +168,43 @@ def check_integrity(builder):
         group, key = dotted.split('.')
         assert data[group][key].strip(), f'{dotted} must not be blank'
     assert 'fork' not in data and 'check' not in data and 'invite' not in data and 'why' not in data, 'removed blocks must stay removed'
+
+
+def check_fonts(destination):
+    """Fonts live on the site: no request to Google (or any font provider), and every listed file exists."""
+    pages = {name: (destination / name).read_text(encoding='utf-8') for name in ('index.html', 'assets/site.css', 'assets/articles.css', 'privacy/index.html')}
+    for name, text in pages.items():
+        assert 'fonts.googleapis' not in text and 'fonts.gstatic' not in text, f'{name}: fonts must not load from Google'
+    home = pages['index.html']
+    fonts_css = (destination / 'assets/fonts/fonts.css').read_text(encoding='utf-8')
+    assert '<link rel="stylesheet" href="assets/fonts/fonts.css">' in home and 'assets/fonts/fonts.css' in pages['privacy/index.html']
+    files = re.findall(r'url\(([^)]+\.woff2)\)', fonts_css)
+    assert files, 'fonts.css lists no font files'
+    for name in files:
+        data = (destination / 'assets/fonts' / name).read_bytes()
+        assert data[:4] == b'wOF2' and len(data) > 1000, f'{name} is not a WOFF2 font'
+    for family in ('Inter', 'Source Serif 4', 'Caveat'):
+        assert f'font-family:"{family}"' in fonts_css, f'{family} is missing from fonts.css'
+    assert fonts_css.count('font-display:swap') == fonts_css.count('@font-face'), 'every font shows text at once (font-display: swap)'
+    preloads = re.findall(r'<link rel="preload" href="(assets/fonts/[^"]+)"', home)
+    assert preloads and all((destination / path).exists() for path in preloads), 'preloaded fonts must exist'
+    assert 'preconnect' not in home, 'no connection to a third party is opened'
+
+
+def check_about_and_questions(destination):
+    """One question block (Q&A), the new story text in the preface layout, warm sand."""
+    home = (destination / 'index.html').read_text(encoding='utf-8')
+    data = json.loads((ROOT / 'content/home_en.json').read_text(encoding='utf-8'))
+    assert 'faq' not in data and 'id="faq"' not in home and 'data-faq' not in home and 'Questions and answers' not in home, 'the old question block must stay removed'
+    keys = ('about.lead', 'about.c1Text', 'about.c2Text', 'about.pull', 'about.c3Text', 'about.c4Text', 'about.c5Text', 'about.note')
+    order = [home.index(f'data-i18n="{key}"') for key in keys]
+    assert order == sorted(order), 'the story keeps its order: lead, four paragraphs with photos, highlighted phrase, closing line'
+    assert re.search(r'<p class="pull pull-long"[^>]*data-i18n="about\.pull"', home), 'the highlighted phrase uses the shared format'
+    assert data['about']['lead'].startswith('Although I am not an athlete myself') and 'FIFA' in data['about']['c2Text']
+    assert data['about']['note'].startswith('Guiding others'), 'the closing line is the last sentence of the new text'
+    assert home.index('id="qa"') < home.index('id="free"'), 'the free card closes the Q&A'
+    css = (destination / 'assets/site.css').read_text(encoding='utf-8')
+    assert '.faq' not in css, 'no leftover styles of the old block'
 
 
 def check_scripts(destination):
@@ -195,7 +235,7 @@ def check_brand_and_dashboard(builder, destination):
     schema = json.loads((destination / 'admin/schema.json').read_text(encoding='utf-8'))
     assert [p['num'] for p in schema['photos']] == list(range(1, 8)) and schema['brand'] == brand
     assert schema['langs'] == ['en'], 'the dashboard edits one language'
-    assert {s['name'] for s in schema['sections']} >= {'hero', 'story', 'sessions', 'about', 'faq'}
+    assert {s['name'] for s in schema['sections']} >= {'hero', 'story', 'sessions', 'about', 'qa'}
     assert 'banned' in schema and schema['required'] == list(builder.REQUIRED_COPY)
     admin = (destination / 'admin/index.html').read_text(encoding='utf-8')
     assert 'noindex' in admin and 'fonts.googleapis' not in admin and 'localStorage' in admin
@@ -219,6 +259,7 @@ def build_fixture(builder, mutate, posts):
     shutil.copytree(ROOT / 'templates', work / 'templates')
     shutil.copytree(ROOT / 'content', work / 'content')
     shutil.copytree(ROOT / 'admin', work / 'admin')
+    shutil.copytree(ROOT / 'fonts', work / 'fonts')
     shutil.copy(ROOT / '.pages.yml', work / '.pages.yml')
     (work / 'media').mkdir()
     (work / 'media/test-cover.webp').write_bytes(b'fake image bytes')
@@ -251,6 +292,8 @@ def main():
     check_static(builder, ROOT / '_site')
     check_privacy(ROOT / '_site')
     check_brand_and_dashboard(builder, ROOT / '_site')
+    check_fonts(ROOT / '_site')
+    check_about_and_questions(ROOT / '_site')
     check_scripts(ROOT / '_site')
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
@@ -259,7 +302,6 @@ def main():
                      'portrait': 'media/test-cover.webp', 'story_photo_2': 'media/test-cover.webp', 'eyes_photo': '', 'quote_photo': '',
                      'story_photo_1': '', 'story_photo_3': '', 'story_photo_4': '', 'form_endpoint': 'https://formspree.io/f/abc123', 'publish_ready': True})
         data = json.loads((work / 'content/home_en.json').read_text(encoding='utf-8'))
-        data['faq']['q5'] = ''
         data['qa']['q3'] = ''
         data['story']['title'] = '</script><b>x</b>'
         (work / 'content/home_en.json').write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
@@ -275,7 +317,6 @@ def main():
         assert 'id="notes"' in home and 'CMS_VISIBLE_POSTS = {"en":1}' in home
         assert '<article class="blog-card" data-post-lang="en">' in home
         assert '<footer class="site-footer after-sand"' in home, 'with notes the footer fades from sand'
-        assert '<details data-faq="5" hidden>' in home and '<details data-faq="4">' in home
         assert '<details name="qa" data-qa="3" hidden>' in home and '<details name="qa" data-qa="2">' in home
         assert '</script><b>x</b>' not in home and '\\u003c/script' in home and '&lt;/script&gt;' in home
         assert 'https://demo.github.io/athlete-support/' in home and 'index,follow' in home
@@ -283,6 +324,7 @@ def main():
         assert 'Testing heading' in article and '<script>alert(1)</script>' not in article
         assert '<base href="../../../">' in article and 'rel="icon"' in article and 'scroll-progress' in article and 'viewBox="0 0 48 48"' in article
         assert 'https://demo.github.io/athlete-support/en/articles/sample/' in article
+        assert 'assets/fonts/fonts.css' in article and 'fonts.googleapis' not in article and (work / '_site/assets/fonts/fonts.css').exists(), 'article pages use the self-hosted fonts'
         assert 'href="en/articles/sample/#content"' in article, 'with <base>, the skip link must point back at the article itself'
         assert 'Test Person' in privacy and 'hello@example.com' in privacy and 'Example Street 1' in privacy and 'formspree.io' in privacy
         assert 'https://demo.github.io/athlete-support/privacy/' in privacy, 'privacy page has its canonical address'
@@ -298,10 +340,10 @@ def main():
         home = (work / '_site/index.html').read_text(encoding='utf-8')
         privacy = (work / '_site/privacy/index.html').read_text(encoding='utf-8')
         assert '"formEndpoint":""' in home and 'insecure.example' not in home and 'insecure.example' not in privacy
-        assert 'id="notes"' not in home and 'noindex,nofollow' in home and '<footer class="site-footer after-dune"' in home
+        assert 'id="notes"' not in home and 'noindex,nofollow' in home and '<footer class="site-footer after-teal"' in home
         assert 'through the contact form on this website' in privacy and 'opens your own email program' in privacy
         assert 'Disallow: /' in (work / '_site/robots.txt').read_text(encoding='utf-8')
-    print('OK: English-only copy and CMS in sync, soft sand bands and transitions, hero order, highlighted phrases, closing statements, preface, privacy notice, photos, form, notes, safety and publish mode')
+    print('OK: English-only copy and CMS in sync, warm sand bands and transitions, self-hosted fonts, one Q&A block, half-and-half hero, highlighted phrases, closing statements, preface, privacy notice, photos, form, notes, safety and publish mode')
 
 
 if __name__ == '__main__':
