@@ -87,6 +87,7 @@ details.sec>summary .go{margin-left:auto;font-weight:500;font-size:.85rem}
 .save{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--abyss);color:#e8f0f7;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;padding:14px clamp(14px,3vw,32px)}
 .save .msg{font-weight:600}.save .msg small{display:block;font-weight:400;color:var(--hi)}
 .save .btn.ghost{background:transparent;color:#cfe3f7;border-color:#456279}
+.quick{margin:0 0 18px}.quick h2{margin:0 0 8px}.quick select{padding:10px 12px;border:1px solid var(--line);background:#fff;min-width:240px;max-width:100%}.quick .row{align-items:center;margin-top:8px}.quick .or{margin:12px 0 0;color:var(--muted);font-size:.9rem}.box.drop{outline:3px dashed var(--blue);outline-offset:-3px}
 @media (max-width:560px){.top .sub{display:none}.save .row{width:100%}.save .btn{flex:1}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -104,7 +105,7 @@ const LS = {
   del(k) { try { localStorage.removeItem(k); } catch (e) {} },
 };
 const S = { schema: null, token: '', repo: '', branch: 'main', site: {}, home: {}, raw: {}, orig: { site: {}, home: {} },
-            pending: {}, tab: 'photos', lang: 'ru', filter: '', run: null, busy: '', notice: null, dirty: 0 };
+            pending: {}, tab: 'photos', lang: 'en', filter: '', run: null, busy: '', notice: null, dirty: 0 };
 const clone = o => JSON.parse(JSON.stringify(o));
 const enc = p => p.split('/').map(encodeURIComponent).join('/');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -409,6 +410,35 @@ async function takeFile(slot, file) {
   } catch (e) { setNotice('bad', e.message); }
   S.busy = ''; renderPanel(); paintBar();
 }
+/** "3.jpg", "фото-3.png", "photo 3 final.webp" -> the slot number (1-99); camera names like IMG_2045.jpg give 0. */
+function numberFromName(name) {
+  const m = String(name || '').replace(/\.[^.]+$/, '').match(/(?:^|\D)(\d{1,2})(?:\D|$)/);
+  return m ? Number(m[1]) : 0;
+}
+async function takeMany(files) {
+  const picked = new Map(), skipped = [];
+  for (const file of Array.from(files || [])) {
+    const slot = S.schema.photos.find(p => p.num === numberFromName(file.name));
+    if (slot) picked.set(slot.num, { slot, file }); else skipped.push(file.name);
+  }
+  for (const { slot, file } of picked.values()) await takeFile(slot, file);
+  if (skipped.length) setNotice('warn', `Не нашла номер места в названии: ${skipped.join(', ')}. Назовите файл с номером (например, 3.jpg или фото-3.jpg) или загрузите его на карточку ниже.`);
+}
+function quickBar() {
+  const pick = el('select', { id: 'quick-num', 'aria-label': 'Номер фото' }, S.schema.photos.map(s => el('option', { value: String(s.num) }, `Фото ${s.num} · ${s.title}`)));
+  const slotNow = () => S.schema.photos.find(s => s.num === Number(pick.value));
+  const one = el('input', { type: 'file', accept: 'image/*', id: 'quick-file', onchange: e => { const f = e.target.files[0]; e.target.value = ''; takeFile(slotNow(), f); } });
+  const many = el('input', { type: 'file', accept: 'image/*', multiple: true, id: 'quick-many', onchange: e => { const files = Array.from(e.target.files); e.target.value = ''; takeMany(files); } });
+  const key = id => e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); document.getElementById(id).click(); } };
+  const box = el('div', { class: 'box quick',
+    ondragover: e => { e.preventDefault(); box.classList.add('drop'); }, ondragleave: () => box.classList.remove('drop'),
+    ondrop: e => { e.preventDefault(); box.classList.remove('drop'); const files = Array.from(e.dataTransfer.files); if (files.length > 1) takeMany(files); else if (files[0]) takeFile(slotNow(), files[0]); } },
+    el('h2', {}, 'Добавить фото по номеру'),
+    el('div', { class: 'row' }, pick, one, el('label', { class: 'btn', for: 'quick-file', tabindex: 0, onkeydown: key('quick-file') }, 'Выбрать файл')),
+    el('p', { class: 'or' }, 'Или выберите сразу несколько файлов и назовите их по номеру места: 1.jpg, 2.jpg, фото-3.png. Каждое фото встанет на своё место. Файл можно и просто перетащить сюда.'),
+    el('div', { class: 'row' }, many, el('label', { class: 'btn ghost', for: 'quick-many', tabindex: 0, onkeydown: key('quick-many') }, 'Выбрать несколько файлов')));
+  return box;
+}
 function panelPhotos() {
   const cards = S.schema.photos.map(slot => {
     const src = photoSrc(slot.field), changed = photoChanged(slot.field), pend = S.pending[S.site[slot.field]];
@@ -427,7 +457,8 @@ function panelPhotos() {
     return card;
   });
   return el('div', {}, el('h1', {}, 'Фотографии'),
-    el('p', { class: 'lead' }, 'Семь мест на сайте, у каждого свой номер. Перетащите фото на карточку или нажмите «Загрузить». Большие файлы сожмутся сами.'),
+    el('p', { class: 'lead' }, 'Семь мест на сайте, у каждого свой номер. Выберите номер ниже или перетащите фото на нужную карточку. Большие файлы сожмутся сами.'),
+    quickBar(),
     el('div', { class: 'note' }, 'Хотите увидеть номера прямо на сайте? ', el('a', { href: '../?photos', target: '_blank', rel: 'noopener' }, 'Открыть сайт с номерами фото ↗'),
       ' Жёлтые метки на нём совпадают с номерами здесь.'),
     el('div', { class: 'grid' }, cards));
@@ -435,7 +466,7 @@ function panelPhotos() {
 
 function panelTexts() {
   const lang = S.lang;
-  const seg = el('div', { class: 'seg', role: 'group', 'aria-label': 'Язык' }, S.schema.langs.map(l =>
+  const seg = S.schema.langs.length < 2 ? null : el('div', { class: 'seg', role: 'group', 'aria-label': 'Язык' }, S.schema.langs.map(l =>
     el('button', { 'aria-pressed': String(l === lang), onclick: () => { S.lang = l; renderPanel(); } }, S.schema.langLabels[l])));
   const search = el('input', { type: 'search', placeholder: 'Найти поле или слово…', value: S.filter, 'aria-label': 'Поиск по текстам',
     oninput: e => { S.filter = e.target.value; applyFilter(); } });
@@ -448,7 +479,7 @@ function panelTexts() {
       const field = long
         ? el('textarea', { id, rows: Math.min(12, Math.max(2, Math.ceil(value.length / 72) + (value.match(/\n/g) || []).length)) }, value)
         : el('input', { id, type: 'text', value });
-      const ru = lang !== 'ru' ? getv(S.home.ru, sec.name, f.name) : '';
+      const ru = S.schema.langs.length > 1 && lang !== S.schema.langs[0] ? getv(S.home[S.schema.langs[0]], sec.name, f.name) : '';
       const wrap = el('div', { class: 'fld' + (textChanged(lang, sec.name, f.name) ? ' chg' : ''), 'data-find': (f.label + ' ' + value).toLowerCase() },
         el('label', { for: id }, f.label, required ? el('span', { class: 'req' }, ' *') : null),
         ru ? el('div', { class: 'ru', title: ru }, 'RU: ' + ru) : null,
@@ -469,7 +500,7 @@ function panelTexts() {
   });
   setTimeout(applyFilter, 0);
   return el('div', {}, el('h1', {}, 'Тексты'),
-    el('p', { class: 'lead' }, 'Блоки идут в том же порядке, что и на сайте. Изменённые поля отмечены жёлтой чертой. Для EN и FR над полем показан русский оригинал.'),
+    el('p', { class: 'lead' }, 'Блоки идут в том же порядке, что и на сайте. Изменённые поля отмечены жёлтой чертой.'),
     el('div', { class: 'bar2' }, seg, search), el('p', { class: 'lead', id: 'nofind', hidden: true }, 'Ничего не найдено. Попробуйте другое слово.'), ...sections);
 }
 function applyFilter() {

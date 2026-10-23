@@ -319,3 +319,23 @@
 **contact.linksTitle**
 
 > Ou directement
+
+## Убрано при переходе на один английский язык (октябрь 2026)
+
+Весь русский и французский текст лежит в истории git (файлы `content/home_ru.json`, `content/home_fr.json`). Здесь только английские фразы, которые перестали показываться.
+
+**about.c1Title … about.c4Title** (подзаголовки абзацев «Моей истории»; теперь текст идёт сплошным повествованием)
+
+> Sport, always
+> “Enough”
+> Exploring
+> Learning to trust
+
+**free.number / free.unit / free.title** (блок «30 минут бесплатно»)
+
+> 30 minutes: The first 30 minutes are free
+
+**contact.formMessage / contact.formNote** (прежние формулировки)
+
+> What brought you here? (optional)
+> Your message will arrive in my inbox. Please do not share medical or other sensitive information here.

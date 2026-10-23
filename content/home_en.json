@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Intuition in sport",
-    "description": "A conversation about intuition, change and the path in sport. The first 30-minute consultation is free and carries no obligation."
+    "description": "A conversation about intuition, change and the path in sport. An introductory conversation is free and carries no obligation."
   },
   "hero": {
     "alt": "A smiling woman standing by the sea at dusk with her arms open wide",
@@ -18,13 +18,13 @@
   },
   "quotes": {
     "a": "You can only control yourself.\nThe rest is out of your control.",
-    "b": "Not everything in life can be understood through logic,\nnor does everything need to be.",
+    "b": "Not everything in life can be understood through logic, nor does everything need to be.",
     "c": "Often, transformation doesn’t lead us to something new;\nit leads us back to ourselves."
   },
   "sessions": {
     "title": "Intuition sessions",
     "lead": "A space to develop the ability to connect with yourself, listen to your inner voice and recognise what it is saying.",
-    "h1": "It speaks differently to everyone",
+    "h1": "Intuition speaks differently to everyone",
     "p1": "For some, intuition comes as a gut feeling or a sensation in the heart; for others, as a voice, an image, a sudden flash of insight, or even something that appears in a dream. Sometimes it arrives instantly and clearly; at other times it is subtle and needs silence, patience and attention to notice.",
     "h2": "Where we begin",
     "p2": "Our work begins with exploring what intuition means to you: how you naturally perceive it, how it shows up in different situations, and what helps you recognise its signals. You learn to notice, distinguish and interpret these messages, while developing the confidence to trust your own perceptions.",
@@ -60,7 +60,8 @@
     "s1Title": "It begins before we are ready",
     "s1Text": "Transformation often begins independently of our readiness or desire. At a certain point in life, we feel that something is changing — first inside us.\n\nInitially, we dismiss these shifts, calling them moods or temporary phases, thinking that once something external changes, we’ll return to normal.",
     "s2Title": "We are changing",
-    "s2Text": "But at some point, we realise this is not something that will simply pass. We can’t run from it or keep denying it. The first step is to acknowledge the truth: we are changing.",
+    "s2Text": "But at some point, we realise this is not something that will simply pass. We can’t run from it or keep denying it.",
+    "s2Pull": "The first step is to acknowledge the truth: we are changing.",
     "s3Title": "When things lose their power",
     "s3Text": "You recognise this stage when things that once mattered lose their power — what used to bring you joy, purpose and satisfaction no longer does. There is a sense of inner confusion, a void where nothing feels alive or purposeful.",
     "s4Title": "The pull of the familiar",
@@ -76,16 +77,12 @@
   "about": {
     "title": "My story",
     "lead": "I am not an athlete myself — but sport has always been part of my life",
-    "c1Title": "Sport, always",
     "c1Text": "Sport has been part of my life since childhood: grassroots clubs, then a passionate fan. For ten years at FIFA I contributed to the organisation of football World Cups and numerous related events.",
     "c1Alt": "A smiling woman in a pink top standing by the sea",
-    "c2Title": "“Enough”",
     "c2Text": "A few years ago I decided to change direction — not by plan, and with no other plan in hand. Something inside simply said “enough”. I paused, and my focus shifted from external validation and having a cool job towards inner reflection and exploration.",
     "c2Alt": "A woman standing by a wooden fence among dune grass, looking aside",
-    "c3Title": "Exploring",
     "c3Text": "I explored psychology, body and energy practices, alternative healing approaches and ancient philosophies. I went deeper into my own experiences, experimented, and gradually discovered new ways of understanding myself.",
     "c3Alt": "A woman sitting in dry grass in warm evening light",
-    "c4Title": "Learning to trust",
     "c4Text": "I have always been intuitive, even as a child, but my sensitivity was often dismissed or seen as weakness in my family, so I never learnt to trust it. Over recent years I have cleared my inner voice from layers of family conditioning and social expectations. I trust myself more deeply, and rely less on external validation and the need for constant control and security. It has made my life feel lighter and happier.",
     "c4Alt": "A smiling woman in a white top by the sea",
     "note": "This journey continues — and I want to support others in their own search for fulfilment and happiness."
@@ -95,16 +92,16 @@
     "lead": "A few words about you are enough. The details can wait for our conversation.",
     "formName": "Your name",
     "formReach": "How to reach you (email, Telegram or WhatsApp)",
-    "formMessage": "What brought you here? (optional)",
+    "formMessage": "Leave your message",
     "formSend": "Send",
     "formSent": "Thank you. Your message has been sent.",
-    "formNote": "Your message will arrive in my inbox. Please do not share medical or other sensitive information here."
+    "formNote": "By sending this form you agree that I may use your name, contact details and message to reply to you, as described in the"
   },
   "faq": {
     "title": "Questions and answers",
     "lead": "If something is still unclear, the answer may be here.",
     "q1": "How does the first conversation work?",
-    "a1": "The first 30 minutes are free. We can simply meet, talk and listen. There is no obligation to continue — we can both decide whether it feels right to work together.",
+    "a1": "An introductory conversation costs you nothing. We can simply meet, talk and listen. There is no obligation to continue — we can both decide whether it feels right to work together.",
     "q2": "What is an intuition session?",
     "a2": "It is a space to develop the ability to connect with yourself, listen to your inner voice and recognise what it is saying. Our work begins with exploring what intuition means to you: how you naturally perceive it, and what helps you recognise its signals.",
     "q3": "Is there a programme or a method?",
@@ -121,10 +118,9 @@
     "a8": ""
   },
   "free": {
-    "number": "30",
-    "unit": "minutes",
-    "title": "The first 30 minutes are free",
-    "text": "We can simply meet, talk and listen.\n\nThere is no obligation to continue. We can both decide whether it feels right to work together."
+    "title": "An introductory conversation costs you nothing",
+    "text": "We can simply meet, talk and listen.\n\nThere is no obligation to continue. We can both decide whether it feels right to work together.",
+    "cta": "Write to me"
   },
   "qa": {
     "title": "Q&A",
@@ -156,6 +152,6 @@
   },
   "footer": {
     "line": "Listen to yourself.",
-    "privacy": "This site uses no analytics or tracking and does not record what you choose while reading. Your language and theme preferences stay in your own browser. If you write to me, your name and message are used only to reply to you."
+    "privacy": "This site uses no analytics or tracking cookies. If you write to me, your name and message are used only to reply to you."
   }
 }

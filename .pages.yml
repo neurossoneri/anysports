@@ -45,12 +45,8 @@ content:
     required: true
     options:
       values:
-      - name: ru
-        label: Русский
       - name: en
         label: English
-      - name: fr
-        label: Français
   - name: published
     label: Опубликовано / Published
     type: boolean
@@ -87,23 +83,11 @@ content:
     label: Название сайта (бренд)
     description: Показывается в шапке, во вкладке браузера, в подвале и в превью ссылок. Не переводится.
     type: string
-  - name: name_ru
-    label: Имя (RU)
-    type: string
   - name: name_en
-    label: Name (EN)
-    type: string
-  - name: name_fr
-    label: Nom (FR)
-    type: string
-  - name: role_ru
-    label: Специализация (RU)
+    label: Имя (как на сайте)
     type: string
   - name: role_en
-    label: Professional role (EN)
-    type: string
-  - name: role_fr
-    label: Spécialité (FR)
+    label: Специализация (как на сайте)
     type: string
   - name: email
     label: Email
@@ -121,509 +105,63 @@ content:
   - name: public_url
     label: Public site URL (optional, https://...)
     type: string
+  - name: privacy_address
+    label: Адрес для политики конфиденциальности (улица, индекс, город, Швейцария)
+    description: 'Показывается в разделе «Who is responsible» на странице privacy/. Можно оставить пустым: тогда указываются имя и email.'
+    type: string
   - name: portrait
-    label: Фото 1 · Главное фото (первый экран, слева)
+    label: Фото 1 · Главное фото (первый экран, справа)
     type: image
   - name: eyes_photo
-    label: Фото 3 · Крупный план («Интуитивные сессии»; если пусто — фото 1)
+    label: Фото 3 · Крупный план (рядом с «Intuition sessions»; если пусто — фото 1)
     type: image
   - name: quote_photo
     label: Фото 2 · Атмосферное фото за цитатой А (необязательно)
     type: image
   - name: story_photo_1
-    label: Фото 4 · Обо мне (слева сверху)
+    label: Фото 4 · Моя история (справа, после первого абзаца)
     type: image
   - name: story_photo_2
-    label: Фото 5 · Обо мне (справа сверху)
+    label: Фото 5 · Моя история (слева, после второго абзаца)
     type: image
   - name: story_photo_3
-    label: Фото 6 · Обо мне (слева снизу)
+    label: Фото 6 · Моя история (справа, после третьего абзаца)
     type: image
   - name: story_photo_4
-    label: Фото 7 · Обо мне (справа снизу)
+    label: Фото 7 · Моя история (слева, после четвёртого абзаца)
     type: image
   - name: publish_ready
     label: Готов к индексации / Allow search indexing
     description: Activate only after replacing all placeholders with verified details and obtaining permissions for photos.
     type: boolean
-- name: home_ru
-  label: Тексты сайта · русский
+- name: privacy
+  label: Политика конфиденциальности / Privacy notice
   type: file
-  path: content/home_ru.json
-  format: json
+  path: content/privacy.md
+  format: yaml-frontmatter
   operations:
     delete: false
   fields:
-  - name: meta
-    label: Вкладка браузера и поиск
-    type: object
-    fields:
-    - name: title
-      label: Название страницы (« — Sport Intuitive» добавится само)
-      type: string
-    - name: description
-      label: Описание для поисковиков и соцсетей
-      type: text
-  - name: hero
-    label: '1 · Главный экран: фото и цитата'
-    type: object
-    fields:
-    - name: alt
-      label: Описание фото для скринридеров
-      type: string
-    - name: quote1
-      label: Цитата, строка 1 (это заголовок страницы)
-      type: text
-    - name: quote2
-      label: Цитата, строка 2 (меньше, рядом)
-      type: text
-  - name: story
-    label: '2 · Введение: почему страница для спортсменов'
-    type: object
-    fields:
-    - name: title
-      label: Центральный вопрос (заголовок)
-      type: text
-    - name: p1
-      label: Абзац 1
-      type: text
-    - name: p2
-      label: Абзац 2
-      type: text
-    - name: p3
-      label: Крупная рукописная строка
-      type: text
-    - name: p4
-      label: Абзац 4
-      type: text
-    - name: p5
-      label: Абзац 5
-      type: text
-  - name: quotes
-    label: Цитаты рядом с фото (проявляются «от руки»)
-    type: object
-    fields:
-    - name: a
-      label: Цитата А — введение, рядом с фото
-      type: text
-    - name: b
-      label: Цитата Б — интуитивные сессии
-      type: text
-    - name: c
-      label: Цитата В — трансформация
-      type: text
-  - name: sessions
-    label: 3 · Интуитивные сессии
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Вводная фраза
-      type: text
-    - name: h1
-      label: Блок 1 · заголовок
-      type: string
-    - name: p1
-      label: Блок 1 · текст
-      type: text
-    - name: h2
-      label: Блок 2 · заголовок
-      type: string
-    - name: p2
-      label: Блок 2 · текст
-      type: text
-    - name: h3
-      label: Блок 3 · заголовок
-      type: string
-    - name: p3
-      label: Блок 3 · текст
-      type: text
-    - name: h4
-      label: Блок «Как проходят сессии» · заголовок
-      type: string
-    - name: p4
-      label: Блок «Как проходят сессии» · абзац 1
-      type: text
-    - name: p5
-      label: Блок «Как проходят сессии» · абзац 2
-      type: text
-    - name: note
-      label: Мелкая оговорка про медицину и терапию
-      type: text
-    - name: bring
-      label: Что принести с собой
-      type: text
-    - name: photoAlt
-      label: Описание фото крупным планом (для скринридеров)
-      type: string
-  - name: client
-    label: '3 · Интуитивные сессии: темы для исследования (семь символов)'
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: intro
-      label: Вступление
-      type: text
-    - name: l1
-      label: Тема 1 · фраза
-      type: string
-    - name: l1t
-      label: Тема 1 · пояснение
-      type: text
-    - name: l2
-      label: Тема 2 · фраза
-      type: string
-    - name: l2t
-      label: Тема 2 · пояснение
-      type: text
-    - name: l3
-      label: Тема 3 · фраза
-      type: string
-    - name: l3t
-      label: Тема 3 · пояснение
-      type: text
-    - name: l4
-      label: Тема 4 · фраза
-      type: string
-    - name: l4t
-      label: Тема 4 · пояснение
-      type: text
-    - name: l5
-      label: Тема 5 · фраза
-      type: string
-    - name: l5t
-      label: Тема 5 · пояснение
-      type: text
-    - name: l6
-      label: Тема 6 · фраза
-      type: string
-    - name: l6t
-      label: Тема 6 · пояснение
-      type: text
-    - name: l7
-      label: Тема 7 · крупная рукописная фраза
-      type: string
-    - name: l7t
-      label: Тема 7 · пояснение
-      type: text
-  - name: change
-    label: 4 · Трансформация
-    type: object
-    fields:
-    - name: title
-      label: Заголовок раздела
-      type: string
-    - name: s1Title
-      label: Сцена 1 · заголовок
-      type: string
-    - name: s1Text
-      label: Сцена 1 · текст
-      type: text
-    - name: s2Title
-      label: Сцена 2 · заголовок
-      type: string
-    - name: s2Text
-      label: Сцена 2 · текст
-      type: text
-    - name: s3Title
-      label: Сцена 3 · заголовок
-      type: string
-    - name: s3Text
-      label: Сцена 3 · текст
-      type: text
-    - name: s4Title
-      label: Сцена 4 · заголовок
-      type: string
-    - name: s4Text
-      label: Сцена 4 · текст
-      type: text
-    - name: bTitle
-      label: Сцена с бабочкой · заголовок
-      type: string
-    - name: bText
-      label: Сцена с бабочкой · текст
-      type: text
-    - name: mTitle
-      label: Сцена «когда не понимают» · заголовок
-      type: string
-    - name: mText
-      label: Сцена «когда не понимают» · текст
-      type: text
-    - name: wTitle
-      label: Сцена «свидетель» · заголовок
-      type: string
-    - name: wText
-      label: Сцена «свидетель» · текст
-      type: text
-    - name: wNote
-      label: Рукописная строка в конце
-      type: text
-  - name: about
-    label: 5 · Обо мне (четыре фото — в «Контакты, фото, имя»)
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Вводная фраза (крупно, под заголовком)
-      type: text
-    - name: c1Title
-      label: Абзац 1 · начальные слова (жирным)
-      type: string
-    - name: c1Text
-      label: Абзац 1 · текст
-      type: text
-    - name: c1Alt
-      label: Фото 1 · описание для скринридеров
-      type: string
-    - name: c2Title
-      label: Абзац 2 · начальные слова (жирным)
-      type: string
-    - name: c2Text
-      label: Абзац 2 · текст
-      type: text
-    - name: c2Alt
-      label: Фото 2 · описание для скринридеров
-      type: string
-    - name: c3Title
-      label: Абзац 3 · начальные слова (жирным)
-      type: string
-    - name: c3Text
-      label: Абзац 3 · текст
-      type: text
-    - name: c3Alt
-      label: Фото 3 · описание для скринридеров
-      type: string
-    - name: c4Title
-      label: Абзац 4 · начальные слова (жирным)
-      type: string
-    - name: c4Text
-      label: Абзац 4 · текст
-      type: text
-    - name: c4Alt
-      label: Фото 4 · описание для скринридеров
-      type: string
-    - name: note
-      label: Рукописная строка в конце
-      type: text
-  - name: contact
-    label: 6 · Контакты и форма (сразу после «Обо мне»)
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Текст под заголовком
-      type: text
-    - name: formName
-      label: Поле «имя»
-      type: string
-    - name: formReach
-      label: Поле «как связаться»
-      type: string
-    - name: formMessage
-      label: Поле «сообщение»
-      type: string
-    - name: formSend
-      label: Кнопка отправки
-      type: string
-    - name: formSent
-      label: Сообщение после успешной отправки
-      type: text
-    - name: formNote
-      label: Мелкая пометка под формой
-      type: text
-  - name: faq
-    label: 7 · Вопросы и ответы (пустой вопрос скрывает слот)
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Текст под заголовком
-      type: text
-    - name: q1
-      label: Вопрос 1
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a1
-      label: Ответ 1
-      type: text
-    - name: q2
-      label: Вопрос 2
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a2
-      label: Ответ 2
-      type: text
-    - name: q3
-      label: Вопрос 3
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a3
-      label: Ответ 3
-      type: text
-    - name: q4
-      label: Вопрос 4
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a4
-      label: Ответ 4
-      type: text
-    - name: q5
-      label: Вопрос 5
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a5
-      label: Ответ 5
-      type: text
-    - name: q6
-      label: Вопрос 6
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a6
-      label: Ответ 6
-      type: text
-    - name: q7
-      label: Вопрос 7
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a7
-      label: Ответ 7
-      type: text
-    - name: q8
-      label: Вопрос 8
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a8
-      label: Ответ 8
-      type: text
-  - name: free
-    label: '7 · Вопросы и ответы: блок «30 минут бесплатно» (в конце раздела)'
-    type: object
-    fields:
-    - name: number
-      label: Число в круге
-      type: string
-    - name: unit
-      label: Единица
-      type: string
-    - name: title
-      label: Заголовок
-      type: string
-    - name: text
-      label: Текст
-      type: text
-  - name: qa
-    label: 8 · Q&A внизу страницы (пустой вопрос скрывает слот)
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Текст под заголовком
-      type: text
-    - name: ask
-      label: Ссылка под текстом (ведёт к форме контактов)
-      type: string
-    - name: g1
-      label: Подпись группы 1 (над вопросами 1–4)
-      type: string
-      description: Оставьте пустым, чтобы убрать подпись.
-    - name: q1
-      label: Вопрос 1
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a1
-      label: Ответ 1
-      type: text
-    - name: q2
-      label: Вопрос 2
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a2
-      label: Ответ 2
-      type: text
-    - name: q3
-      label: Вопрос 3
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a3
-      label: Ответ 3
-      type: text
-    - name: q4
-      label: Вопрос 4
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a4
-      label: Ответ 4
-      type: text
-    - name: g2
-      label: Подпись группы 2 (над вопросами 5–6)
-      type: string
-      description: Оставьте пустым, чтобы убрать подпись.
-    - name: q5
-      label: Вопрос 5
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a5
-      label: Ответ 5
-      type: text
-    - name: q6
-      label: Вопрос 6
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a6
-      label: Ответ 6
-      type: text
-    - name: g3
-      label: Подпись группы 3 (над вопросами 7–8)
-      type: string
-      description: Оставьте пустым, чтобы убрать подпись.
-    - name: q7
-      label: Вопрос 7
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a7
-      label: Ответ 7
-      type: text
-    - name: q8
-      label: Вопрос 8
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a8
-      label: Ответ 8
-      type: text
-  - name: notes
-    label: Заметки (раздел виден, только если есть опубликованные статьи)
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Текст под заголовком
-      type: text
-  - name: footer
-    label: Подвал
-    type: object
-    fields:
-    - name: line
-      label: Короткая фраза
-      type: string
-    - name: privacy
-      label: Строка о приватности
-      type: text
+  - name: title
+    label: Заголовок / Title
+    type: string
+    required: true
+  - name: description
+    label: Описание / Description
+    type: text
+  - name: updated
+    label: Дата обновления / Last updated
+    type: date
+    required: true
+  - name: body
+    label: Текст / Text (метки {{controller}}, {{form_service}}, {{updated}} подставляются сами)
+    type: rich-text
+    required: true
+    options:
+      format: markdown
+      switcher: true
 - name: home_en
-  label: Тексты сайта · English
+  label: Тексты сайта (English)
   type: file
   path: content/home_en.json
   format: json
@@ -667,7 +205,7 @@ content:
       label: Абзац 2
       type: text
     - name: p3
-      label: Крупная рукописная строка
+      label: Выделенная цитата (курсив с линией слева)
       type: text
     - name: p4
       label: Абзац 4
@@ -676,17 +214,17 @@ content:
       label: Абзац 5
       type: text
   - name: quotes
-    label: Цитаты рядом с фото (проявляются «от руки»)
+    label: Цитаты
     type: object
     fields:
     - name: a
-      label: Цитата А — введение, рядом с фото
+      label: 'Цитата А: рукописная, на фото во введении'
       type: text
     - name: b
-      label: Цитата Б — интуитивные сессии
+      label: 'Цитата Б: выделенная, в «Intuition sessions» после первого блока'
       type: text
     - name: c
-      label: Цитата В — трансформация
+      label: 'Цитата В: рукописная, в «Transformation»'
       type: text
   - name: sessions
     label: 3 · Интуитивные сессии
@@ -729,13 +267,13 @@ content:
       label: Мелкая оговорка про медицину и терапию
       type: text
     - name: bring
-      label: Что принести с собой
+      label: 'Выделенная цитата: что принести с собой (после блока «Where we begin»)'
       type: text
     - name: photoAlt
       label: Описание фото крупным планом (для скринридеров)
       type: string
   - name: client
-    label: '3 · Интуитивные сессии: темы для исследования (семь символов)'
+    label: '3 · Intuition sessions: темы для исследования (шесть символов и итоговая фраза)'
     type: object
     fields:
     - name: title
@@ -781,10 +319,10 @@ content:
       label: Тема 6 · пояснение
       type: text
     - name: l7
-      label: Тема 7 · крупная рукописная фраза
+      label: Итоговая фраза · заголовок (по центру, крупно)
       type: string
     - name: l7t
-      label: Тема 7 · пояснение
+      label: Итоговая фраза · текст (по центру)
       type: text
   - name: change
     label: 4 · Трансформация
@@ -804,6 +342,9 @@ content:
       type: string
     - name: s2Text
       label: Сцена 2 · текст
+      type: text
+    - name: s2Pull
+      label: Сцена 2 · выделенная фраза (после текста; пусто = не показывать)
       type: text
     - name: s3Title
       label: Сцена 3 · заголовок
@@ -836,10 +377,10 @@ content:
       label: Сцена «свидетель» · текст
       type: text
     - name: wNote
-      label: Рукописная строка в конце
+      label: Выделенная строка в конце
       type: text
   - name: about
-    label: 5 · Обо мне (четыре фото — в «Контакты, фото, имя»)
+    label: 5 · Моя история (читается как предисловие к книге; четыре фото — в «Контакты, фото, имя»)
     type: object
     fields:
     - name: title
@@ -848,520 +389,32 @@ content:
     - name: lead
       label: Вводная фраза (крупно, под заголовком)
       type: text
-    - name: c1Title
-      label: Абзац 1 · начальные слова (жирным)
-      type: string
     - name: c1Text
-      label: Абзац 1 · текст
-      type: text
-    - name: c1Alt
-      label: Фото 1 · описание для скринридеров
-      type: string
-    - name: c2Title
-      label: Абзац 2 · начальные слова (жирным)
-      type: string
-    - name: c2Text
-      label: Абзац 2 · текст
-      type: text
-    - name: c2Alt
-      label: Фото 2 · описание для скринридеров
-      type: string
-    - name: c3Title
-      label: Абзац 3 · начальные слова (жирным)
-      type: string
-    - name: c3Text
-      label: Абзац 3 · текст
-      type: text
-    - name: c3Alt
-      label: Фото 3 · описание для скринридеров
-      type: string
-    - name: c4Title
-      label: Абзац 4 · начальные слова (жирным)
-      type: string
-    - name: c4Text
-      label: Абзац 4 · текст
-      type: text
-    - name: c4Alt
-      label: Фото 4 · описание для скринридеров
-      type: string
-    - name: note
-      label: Рукописная строка в конце
-      type: text
-  - name: contact
-    label: 6 · Контакты и форма (сразу после «Обо мне»)
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Текст под заголовком
-      type: text
-    - name: formName
-      label: Поле «имя»
-      type: string
-    - name: formReach
-      label: Поле «как связаться»
-      type: string
-    - name: formMessage
-      label: Поле «сообщение»
-      type: string
-    - name: formSend
-      label: Кнопка отправки
-      type: string
-    - name: formSent
-      label: Сообщение после успешной отправки
-      type: text
-    - name: formNote
-      label: Мелкая пометка под формой
-      type: text
-  - name: faq
-    label: 7 · Вопросы и ответы (пустой вопрос скрывает слот)
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Текст под заголовком
-      type: text
-    - name: q1
-      label: Вопрос 1
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a1
-      label: Ответ 1
-      type: text
-    - name: q2
-      label: Вопрос 2
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a2
-      label: Ответ 2
-      type: text
-    - name: q3
-      label: Вопрос 3
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a3
-      label: Ответ 3
-      type: text
-    - name: q4
-      label: Вопрос 4
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a4
-      label: Ответ 4
-      type: text
-    - name: q5
-      label: Вопрос 5
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a5
-      label: Ответ 5
-      type: text
-    - name: q6
-      label: Вопрос 6
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a6
-      label: Ответ 6
-      type: text
-    - name: q7
-      label: Вопрос 7
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a7
-      label: Ответ 7
-      type: text
-    - name: q8
-      label: Вопрос 8
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a8
-      label: Ответ 8
-      type: text
-  - name: free
-    label: '7 · Вопросы и ответы: блок «30 минут бесплатно» (в конце раздела)'
-    type: object
-    fields:
-    - name: number
-      label: Число в круге
-      type: string
-    - name: unit
-      label: Единица
-      type: string
-    - name: title
-      label: Заголовок
-      type: string
-    - name: text
-      label: Текст
-      type: text
-  - name: qa
-    label: 8 · Q&A внизу страницы (пустой вопрос скрывает слот)
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Текст под заголовком
-      type: text
-    - name: ask
-      label: Ссылка под текстом (ведёт к форме контактов)
-      type: string
-    - name: g1
-      label: Подпись группы 1 (над вопросами 1–4)
-      type: string
-      description: Оставьте пустым, чтобы убрать подпись.
-    - name: q1
-      label: Вопрос 1
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a1
-      label: Ответ 1
-      type: text
-    - name: q2
-      label: Вопрос 2
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a2
-      label: Ответ 2
-      type: text
-    - name: q3
-      label: Вопрос 3
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a3
-      label: Ответ 3
-      type: text
-    - name: q4
-      label: Вопрос 4
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a4
-      label: Ответ 4
-      type: text
-    - name: g2
-      label: Подпись группы 2 (над вопросами 5–6)
-      type: string
-      description: Оставьте пустым, чтобы убрать подпись.
-    - name: q5
-      label: Вопрос 5
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a5
-      label: Ответ 5
-      type: text
-    - name: q6
-      label: Вопрос 6
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a6
-      label: Ответ 6
-      type: text
-    - name: g3
-      label: Подпись группы 3 (над вопросами 7–8)
-      type: string
-      description: Оставьте пустым, чтобы убрать подпись.
-    - name: q7
-      label: Вопрос 7
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a7
-      label: Ответ 7
-      type: text
-    - name: q8
-      label: Вопрос 8
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a8
-      label: Ответ 8
-      type: text
-  - name: notes
-    label: Заметки (раздел виден, только если есть опубликованные статьи)
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Текст под заголовком
-      type: text
-  - name: footer
-    label: Подвал
-    type: object
-    fields:
-    - name: line
-      label: Короткая фраза
-      type: string
-    - name: privacy
-      label: Строка о приватности
-      type: text
-- name: home_fr
-  label: Тексты сайта · Français
-  type: file
-  path: content/home_fr.json
-  format: json
-  operations:
-    delete: false
-  fields:
-  - name: meta
-    label: Вкладка браузера и поиск
-    type: object
-    fields:
-    - name: title
-      label: Название страницы (« — Sport Intuitive» добавится само)
-      type: string
-    - name: description
-      label: Описание для поисковиков и соцсетей
-      type: text
-  - name: hero
-    label: '1 · Главный экран: фото и цитата'
-    type: object
-    fields:
-    - name: alt
-      label: Описание фото для скринридеров
-      type: string
-    - name: quote1
-      label: Цитата, строка 1 (это заголовок страницы)
-      type: text
-    - name: quote2
-      label: Цитата, строка 2 (меньше, рядом)
-      type: text
-  - name: story
-    label: '2 · Введение: почему страница для спортсменов'
-    type: object
-    fields:
-    - name: title
-      label: Центральный вопрос (заголовок)
-      type: text
-    - name: p1
       label: Абзац 1
       type: text
-    - name: p2
-      label: Абзац 2
-      type: text
-    - name: p3
-      label: Крупная рукописная строка
-      type: text
-    - name: p4
-      label: Абзац 4
-      type: text
-    - name: p5
-      label: Абзац 5
-      type: text
-  - name: quotes
-    label: Цитаты рядом с фото (проявляются «от руки»)
-    type: object
-    fields:
-    - name: a
-      label: Цитата А — введение, рядом с фото
-      type: text
-    - name: b
-      label: Цитата Б — интуитивные сессии
-      type: text
-    - name: c
-      label: Цитата В — трансформация
-      type: text
-  - name: sessions
-    label: 3 · Интуитивные сессии
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Вводная фраза
-      type: text
-    - name: h1
-      label: Блок 1 · заголовок
-      type: string
-    - name: p1
-      label: Блок 1 · текст
-      type: text
-    - name: h2
-      label: Блок 2 · заголовок
-      type: string
-    - name: p2
-      label: Блок 2 · текст
-      type: text
-    - name: h3
-      label: Блок 3 · заголовок
-      type: string
-    - name: p3
-      label: Блок 3 · текст
-      type: text
-    - name: h4
-      label: Блок «Как проходят сессии» · заголовок
-      type: string
-    - name: p4
-      label: Блок «Как проходят сессии» · абзац 1
-      type: text
-    - name: p5
-      label: Блок «Как проходят сессии» · абзац 2
-      type: text
-    - name: note
-      label: Мелкая оговорка про медицину и терапию
-      type: text
-    - name: bring
-      label: Что принести с собой
-      type: text
-    - name: photoAlt
-      label: Описание фото крупным планом (для скринридеров)
-      type: string
-  - name: client
-    label: '3 · Интуитивные сессии: темы для исследования (семь символов)'
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: intro
-      label: Вступление
-      type: text
-    - name: l1
-      label: Тема 1 · фраза
-      type: string
-    - name: l1t
-      label: Тема 1 · пояснение
-      type: text
-    - name: l2
-      label: Тема 2 · фраза
-      type: string
-    - name: l2t
-      label: Тема 2 · пояснение
-      type: text
-    - name: l3
-      label: Тема 3 · фраза
-      type: string
-    - name: l3t
-      label: Тема 3 · пояснение
-      type: text
-    - name: l4
-      label: Тема 4 · фраза
-      type: string
-    - name: l4t
-      label: Тема 4 · пояснение
-      type: text
-    - name: l5
-      label: Тема 5 · фраза
-      type: string
-    - name: l5t
-      label: Тема 5 · пояснение
-      type: text
-    - name: l6
-      label: Тема 6 · фраза
-      type: string
-    - name: l6t
-      label: Тема 6 · пояснение
-      type: text
-    - name: l7
-      label: Тема 7 · крупная рукописная фраза
-      type: string
-    - name: l7t
-      label: Тема 7 · пояснение
-      type: text
-  - name: change
-    label: 4 · Трансформация
-    type: object
-    fields:
-    - name: title
-      label: Заголовок раздела
-      type: string
-    - name: s1Title
-      label: Сцена 1 · заголовок
-      type: string
-    - name: s1Text
-      label: Сцена 1 · текст
-      type: text
-    - name: s2Title
-      label: Сцена 2 · заголовок
-      type: string
-    - name: s2Text
-      label: Сцена 2 · текст
-      type: text
-    - name: s3Title
-      label: Сцена 3 · заголовок
-      type: string
-    - name: s3Text
-      label: Сцена 3 · текст
-      type: text
-    - name: s4Title
-      label: Сцена 4 · заголовок
-      type: string
-    - name: s4Text
-      label: Сцена 4 · текст
-      type: text
-    - name: bTitle
-      label: Сцена с бабочкой · заголовок
-      type: string
-    - name: bText
-      label: Сцена с бабочкой · текст
-      type: text
-    - name: mTitle
-      label: Сцена «когда не понимают» · заголовок
-      type: string
-    - name: mText
-      label: Сцена «когда не понимают» · текст
-      type: text
-    - name: wTitle
-      label: Сцена «свидетель» · заголовок
-      type: string
-    - name: wText
-      label: Сцена «свидетель» · текст
-      type: text
-    - name: wNote
-      label: Рукописная строка в конце
-      type: text
-  - name: about
-    label: 5 · Обо мне (четыре фото — в «Контакты, фото, имя»)
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Вводная фраза (крупно, под заголовком)
-      type: text
-    - name: c1Title
-      label: Абзац 1 · начальные слова (жирным)
-      type: string
-    - name: c1Text
-      label: Абзац 1 · текст
-      type: text
     - name: c1Alt
-      label: Фото 1 · описание для скринридеров
-      type: string
-    - name: c2Title
-      label: Абзац 2 · начальные слова (жирным)
-      type: string
-    - name: c2Text
-      label: Абзац 2 · текст
-      type: text
-    - name: c2Alt
-      label: Фото 2 · описание для скринридеров
-      type: string
-    - name: c3Title
-      label: Абзац 3 · начальные слова (жирным)
-      type: string
-    - name: c3Text
-      label: Абзац 3 · текст
-      type: text
-    - name: c3Alt
-      label: Фото 3 · описание для скринридеров
-      type: string
-    - name: c4Title
-      label: Абзац 4 · начальные слова (жирным)
-      type: string
-    - name: c4Text
-      label: Абзац 4 · текст
-      type: text
-    - name: c4Alt
       label: Фото 4 · описание для скринридеров
       type: string
+    - name: c2Text
+      label: Абзац 2
+      type: text
+    - name: c2Alt
+      label: Фото 5 · описание для скринридеров
+      type: string
+    - name: c3Text
+      label: Абзац 3
+      type: text
+    - name: c3Alt
+      label: Фото 6 · описание для скринридеров
+      type: string
+    - name: c4Text
+      label: Абзац 4
+      type: text
+    - name: c4Alt
+      label: Фото 7 · описание для скринридеров
+      type: string
     - name: note
-      label: Рукописная строка в конце
+      label: Итоговая фраза (по центру, рукописная)
       type: text
   - name: contact
     label: 6 · Контакты и форма (сразу после «Обо мне»)
@@ -1380,7 +433,7 @@ content:
       label: Поле «как связаться»
       type: string
     - name: formMessage
-      label: Поле «сообщение»
+      label: Поле «сообщение» (приглашение написать)
       type: string
     - name: formSend
       label: Кнопка отправки
@@ -1389,7 +442,7 @@ content:
       label: Сообщение после успешной отправки
       type: text
     - name: formNote
-      label: Мелкая пометка под формой
+      label: Согласие под формой (после текста сама добавляется ссылка «privacy notice»)
       type: text
   - name: faq
     label: 7 · Вопросы и ответы (пустой вопрос скрывает слот)
@@ -1458,21 +511,18 @@ content:
       label: Ответ 8
       type: text
   - name: free
-    label: '7 · Вопросы и ответы: блок «30 минут бесплатно» (в конце раздела)'
+    label: '7 · Вопросы и ответы: блок «вводная беседа бесплатно» (в конце раздела)'
     type: object
     fields:
-    - name: number
-      label: Число в круге
-      type: string
-    - name: unit
-      label: Единица
-      type: string
     - name: title
       label: Заголовок
       type: string
     - name: text
       label: Текст
       type: text
+    - name: cta
+      label: Кнопка (ведёт к форме «Write to me»)
+      type: string
   - name: qa
     label: 8 · Q&A внизу страницы (пустой вопрос скрывает слот)
     type: object

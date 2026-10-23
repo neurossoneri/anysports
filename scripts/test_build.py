@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Regression checks: copy/template/CMS consistency, static output, form settings, notes, safe HTML."""
+"""Regression checks: copy/template/CMS consistency, static output, privacy notice, form settings, notes, safe HTML."""
 import html
 import importlib.util
 import json
 import os
 import re
 import shutil
+import subprocess
 import tempfile
 from pathlib import Path
 
@@ -13,7 +14,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 esc = lambda v: html.escape(v, quote=True)
-LANGS = ('ru', 'en', 'fr')
+LANGS = ('en',)
 SECTION_IDS = ('hero', 'intro', 'sessions', 'change', 'about', 'contact', 'faq', 'qa')   # page order, top to bottom
 
 
@@ -36,47 +37,91 @@ def cms_keys(fields, prefix=''):
 
 
 def check_consistency(builder):
-    """Every key the template asks for exists in all languages; CMS config and JSON files agree."""
+    """Every key the template asks for has copy; CMS config and JSON agree; the site really has one language."""
     template = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
     wanted = set(re.findall(r'data-(?:i18n|i18n-aria|i18n-alt)="([^"]+)"', template))
     site = json.loads((ROOT / 'content/site.json').read_text(encoding='utf-8'))
     values = builder.collect_values(site)
     config = yaml.safe_load((ROOT / '.pages.yml').read_text(encoding='utf-8'))
     entries = {entry['name']: entry for entry in config['content']}
-    content_sets = {}
-    for lang in LANGS:
-        flat = builder.flatten(json.loads((ROOT / f'content/home_{lang}.json').read_text(encoding='utf-8')), lang)
-        content_sets[lang] = set(flat)
-        missing = wanted - set(values[lang]) - {'notes.title', 'notes.lead'}
-        assert not missing, f'{lang}: template keys without copy: {sorted(missing)}'
-        assert cms_keys(entries[f'home_{lang}']['fields']) == set(flat), f'{lang}: .pages.yml and content/home_{lang}.json differ'
-        unused = {k for k in flat if k not in wanted and not k.startswith(('meta.', 'notes.'))}
-        assert not unused, f'{lang}: copy that the template never shows: {sorted(unused)}'
-    assert content_sets['ru'] == content_sets['en'] == content_sets['fr'], 'languages have different keys'
-    for key in ('form_endpoint', 'portrait', 'eyes_photo', 'story_photo_1', 'story_photo_4'):
+    assert builder.LANGS == ('en',), 'the site is English only'
+    assert not (ROOT / 'content/home_ru.json').exists() and not (ROOT / 'content/home_fr.json').exists(), 'RU/FR copy must stay removed'
+    assert 'home_ru' not in entries and 'home_fr' not in entries, 'RU/FR forms must stay removed from .pages.yml'
+    flat = builder.flatten(json.loads((ROOT / 'content/home_en.json').read_text(encoding='utf-8')), 'en')
+    missing = wanted - set(values['en']) - {'notes.title', 'notes.lead'}
+    assert not missing, f'template keys without copy: {sorted(missing)}'
+    assert cms_keys(entries['home_en']['fields']) == set(flat), '.pages.yml and content/home_en.json differ'
+    unused = {k for k in flat if k not in wanted and not k.startswith(('meta.', 'notes.'))}
+    assert not unused, f'copy that the template never shows: {sorted(unused)}'
+    for key in ('form_endpoint', 'portrait', 'eyes_photo', 'story_photo_1', 'story_photo_4', 'privacy_address'):
         assert key in cms_keys(entries['site']['fields']), f'site settings lack {key}'
+    for key in ('name_ru', 'name_fr', 'role_ru', 'role_fr'):
+        assert key not in site and key not in cms_keys(entries['site']['fields']), f'old language field is back: {key}'
+    assert 'privacy' in entries and (ROOT / 'content/privacy.md').exists(), 'the privacy notice must stay editable'
 
 
 def check_static(builder, destination):
     home = (destination / 'index.html').read_text(encoding='utf-8')
     css = (destination / 'assets/site.css').read_text(encoding='utf-8')
-    assert '<html lang="ru">' in home and 'const CMS_OVERRIDES' in home
+    assert '<html lang="en">' in home and 'const CMS_OVERRIDES' in home
     assert '@@' not in home and 'data-photo=' not in home, 'unresolved template marker'
     for section in SECTION_IDS:
         assert f'id="{section}"' in home, f'section missing: {section}'
     positions = [home.index(f'id="{section}"') for section in SECTION_IDS]
     assert positions == sorted(positions), 'sections are out of the agreed order'
-    assert home.index('id="faq"') < home.index('id="free"') < home.index('class="site-footer"'), 'the free 30 minutes must close the Q&A'
-    assert home.index('id="contact"') > home.index('id="about"') and home.index('id="contact"') < home.index('id="faq"'), 'the form goes right after "About me"'
-    for band in ('band-deep', 'band-frost', 'band-teal', 'band-ice'):
+    assert home.index('id="faq"') < home.index('id="free"') < home.index('class="site-footer'), 'the introductory-conversation card closes the first Q&A'
+    assert home.index('id="contact"') > home.index('id="about"') and home.index('id="contact"') < home.index('id="faq"'), 'the form goes right after "My story"'
+
+    # one language, no top bar, favicon stays
+    assert 'id="language"' not in home and '<header class="site-header">' not in home and 'langSelect' not in home, 'language switch / top bar must stay removed'
+    assert 'rel="icon"' in home and 'data:image/svg+xml' in home, 'the favicon stays'
+
+    # hero: text on the left, photograph on the right
+    assert home.index('<div class="hero-quote">') < home.index('<figure class="photo hero-photo">'), 'hero: quotation first, photograph second'
+    assert re.search(r'\.hero-grid \{[^}]*grid-template-columns:minmax\(0,\.8fr\) minmax\(0,1\.2fr\)', css), 'hero: narrow text column, wide photo column'
+
+    # soft light bands and soft transitions
+    for band in ('band-deep', 'band-sand', 'band-teal', 'band-dune'):
         assert band in home, f'background band missing: {band}'
-    assert home.count('<blockquote class="quote-text" data-write ') == 3, 'expected three handwritten quote blocks'
+    assert 'band-frost' not in home and 'band-ice' not in home
+    assert '#edf3f7' not in css and '#dae7f0' not in css, 'near-white blue must not return'
+    assert '--sand:#e6e3d8' in css and '--dune:#d9dfd6' in css
+    for pair in ('.band-deep + .band-sand::before', '.band-sand + .band-teal::before', '.band-teal + .band-dune::before',
+                 '.band-dune + .band-deep::before', '.band-dune + .band-sand::before', '.site-footer.after-dune::before'):
+        assert pair in css, f'transition missing: {pair}'
+
+    # copy changes
+    assert 'Intuition speaks differently to everyone' in home and 'It speaks differently' not in home
+    assert 'Leave your message' in home and '(optional)' not in home and 'sensitive information here' not in home
+    assert 'By sending this form you agree' in home and home.count('href="privacy/"') >= 2, 'consent text and privacy links (form and footer)'
+    assert '30 minutes' not in home.lower() and '30-minute' not in home.lower() and 'free-num' not in home, 'no 30-minute limit'
+    assert 'An introductory conversation costs you nothing' in home
+    assert re.search(r'<a class="button" href="#contact" data-i18n="free\.cta">', home), 'the card leads back to the form'
+    assert re.search(r'<p class="mid"[^>]*data-i18n="story\.p1"', home) and re.search(r'<p class="mid"[^>]*data-i18n="story\.p5"', home), 'intro lines use the main text style'
+
+    # highlighted phrases, in the text where they belong
+    assert len(re.findall(r'class="pull[ "]', home)) >= 5, 'key phrases are highlighted in every block'
+    order = [home.index(f'data-i18n="{k}"') for k in ('sessions.p1', 'quotes.b', 'sessions.p2', 'sessions.bring', 'sessions.p3')]
+    assert order == sorted(order), 'quote B follows the first sessions text, "bring" follows "Where we begin"'
+    assert home.index('data-i18n="change.s2Text"') < home.index('data-i18n="change.s2Pull"')
+    assert home.count('<blockquote class="quote-text" data-write ') == 2, 'two handwritten quotations (A and C)'
+
+    # closing statements
+    finales = re.findall(r'<div class="finale[^"]*" data-finale>', home)
+    assert len(finales) == 2, 'two centred closing statements'
+    assert home.index('data-i18n="client.l6t"') < home.index('data-i18n="client.l7"') < home.index('id="change"')
+    assert 'data-write data-i18n="about.note"' in home
+
+    # my story: one flowing preface
+    assert 'about.c1Title' not in home and 'mosaic' not in home and 'class="chap dropcap"' in home
+    assert home.count('class="photo plate plate-') == 4, 'four numbered photographs inside the story'
+
     assert 'id="contact-form"' in home and 'name="_gotcha"' in home
     assert 'id="close-page"' not in home and 'farewell' not in home, 'no forced choice and no farewell dialog'
     assert 'id="to-top"' in home and 'class="scroll-progress"' in home, 'back-to-top button or progress line is missing'
-    assert re.search(r'<div id="top"', home) and not re.search(r'<header[^>]*\bid="top"', home), '#top must be a plain anchor at the very top, not the sticky header'
-    ru = json.loads((ROOT / 'content/home_ru.json').read_text(encoding='utf-8'))
-    assert esc(ru['story']['title']) in home and esc(ru['quotes']['a'].split('\n')[0]) in home, 'Russian copy must be baked into the static HTML'
+    assert re.search(r'<div id="top"', home)
+    en = json.loads((ROOT / 'content/home_en.json').read_text(encoding='utf-8'))
+    assert esc(en['story']['title']) in home and esc(en['quotes']['a'].split('\n')[0]) in home, 'English copy must be baked into the static HTML'
     assert ('id="notes"' in home) == bool(builder.parse_posts()), 'notes appear exactly when an article is published'
     for gone in ('review-grid', 'quiz', 'credential', 'mobile-cta', 'hero-floating', 'hero-tag', 'hero-hint', 'contact-booking', 'id="check"', 'id="fork"', 'id="invite"'):
         assert gone not in home, f'old template block is back: {gone}'
@@ -88,14 +133,22 @@ def check_static(builder, destination):
     for phrase in ('book online', 'choose a timezone', 'choose a time', 'conversation with'):
         assert phrase not in home.lower(), f'call to action must not return: {phrase}'
     assert '@view-transition' in css and 'scroll-progress' in css
-    assert 'rel="icon"' in home and 'class="brand-mark"' in home and 'viewBox="0 0 48 48"' in home
-    for lang in LANGS:
-        assert (destination / lang / 'articles/index.html').exists()
+    assert (destination / 'en/articles/index.html').exists() and not (destination / 'ru').exists() and not (destination / 'fr').exists()
     assert (destination / '.nojekyll').exists()
 
 
+def check_privacy(destination):
+    """The Swiss FADP (art. 19) asks for: who is responsible, why, who receives the data, which countries."""
+    page = (destination / 'privacy/index.html').read_text(encoding='utf-8')
+    for needle in ('Privacy notice', 'Swiss Federal Act on Data Protection', 'Who is responsible', 'What data I process', 'Who receives your data',
+                   'Disclosure abroad', 'Your consent', 'Your rights', 'FDPIC', 'Google Fonts', '<base href="../">'):
+        assert needle in page, f'privacy notice lacks: {needle}'
+    assert '{{' not in page, 'unresolved placeholder in the privacy notice'
+    assert 'rel="icon"' in page and 'viewBox="0 0 48 48"' in page, 'privacy page keeps the logo and favicon'
+
+
 def check_integrity(builder):
-    """Guards added with the Intuition update: honesty of copy, calm exit, editable FAQ, accessible form."""
+    """Honesty of copy, editable FAQ, accessible form."""
     template = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
     assert 'window.close' not in template, 'a web page must not pretend it can close the tab'
     assert builder.FAQ_SLOTS == 8 and template.count('<details data-faq=') == 8, 'FAQ must have 8 editable slots'
@@ -103,35 +156,50 @@ def check_integrity(builder):
     assert 'quote_photo' in builder.PHOTO_FIELDS and 'id="sessions"' in template
     assert 'aria-describedby="form-status"' in template and 'data-write' in template
     assert template.count('<h1') == 1, 'exactly one h1 (the opening quotation)'
-    banned = builder.BANNED_PHRASES
-    for lang, patterns in banned.items():
+    for lang, patterns in builder.BANNED_PHRASES.items():
         text = json.dumps(json.loads((ROOT / f'content/home_{lang}.json').read_text(encoding='utf-8')), ensure_ascii=False).lower()
         for pattern in patterns:
             assert not re.search(pattern, text), f'{lang}: promise-like wording must not return: {pattern}'
-    for lang in LANGS:
-        data = json.loads((ROOT / f'content/home_{lang}.json').read_text(encoding='utf-8'))
-        for dotted in builder.REQUIRED_COPY:
-            group, key = dotted.split('.')
-            assert data[group][key].strip(), f'{lang}: {dotted} must not be blank'
-        assert 'fork' not in data and 'check' not in data and 'invite' not in data and 'why' not in data, 'removed blocks must stay removed'
+    data = json.loads((ROOT / 'content/home_en.json').read_text(encoding='utf-8'))
+    for dotted in builder.REQUIRED_COPY:
+        group, key = dotted.split('.')
+        assert data[group][key].strip(), f'{dotted} must not be blank'
+    assert 'fork' not in data and 'check' not in data and 'invite' not in data and 'why' not in data, 'removed blocks must stay removed'
+
+
+def check_scripts(destination):
+    """Syntax check of the inline scripts (only when Node.js is available)."""
+    node = shutil.which('node')
+    if not node:
+        return
+    for page in ('index.html', 'admin/index.html'):
+        text = (destination / page).read_text(encoding='utf-8')
+        scripts = [s for s in re.findall(r'<script>(.*?)</script>', text, re.S) if len(s) > 400]
+        assert scripts, f'{page}: no inline script found'
+        with tempfile.TemporaryDirectory() as folder:
+            target = Path(folder) / 'check.js'
+            target.write_text(scripts[-1], encoding='utf-8')
+            result = subprocess.run([node, '--check', str(target)], capture_output=True, text=True)
+            assert result.returncode == 0, f'{page}: JavaScript syntax error: {result.stderr[:400]}'
 
 
 def check_brand_and_dashboard(builder, destination):
-    """Sport Intuitive everywhere the site names itself; numbered photo slots; the owner's dashboard ships with the site."""
+    """Sport Intuitive in the title and footer; numbered photo slots; the owner's dashboard ships with the site."""
     home = (destination / 'index.html').read_text(encoding='utf-8')
     brand = builder.BRAND_DEFAULT
-    assert f'<title>' in home and brand in re.search(r'<title>(.*?)</title>', home).group(1), 'brand missing from <title>'
-    assert re.search(r'data-i18n="brand" class="brand-name">' + re.escape(brand) + '<', home), 'brand must be visible in the header'
+    assert brand in re.search(r'<title>(.*?)</title>', home).group(1), 'brand missing from <title>'
     assert brand in re.search(r'<footer.*?</footer>', home, re.S).group(0), 'brand missing from the footer'
     slots = sorted(int(n) for n in re.findall(r'data-slot="(\d+)"', home))
     assert slots == list(range(1, 8)), f'photo slots must be numbered 1..7, got {slots}'
     assert 'slot-badge' in home and 'photos' in home, 'the ?photos mode is missing'
     schema = json.loads((destination / 'admin/schema.json').read_text(encoding='utf-8'))
     assert [p['num'] for p in schema['photos']] == list(range(1, 8)) and schema['brand'] == brand
+    assert schema['langs'] == ['en'], 'the dashboard edits one language'
     assert {s['name'] for s in schema['sections']} >= {'hero', 'story', 'sessions', 'about', 'faq'}
     assert 'banned' in schema and schema['required'] == list(builder.REQUIRED_COPY)
     admin = (destination / 'admin/index.html').read_text(encoding='utf-8')
     assert 'noindex' in admin and 'fonts.googleapis' not in admin and 'localStorage' in admin
+    assert 'quick-num' in admin and 'takeMany' in admin and 'numberFromName' in admin, 'dashboard: add photos by number'
     for field in builder.PHOTO_FIELDS:
         assert any(p['field'] == field for p in schema['photos'])
     robots = (destination / 'robots.txt').read_text(encoding='utf-8')
@@ -154,6 +222,7 @@ def build_fixture(builder, mutate, posts):
     shutil.copy(ROOT / '.pages.yml', work / '.pages.yml')
     (work / 'media').mkdir()
     (work / 'media/test-cover.webp').write_bytes(b'fake image bytes')
+    (work / 'content/posts').mkdir(exist_ok=True)
     site = json.loads((work / 'content/site.json').read_text(encoding='utf-8'))
     mutate(work, site)
     (work / 'content/site.json').write_text(json.dumps(site, ensure_ascii=False), encoding='utf-8')
@@ -180,39 +249,45 @@ def main():
     check_consistency(builder)
     check_integrity(builder)
     check_static(builder, ROOT / '_site')
+    check_privacy(ROOT / '_site')
     check_brand_and_dashboard(builder, ROOT / '_site')
+    check_scripts(ROOT / '_site')
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
     def full(work, site):
-        site.update({'name_ru': 'Наталья Тестовая', 'email': 'hello@example.com', 'portrait': 'media/test-cover.webp',
-                     'story_photo_2': 'media/test-cover.webp', 'eyes_photo': '', 'quote_photo': '', 'story_photo_1': '', 'story_photo_3': '', 'story_photo_4': '', 'form_endpoint': 'https://formspree.io/f/abc123', 'publish_ready': True})
-        ru = json.loads((work / 'content/home_ru.json').read_text(encoding='utf-8'))
-        ru['faq']['q5'] = ''
-        ru['qa']['q3'] = ''
-        ru['story']['title'] = '</script><b>x</b>'
-        (work / 'content/home_ru.json').write_text(json.dumps(ru, ensure_ascii=False), encoding='utf-8')
+        site.update({'name_en': 'Test Person', 'email': 'hello@example.com', 'privacy_address': 'Example Street 1, 8000 Zürich, Switzerland',
+                     'portrait': 'media/test-cover.webp', 'story_photo_2': 'media/test-cover.webp', 'eyes_photo': '', 'quote_photo': '',
+                     'story_photo_1': '', 'story_photo_3': '', 'story_photo_4': '', 'form_endpoint': 'https://formspree.io/f/abc123', 'publish_ready': True})
+        data = json.loads((work / 'content/home_en.json').read_text(encoding='utf-8'))
+        data['faq']['q5'] = ''
+        data['qa']['q3'] = ''
+        data['story']['title'] = '</script><b>x</b>'
+        (work / 'content/home_en.json').write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
     temporary, work = build_fixture(builder, full, posts=True)
     with temporary:
         home = (work / '_site/index.html').read_text(encoding='utf-8')
-        article = (work / '_site/ru/articles/sample/index.html').read_text(encoding='utf-8')
-        assert 'Наталья Тестовая' in home and 'hello@example.com' in home and 'Sport Intuitive' in home
+        article = (work / '_site/en/articles/sample/index.html').read_text(encoding='utf-8')
+        privacy = (work / '_site/privacy/index.html').read_text(encoding='utf-8')
+        assert 'Test Person' in home and 'hello@example.com' in home and 'Sport Intuitive' in home
         assert 'Disallow: /admin/' in (work / '_site/robots.txt').read_text(encoding='utf-8')
-        assert home.count('src="media/test-cover.webp"') == 6, 'hero, eyes fallback, story frame 2 and three note covers'
+        assert home.count('src="media/test-cover.webp"') == 4, 'hero, eyes fallback, story frame 2 and one note cover'
         assert '"formEndpoint":"https://formspree.io/f/abc123"' in home
-        assert 'id="notes"' in home and 'CMS_VISIBLE_POSTS = {"ru":1,"en":1,"fr":1}' in home
-        assert 'data-post-lang="ru"' in home and 'data-post-lang="en" hidden' in home and 'data-post-lang="fr" hidden' in home
+        assert 'id="notes"' in home and 'CMS_VISIBLE_POSTS = {"en":1}' in home
+        assert '<article class="blog-card" data-post-lang="en">' in home
+        assert '<footer class="site-footer after-sand"' in home, 'with notes the footer fades from sand'
         assert '<details data-faq="5" hidden>' in home and '<details data-faq="4">' in home
         assert '<details name="qa" data-qa="3" hidden>' in home and '<details name="qa" data-qa="2">' in home
         assert '</script><b>x</b>' not in home and '\\u003c/script' in home and '&lt;/script&gt;' in home
         assert 'https://demo.github.io/athlete-support/' in home and 'index,follow' in home
         assert 'application/ld+json' in home and 'og:image' in home
         assert 'Testing heading' in article and '<script>alert(1)</script>' not in article
-        assert '<base href="../../../">' in article and 'rel="icon"' in article and 'scroll-progress' in article
-        assert 'https://demo.github.io/athlete-support/ru/articles/sample/' in article
-        assert 'href="ru/articles/sample/#content"' in article, 'with <base>, the skip link must point back at the article itself'
-        for lang in ('en', 'fr'):
-            assert (work / f'_site/{lang}/articles/sample/index.html').exists()
-        assert (work / '_site/media/test-cover.webp').exists() and (work / '_site/sitemap.xml').exists()
+        assert '<base href="../../../">' in article and 'rel="icon"' in article and 'scroll-progress' in article and 'viewBox="0 0 48 48"' in article
+        assert 'https://demo.github.io/athlete-support/en/articles/sample/' in article
+        assert 'href="en/articles/sample/#content"' in article, 'with <base>, the skip link must point back at the article itself'
+        assert 'Test Person' in privacy and 'hello@example.com' in privacy and 'Example Street 1' in privacy and 'formspree.io' in privacy
+        assert 'https://demo.github.io/athlete-support/privacy/' in privacy, 'privacy page has its canonical address'
+        sitemap = (work / '_site/sitemap.xml').read_text(encoding='utf-8')
+        assert 'privacy/' in sitemap and (work / '_site/media/test-cover.webp').exists()
         assert 'Disallow: /\n' not in (work / '_site/robots.txt').read_text(encoding='utf-8'), 'an indexable site must not block everything'
 
     # Defensive build: an insecure form endpoint is dropped, nothing is published, no notes appear.
@@ -221,10 +296,12 @@ def main():
     temporary, work = build_fixture(builder, careless, posts=False)
     with temporary:
         home = (work / '_site/index.html').read_text(encoding='utf-8')
-        assert '"formEndpoint":""' in home and 'insecure.example' not in home
-        assert 'id="notes"' not in home and 'noindex,nofollow' in home
+        privacy = (work / '_site/privacy/index.html').read_text(encoding='utf-8')
+        assert '"formEndpoint":""' in home and 'insecure.example' not in home and 'insecure.example' not in privacy
+        assert 'id="notes"' not in home and 'noindex,nofollow' in home and '<footer class="site-footer after-dune"' in home
+        assert 'through the contact form on this website' in privacy and 'opens your own email program' in privacy
         assert 'Disallow: /' in (work / '_site/robots.txt').read_text(encoding='utf-8')
-    print('OK: copy and CMS in sync, three languages, cold bands, handwritten quotes, photos, form, notes, safety and publish mode')
+    print('OK: English-only copy and CMS in sync, soft sand bands and transitions, hero order, highlighted phrases, closing statements, preface, privacy notice, photos, form, notes, safety and publish mode')
 
 
 if __name__ == '__main__':

@@ -1,12 +1,9 @@
 {
   "brand": "Sport Intuitive",
-  "name_ru": "Анна Манаева",
   "name_en": "Anna Manaeva",
-  "name_fr": "Anna Manaeva",
-  "role_ru": "Консультант по работе со спортсменами",
   "role_en": "Athlete support consultant",
-  "role_fr": "Consultante en accompagnement des sportifs",
   "publish_ready": false,
   "form_endpoint": "",
-  "quote_photo": ""
+  "quote_photo": "",
+  "privacy_address": ""
 }
