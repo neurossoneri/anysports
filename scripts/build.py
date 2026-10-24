@@ -61,7 +61,7 @@ ALLOWED_ATTRS = {'a': ['href', 'title'], 'img': ['src', 'alt', 'title', 'loading
 # Numbered in page order, top to bottom. The same numbers appear on the live site (open it with ?photos)
 # and in the dashboard, so the owner always knows which photo she is replacing.
 PHOTO_SLOTS = (
-    {'field': 'portrait', 'num': 1, 'title': 'Главное фото', 'where': 'Первый экран: правая половина экрана (и на компьютере, и на телефоне)', 'anchor': 'hero', 'shape': 'вертикаль, например половина лица; по краям кадр обрежется по центру'},
+    {'field': 'portrait', 'num': 1, 'title': 'Главное фото', 'where': 'Первый экран: левая половина экрана (и на компьютере, и на телефоне)', 'anchor': 'hero', 'shape': 'вертикаль, например половина лица; по краям кадр обрежется по центру'},
     {'field': 'quote_photo', 'num': 2, 'title': 'Атмосферное фото', 'where': 'Фон за цитатой А «You can only control yourself» (необязательно)', 'anchor': 'intro', 'shape': 'пейзаж, горизонталь'},
     {'field': 'eyes_photo', 'num': 3, 'title': 'Крупный план', 'where': 'Рядом с «Intuition sessions» (если пусто — берётся фото 1)', 'anchor': 'sessions', 'shape': 'вертикаль 3:4'},
     {'field': 'story_photo_1', 'num': 4, 'title': 'Моя история', 'where': 'Справа, после первого абзаца', 'anchor': 'about', 'shape': 'вертикаль 4:5'},
@@ -150,6 +150,23 @@ def form_endpoint(site):
         print(f'WARNING: form_endpoint ignored (must start with https://): {value!r}', file=sys.stderr)
         return ''
     return value
+
+
+INBOX_URL = re.compile(r'^https://script\.google\.com/(?:a/macros/[\w.-]+|macros)/s/[\w-]+/exec$', re.I)
+
+
+def inbox_endpoint(site):
+    """The requests inbox: a Google Apps Script web app in the owner's own Google account. Anything else is ignored (with a warning)."""
+    value = str(site.get('inbox_endpoint') or '').strip()
+    if value and not INBOX_URL.fullmatch(value):
+        print(f'WARNING: inbox_endpoint ignored (must look like https://script.google.com/macros/s/.../exec): {value!r}', file=sys.stderr)
+        return ''
+    return value
+
+
+def inbox_endpoint_quiet(site):
+    value = str(site.get('inbox_endpoint') or '').strip()
+    return value if INBOX_URL.fullmatch(value) else ''
 
 
 def parse_posts():
@@ -285,12 +302,15 @@ def build_home(site, posts, public_url, ready):
     for field in PHOTO_FIELDS:
         slot = next(item['num'] for item in PHOTO_SLOTS if item['field'] == field)
         template = replace_required(template, f'data-photo="{field}"',
-                                    f'data-slot="{slot}"' + (f' src="{esc(paths[field])}"' if paths[field] else ''), f'photo {field}')
+                                    f'data-slot="{slot}"' + (f' src="{esc(paths[field])}"' if paths[field] else '')
+                                    + (' data-fallback' if field == 'eyes_photo' and paths[field] and not photo_path(site.get('eyes_photo')) else ''), f'photo {field}')   # slot 3 borrows photo 1 while empty
     settings = {
         'email': str(site.get('email') or ''),
         'whatsapp': str(site.get('whatsapp') or ''),
         'telegram': str(site.get('telegram') or ''),
         'formEndpoint': form_endpoint(site),
+        'inboxEndpoint': inbox_endpoint(site),
+        'preview': not ready,   # before launch the empty photo places carry their numbers
     }
     # Content inserted before the page script reads it, right after the empty translation object.
     counts = {lang: sum(p['lang'] == lang for p in posts) for lang in LANGS}
@@ -466,10 +486,15 @@ def privacy_page(site, public_url, ready):
         print('WARNING: no email in content/site.json; the privacy notice names the contact form as the way to reach you.', file=sys.stderr)
     endpoint = form_endpoint_quiet(site)
     host = urlparse(endpoint).hostname if endpoint else ''
+    inbox = inbox_endpoint_quiet(site)
     if host:
         service = f'The contact form is run by an external service provider (`{host}`). It receives your message and forwards it to my email inbox.'
-    else:
+    elif not inbox:
         service = 'The contact form opens your own email program, so no external form service is involved. Your message then travels through your email provider and mine.'
+    else:
+        service = 'The contact form sends your message to a script in my own Google account (Google Apps Script), which notifies me by email.'
+    if inbox:
+        service += ' A copy of your message is also saved in a private spreadsheet in my own Google account (Google Sheets), which I use to keep track of requests and replies. Google processes it on my behalf.'
     updated = meta.get('updated')
     updated = f'{updated.day} {updated:%B %Y}' if isinstance(updated, (dt.date, dt.datetime)) else str(updated or '')
     for marker, value in (('{{controller}}', '\n'.join(lines)), ('{{form_service}}', service), ('{{updated}}', updated)):

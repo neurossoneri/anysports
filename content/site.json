@@ -5,5 +5,7 @@
   "publish_ready": false,
   "form_endpoint": "",
   "quote_photo": "",
-  "privacy_address": ""
+  "privacy_address": "",
+  "inbox_endpoint": "",
+  "portrait": "media/photo-1.jpg"
 }

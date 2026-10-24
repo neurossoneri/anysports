@@ -53,7 +53,7 @@ def check_consistency(builder):
     assert cms_keys(entries['home_en']['fields']) == set(flat), '.pages.yml and content/home_en.json differ'
     unused = {k for k in flat if k not in wanted and not k.startswith(('meta.', 'notes.'))}
     assert not unused, f'copy that the template never shows: {sorted(unused)}'
-    for key in ('form_endpoint', 'portrait', 'eyes_photo', 'story_photo_1', 'story_photo_4', 'privacy_address'):
+    for key in ('form_endpoint', 'inbox_endpoint', 'portrait', 'eyes_photo', 'story_photo_1', 'story_photo_4', 'privacy_address'):
         assert key in cms_keys(entries['site']['fields']), f'site settings lack {key}'
     for key in ('name_ru', 'name_fr', 'role_ru', 'role_fr'):
         assert key not in site and key not in cms_keys(entries['site']['fields']), f'old language field is back: {key}'
@@ -76,8 +76,8 @@ def check_static(builder, destination):
     assert 'id="language"' not in home and '<header class="site-header">' not in home and 'langSelect' not in home, 'language switch / top bar must stay removed'
     assert 'rel="icon"' in home and 'data:image/svg+xml' in home, 'the favicon stays'
 
-    # hero: text on the left, photograph on the right
-    assert home.index('<div class="hero-quote">') < home.index('<figure class="photo hero-photo">'), 'hero: quotation first, photograph second'
+    # hero: photograph on the left, text on the right
+    assert home.index('<figure class="photo hero-photo">') < home.index('<div class="hero-quote">'), 'hero: photograph first, quotation second'
     assert re.search(r'\.hero-grid \{[^}]*grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)', css), 'hero: the vertical photograph fills exactly half of the first screen'
     assert not re.search(r'\.hero-grid \{[^}]*grid-template-columns:1fr[;\s]', css), 'hero: two halves also on phones, no stacking'
 
@@ -120,7 +120,7 @@ def check_static(builder, destination):
 
     assert 'id="contact-form"' in home and 'name="_gotcha"' in home
     assert 'id="close-page"' not in home and 'farewell' not in home, 'no forced choice and no farewell dialog'
-    assert 'id="to-top"' in home and 'class="scroll-progress"' in home, 'back-to-top button or progress line is missing'
+    assert 'id="to-top"' not in home and 'class="scroll-progress"' in home, 'no up button, but the progress line stays'
     assert re.search(r'<div id="top"', home)
     en = json.loads((ROOT / 'content/home_en.json').read_text(encoding='utf-8'))
     assert esc(en['story']['title']) in home and esc(en['quotes']['a'].split('\n')[0]) in home, 'English copy must be baked into the static HTML'
@@ -129,9 +129,7 @@ def check_static(builder, destination):
         assert gone not in home, f'old template block is back: {gone}'
     assert 'prefers-reduced-motion' in home and '[hidden] { display:none!important; }' in home
     articles_css = (destination / 'assets/articles.css').read_text(encoding='utf-8')
-    for sheet in (css, articles_css):
-        rounded = re.findall(r'border-radius\s*:\s*(?!0(?:px)?\s*[;}])[^;}]+', sheet)
-        assert not rounded, f'rounded corners are against the cold redesign: {rounded[:3]}'
+    check_soft_controls(destination)   # rounded corners only on buttons and fields
     for phrase in ('book online', 'choose a timezone', 'choose a time', 'conversation with'):
         assert phrase not in home.lower(), f'call to action must not return: {phrase}'
     assert '@view-transition' in css and 'scroll-progress' in css
@@ -240,10 +238,63 @@ def check_brand_and_dashboard(builder, destination):
     admin = (destination / 'admin/index.html').read_text(encoding='utf-8')
     assert 'noindex' in admin and 'fonts.googleapis' not in admin and 'localStorage' in admin
     assert 'quick-num' in admin and 'takeMany' in admin and 'numberFromName' in admin, 'dashboard: add photos by number'
+    assert 'data-tab' in admin and "['requests', 'Заявки'" in admin, 'dashboard: the Requests tab'
     for field in builder.PHOTO_FIELDS:
         assert any(p['field'] == field for p in schema['photos'])
     robots = (destination / 'robots.txt').read_text(encoding='utf-8')
     assert 'Disallow' in robots
+
+
+def check_soft_controls(destination):
+    """Rounded corners belong to buttons and fields only; photos, panels and sections stay square. No \"up\" button."""
+    css = (destination / 'assets/site.css').read_text(encoding='utf-8')
+    articles_css = (destination / 'assets/articles.css').read_text(encoding='utf-8')
+    allowed = ('.button', '.icon-button', '.contact-links', 'summary::after', '.field', '.slot-badge', '.skip')
+    for sheet in (css, articles_css):
+        for selector, body in re.findall(r'([^{}]+)\{([^{}]*border-radius[^{}]*)\}', sheet):
+            values = re.findall(r'border-radius\s*:\s*([^;}]+)', body)
+            if all(v.strip() in ('0', '0px') for v in values):
+                continue                      # resets are fine
+            assert any(token in selector for token in allowed), f'rounded corners are only for buttons and fields, found on: {selector.strip()[:60]}'
+    for must in ('.button { display:inline-flex', '.qa summary::after {', '.contact-links a {'):
+        rule = css[css.index(must):].split('}', 1)[0]
+        assert 'border-radius' in rule, f'{must} should be soft'
+    for square in ('.photo {', '.plate {', '.quote-panel {', '.free {', '.blog-card {', '.s-honest {'):
+        rule = css[css.index(square):].split('}', 1)[0]
+        assert 'border-radius' not in rule, f'{square} stays square'
+    home = (destination / 'index.html').read_text(encoding='utf-8')
+    assert 'to-top' not in home and 'to-top' not in css, 'the up button is gone'
+    assert 'id="top"' in home and 'href="#top"' in home, 'the footer link still goes up'
+
+
+def check_photo_numbers(destination):
+    """Photo places carry numbers: empty places before launch, every photo with ?photos."""
+    home = (destination / 'index.html').read_text(encoding='utf-8')
+    assert 'const showAllSlots' in home and 'SETTINGS.preview' in home and "hasAttribute('data-fallback')" in home and "'Фото ' + image.dataset.slot" in home
+    assert "image.closest('.quote-panel')" in home, 'the badge of the quotation background must stay visible'
+    assert '"preview":' in home, 'the page knows whether it is still a preview'
+
+
+def check_inbox(builder, destination):
+    """The requests inbox: script file, dashboard tab, form wiring."""
+    script = (destination / 'admin/inbox-script.txt').read_text(encoding='utf-8')
+    for needle in ('function doPost', 'ADMIN_KEY', "'submit'", 'LockService', 'setNumberFormat'):
+        assert needle in script, f'inbox script lacks {needle}'
+    admin = (destination / 'admin/index.html').read_text(encoding='utf-8')
+    for needle in ('panelRequests', 'inboxCall', 'inbox-script.txt', 'csvOf', 'photoMap'):
+        assert needle in admin, f'dashboard lacks {needle}'
+    home = (destination / 'index.html').read_text(encoding='utf-8')
+    assert "action:'submit'" in home and 'Promise.allSettled' in home, 'the form must also write to the inbox'
+    node = shutil.which('node')
+    if node:
+        with tempfile.TemporaryDirectory() as folder:
+            target = Path(folder) / 'inbox.js'
+            target.write_text(script, encoding='utf-8')
+            result = subprocess.run([node, '--check', str(target)], capture_output=True, text=True)
+            assert result.returncode == 0, f'inbox script syntax error: {result.stderr[:400]}'
+    assert builder.inbox_endpoint({'inbox_endpoint': 'https://script.google.com/macros/s/AKfy_1-x/exec'}).endswith('/exec')
+    assert builder.inbox_endpoint_quiet({'inbox_endpoint': 'https://evil.example/macros/s/x/exec'}) == ''
+    assert builder.inbox_endpoint_quiet({'inbox_endpoint': 'http://script.google.com/macros/s/x/exec'}) == ''
 
 
 def write_post(work, lang, body, name='published'):
@@ -295,12 +346,14 @@ def main():
     check_fonts(ROOT / '_site')
     check_about_and_questions(ROOT / '_site')
     check_scripts(ROOT / '_site')
+    check_photo_numbers(ROOT / '_site')
+    check_inbox(builder, ROOT / '_site')
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
     def full(work, site):
         site.update({'name_en': 'Test Person', 'email': 'hello@example.com', 'privacy_address': 'Example Street 1, 8000 Zürich, Switzerland',
                      'portrait': 'media/test-cover.webp', 'story_photo_2': 'media/test-cover.webp', 'eyes_photo': '', 'quote_photo': '',
-                     'story_photo_1': '', 'story_photo_3': '', 'story_photo_4': '', 'form_endpoint': 'https://formspree.io/f/abc123', 'publish_ready': True})
+                     'story_photo_1': '', 'story_photo_3': '', 'story_photo_4': '', 'form_endpoint': 'https://formspree.io/f/abc123', 'inbox_endpoint': 'https://script.google.com/macros/s/AKfycbTEST_123/exec', 'publish_ready': True})
         data = json.loads((work / 'content/home_en.json').read_text(encoding='utf-8'))
         data['qa']['q3'] = ''
         data['story']['title'] = '</script><b>x</b>'
@@ -314,6 +367,8 @@ def main():
         assert 'Disallow: /admin/' in (work / '_site/robots.txt').read_text(encoding='utf-8')
         assert home.count('src="media/test-cover.webp"') == 4, 'hero, eyes fallback, story frame 2 and one note cover'
         assert '"formEndpoint":"https://formspree.io/f/abc123"' in home
+        assert '"inboxEndpoint":"https://script.google.com/macros/s/AKfycbTEST_123/exec"' in home and '"preview":false' in home
+        assert 'Google Sheets' in privacy and 'formspree.io' in privacy, 'privacy notice names the form service and the spreadsheet'
         assert 'id="notes"' in home and 'CMS_VISIBLE_POSTS = {"en":1}' in home
         assert '<article class="blog-card" data-post-lang="en">' in home
         assert '<footer class="site-footer after-sand"' in home, 'with notes the footer fades from sand'
@@ -334,16 +389,17 @@ def main():
 
     # Defensive build: an insecure form endpoint is dropped, nothing is published, no notes appear.
     def careless(work, site):
-        site.update({'form_endpoint': 'http://insecure.example/submit', 'publish_ready': False})
+        site.update({'form_endpoint': 'http://insecure.example/submit', 'inbox_endpoint': 'https://evil.example/macros/s/x/exec', 'publish_ready': False})
     temporary, work = build_fixture(builder, careless, posts=False)
     with temporary:
         home = (work / '_site/index.html').read_text(encoding='utf-8')
         privacy = (work / '_site/privacy/index.html').read_text(encoding='utf-8')
         assert '"formEndpoint":""' in home and 'insecure.example' not in home and 'insecure.example' not in privacy
+        assert '"inboxEndpoint":""' in home and 'evil.example' not in home and 'Google Sheets' not in privacy and '"preview":true' in home
         assert 'id="notes"' not in home and 'noindex,nofollow' in home and '<footer class="site-footer after-teal"' in home
         assert 'through the contact form on this website' in privacy and 'opens your own email program' in privacy
         assert 'Disallow: /' in (work / '_site/robots.txt').read_text(encoding='utf-8')
-    print('OK: English-only copy and CMS in sync, warm sand bands and transitions, self-hosted fonts, one Q&A block, half-and-half hero, highlighted phrases, closing statements, preface, privacy notice, photos, form, notes, safety and publish mode')
+    print('OK: English-only copy and CMS in sync, warm sand bands and transitions, self-hosted fonts, one Q&A block, photo-left hero, soft floating buttons, numbered photo places, requests inbox, highlighted phrases, closing statements, preface, privacy notice, photos, form, notes, safety and publish mode')
 
 
 if __name__ == '__main__':

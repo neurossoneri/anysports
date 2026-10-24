@@ -25,13 +25,17 @@
       --abyss:#06121e; --deep:#08192a; --teal:#0c2a3d; --sand:#e5dac4; --dune:#dccfb4; --blend:clamp(112px,14vw,216px);
       --blue:#2f6fb3; --blue-hi:#8dbdf0; --green:#1f8a74; --green-hi:#6fd2b8;
       /* Photo grading: one knob. 0 = off (use when every photograph is already cold-graded), 1 = strongest. */
-      --photo-grade:.32;
+      --photo-grade:0;
       /* Shared with article pages */
       --bg:#e5dac4; --bg-soft:#ddd1ba; --paper:#efe6d3; --paper-alt:#e8dec9;
       --text:#10243a; --text-muted:#46607a; --blue-deep:#1f5f9e; --mint-strong:#1f7a67;
       --border:rgba(16,36,58,.16); --shadow-strong:0 30px 70px -44px rgba(6,18,30,.55);
       --glass:rgba(247,241,228,.6); --focus:#2f6fb3;
       --header-muted:#a3b9cc;
+      /* admin-crm-update: soft controls that hover above the page */
+      --r-pill:999px; --r-soft:14px;
+      --float:0 1px 0 rgba(255,255,255,.3) inset,0 14px 28px -16px rgba(6,18,30,.55),0 4px 10px -5px rgba(6,18,30,.28);
+      --float-hi:0 1px 0 rgba(255,255,255,.4) inset,0 22px 36px -16px rgba(6,18,30,.6),0 8px 16px -8px rgba(6,18,30,.3);
     }
     :root[data-theme="dark"] {
       color-scheme:dark;
@@ -84,7 +88,7 @@
     ::selection { background:rgba(111,180,240,.4); }
     [hidden] { display:none!important; }
     .sr-only { position:absolute!important; width:1px!important; height:1px!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; }
-    .skip { position:fixed; top:-90px; left:15px; z-index:1000; background:#fff; color:#10243a; padding:12px 20px; }
+    .skip { position:fixed; top:-90px; left:15px; z-index:1000; background:#fff; color:#10243a; padding:12px 20px; border-radius:var(--r-pill); }
     .skip:focus { top:15px; }
     .container { width:min(1200px,calc(100% - 48px)); margin-inline:auto; }
     .title { font:500 clamp(2rem,4.2vw,3.4rem)/1.12 var(--serif); letter-spacing:-.025em; margin:0 0 clamp(20px,3vw,32px); color:var(--c-text); }
@@ -94,12 +98,14 @@
     .sticky { position:sticky; top:32px; }
 
     /* ---------- Buttons and fields ---------- */
-    .button { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:52px; padding:13px 30px; border:1px solid var(--border); background:transparent; color:var(--text); font-weight:650; font-size:.95rem; text-align:center; transition:background-color .3s,transform .5s var(--ease); }
-    .button:hover { transform:translateY(-2px); }
-    .button:active { transform:scale(.98); transition-duration:.12s; }
-    .button-primary { border-color:transparent; color:#fff; background:linear-gradient(110deg,#2b66ab,#2a8f86 60%,#2f9a7e); }
+    .button { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:52px; padding:13px 32px; border:1px solid var(--border); border-radius:var(--r-pill); background:var(--glass); color:var(--text); font-weight:650; font-size:.95rem; letter-spacing:.005em; text-align:center; box-shadow:var(--float); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); transition:transform .5s var(--ease),box-shadow .5s var(--ease),background-color .3s,border-color .3s,filter .3s; }
+    .button:hover { transform:translateY(-3px); box-shadow:var(--float-hi); }
+    .button:active { transform:translateY(-1px) scale(.985); transition-duration:.12s; }
+    .button:disabled { opacity:.6; cursor:progress; transform:none; box-shadow:var(--float); }
+    .button-primary { border-color:transparent; color:#fff; background:linear-gradient(110deg,#2b66ab,#2a8f86 60%,#2f9a7e); box-shadow:0 1px 0 rgba(255,255,255,.3) inset,0 18px 32px -16px rgba(31,138,116,.8),0 6px 14px -6px rgba(43,102,171,.55); }
+    .button-primary:hover { filter:brightness(1.07); box-shadow:0 1px 0 rgba(255,255,255,.36) inset,0 26px 40px -16px rgba(31,138,116,.85),0 10px 18px -8px rgba(43,102,171,.6); }
     .button-outline { background:var(--glass); }
-    .icon-button { display:grid; place-items:center; width:36px; height:36px; border:1px solid rgba(141,189,240,.32); background:transparent; color:#e8f0f7; flex:none; font-size:1rem; line-height:1; }
+    .icon-button { display:grid; place-items:center; width:38px; height:38px; border:1px solid rgba(141,189,240,.32); border-radius:50%; background:rgba(141,189,240,.08); color:#e8f0f7; flex:none; font-size:1rem; line-height:1; box-shadow:0 8px 18px -10px rgba(0,0,0,.6); }
 
     /* ---------- Header: a flat dark bar, no name, no pill ---------- */
     .site-header { position:sticky; top:0; z-index:90; background:var(--abyss); color:#e8f0f7; border-bottom:1px solid rgba(141,189,240,.16); }
@@ -118,17 +124,18 @@
     .photo::before, .photo::after { content:""; position:absolute; inset:0; z-index:1; pointer-events:none; }
     .photo::before { background:linear-gradient(160deg,#2b6aa8,#1b5a6a); mix-blend-mode:color; opacity:calc(var(--photo-grade) * 1.1); }
     .photo::after { background:linear-gradient(160deg,#2f6aa6,#124057); mix-blend-mode:soft-light; opacity:var(--photo-grade); }
-    .slot-badge { position:absolute; left:0; top:0; z-index:30; padding:9px 14px; background:#ffd23f; color:#111; font:800 1.05rem/1 Inter,system-ui,sans-serif; letter-spacing:.02em; box-shadow:0 3px 14px rgba(0,0,0,.4); pointer-events:none; }
+    .slot-badge { position:absolute; left:12px; top:12px; z-index:30; padding:8px 15px; border-radius:var(--r-pill); background:#ffd23f; color:#111; font:800 .95rem/1 Inter,system-ui,sans-serif; letter-spacing:.02em; box-shadow:0 10px 22px -8px rgba(0,0,0,.55); pointer-events:none; }
+    .plate .slot-badge { left:50%; top:26%; transform:translateX(-50%); white-space:nowrap; }   /* the story photos have feathered edges: keep the number in the clear middle */
     .show-slots .photo { outline:3px dashed #ffd23f; outline-offset:-3px; }
     .ph { position:absolute; inset:0; display:grid; place-content:center; justify-items:center; gap:10px; padding:24px; text-align:center; color:var(--blue-hi); font-size:.82rem; font-weight:600; opacity:.85; }
     .ph svg { width:48px; height:48px; opacity:.7; }
 
-    /* ---------- 1. Hero: the quotation on the left, a vertical photograph on the right half (phones included) ---------- */
+    /* ---------- 1. Hero: a vertical photograph on the left half, the quotation on the right half (phones included) ---------- */
     .hero { padding:0; }
     .hero-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); min-height:min(100svh,900px); }
     .hero-photo { min-height:100%; animation:heroIn 1.8s var(--ease) both; -webkit-mask-image:linear-gradient(180deg,#000 78%,transparent); mask-image:linear-gradient(180deg,#000 78%,transparent); }   /* the lower edge dissolves into the page */
-    .hero-photo > img { object-position:50% 30%; }
-    .hero-quote { align-self:center; padding:clamp(40px,6vw,96px) clamp(24px,4vw,72px) clamp(40px,6vw,96px) max(24px,calc((100vw - 1200px) / 2)); }
+    .hero-photo > img { object-position:88% 42%; }   /* the face sits at the right edge of the picture: keep it in view on narrow screens */
+    .hero-quote { align-self:center; padding:clamp(40px,6vw,96px) max(24px,calc((100vw - 1200px) / 2)) clamp(40px,6vw,96px) clamp(24px,4vw,72px); }
     .hero-quote::before { content:""; display:block; width:64px; height:3px; margin-bottom:clamp(24px,3vw,40px); background:linear-gradient(90deg,var(--blue-hi),var(--green-hi)); }
     .hero-q1 { font:500 clamp(2.2rem,4vw,4rem)/1.08 var(--serif); letter-spacing:-.03em; animation:riseIn 1.6s var(--ease) .5s both; }
     .hero-q2 { margin-top:clamp(22px,3vw,36px); max-width:24em; font:italic 400 clamp(1.05rem,1.5vw,1.3rem)/1.6 var(--serif); color:var(--c-muted); animation:riseIn 1.6s var(--ease) 1.1s both; }
@@ -239,11 +246,13 @@
     /* ---------- 6. Contact ---------- */
     .contact .split { grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); }
     .contact-links { display:grid; gap:10px; margin-top:clamp(24px,4vw,40px); max-width:380px; }
-    .contact-links a { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:14px 20px; border:1px solid var(--c-line); font-weight:650; font-size:.93rem; transition:background-color .3s,border-color .3s; }
-    .contact-links a:hover { background:var(--c-panel); border-color:var(--c-a); }
+    .contact-links a { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:15px 24px; border:1px solid var(--c-line); border-radius:var(--r-pill); background:rgba(255,255,255,.34); box-shadow:var(--float); font-weight:650; font-size:.93rem; transition:transform .5s var(--ease),box-shadow .5s var(--ease),background-color .3s,border-color .3s; }
+    .contact-links a::after { content:"\2192"; color:var(--c-a); transition:transform .5s var(--ease); }
+    .contact-links a:hover { transform:translateY(-3px); background:rgba(255,255,255,.5); border-color:var(--c-a); box-shadow:var(--float-hi); }
+    .contact-links a:hover::after { transform:translateX(5px); }
     .field { display:block; margin-bottom:16px; }
     .field span { display:block; margin:0 0 8px; font-size:.86rem; color:var(--c-muted); }
-    .field input, .field textarea { width:100%; padding:14px 16px; border:1px solid var(--c-line); background:#f4ecda; color:#10243a; }
+    .field input, .field textarea { width:100%; padding:14px 18px; border:1px solid var(--c-line); border-radius:var(--r-soft); background:#f4ecda; color:#10243a; box-shadow:0 12px 24px -18px rgba(16,36,58,.55); }
     .field input:focus, .field textarea:focus { border-color:var(--c-a); }
     .field textarea { min-height:140px; resize:vertical; }
     .field input[aria-invalid="true"] { border-color:#b64c56; box-shadow:0 0 0 3px rgba(182,76,86,.18); }
@@ -279,9 +288,10 @@
     .qa summary::-webkit-details-marker { display:none; }
     .qa-n::before { content:counter(qa,decimal-leading-zero); font:500 .95rem/1 var(--serif); letter-spacing:.06em; font-variant-numeric:tabular-nums; color:var(--c-a); }
     .qa-q { font:500 clamp(1.1rem,1.7vw,1.4rem)/1.35 var(--serif); letter-spacing:-.01em; color:var(--c-text); text-wrap:balance; }
-    .qa summary::after { content:""; flex:none; width:36px; height:36px; border:1px solid var(--c-line); color:var(--c-a); background:linear-gradient(currentColor,currentColor) center/13px 1.8px no-repeat,linear-gradient(currentColor,currentColor) center/1.8px 13px no-repeat; transition:transform .5s var(--ease),border-color .3s ease,background-size .4s var(--ease); }
+    .qa summary::after { content:""; flex:none; width:40px; height:40px; border:1px solid rgba(141,189,240,.3); border-radius:50%; color:var(--c-a); background:linear-gradient(currentColor,currentColor) center/14px 2px no-repeat,linear-gradient(currentColor,currentColor) center/2px 14px no-repeat,linear-gradient(160deg,rgba(141,189,240,.18),rgba(141,189,240,.05)); background-size:14px 2px,2px 14px,100% 100%; box-shadow:0 12px 22px -12px rgba(2,10,18,.85),inset 0 1px 0 rgba(255,255,255,.14); transition:transform .5s var(--ease),translate .45s var(--ease),border-color .3s ease,background-size .4s var(--ease),box-shadow .45s var(--ease); }
     .qa summary:hover::after, .qa details[open] summary::after { border-color:var(--c-a); }
-    .qa details[open] summary::after { background-size:13px 1.8px,1.8px 0; transform:rotate(180deg); }
+    .qa summary:hover::after { translate:0 -2px; box-shadow:0 18px 26px -12px rgba(2,10,18,.9),inset 0 1px 0 rgba(255,255,255,.2); }
+    .qa details[open] summary::after { background-size:14px 2px,2px 0,100% 100%; transform:rotate(180deg); }
     .qa-a { padding:0 var(--qa-pad) clamp(24px,3vw,34px) calc(var(--qa-pad) + var(--qa-num) + var(--qa-gap)); }
     .qa-a p { max-width:62ch; color:var(--c-muted); line-height:1.85; }
     .qa details[open] .qa-a p { animation:fadeIn .6s ease both; }
@@ -316,11 +326,8 @@
     .footer-inner a { color:var(--blue-hi); font-weight:700; font-size:.88rem; }
     .footer-privacy { margin-top:14px; max-width:64ch; font-size:.8rem; line-height:1.6; color:#8ea6bb; }
 
-    /* ---------- Going up ---------- */
+    /* ---------- Jumping between sections ---------- */
     #top:focus, section[tabindex="-1"]:focus, .form-sent:focus { outline:none; }
-    .to-top { position:fixed; right:calc(16px + env(safe-area-inset-right,0px)); bottom:calc(18px + env(safe-area-inset-bottom,0px)); z-index:80; display:grid; place-items:center; width:48px; height:48px; padding:0; border:1px solid rgba(141,189,240,.4); background:var(--abyss); color:var(--blue-hi); opacity:0; visibility:hidden; transform:translateY(14px); transition:opacity .5s var(--ease),transform .6s var(--ease),visibility 0s linear .5s; }
-    .to-top.is-visible { opacity:1; visibility:visible; transform:none; transition-delay:0s; }
-    .to-top svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
     .is-idle, .is-idle * { animation-play-state:paused!important; }
 
     /* ---------- Shared with article pages ---------- */
@@ -344,8 +351,8 @@
 
     /* ---------- Responsive ---------- */
     @media (max-width:900px) {
-      .hero-grid { min-height:min(88svh,760px); }   /* still two halves on a phone: the text, and the vertical photograph */
-      .hero-quote { padding:clamp(28px,6vw,56px) clamp(14px,3.2vw,28px) clamp(36px,7vw,64px) clamp(18px,4vw,36px); }
+      .hero-grid { min-height:min(88svh,760px); }   /* still two halves on a phone: the vertical photograph, and the text */
+      .hero-quote { padding:clamp(28px,6vw,56px) clamp(18px,4vw,36px) clamp(36px,7vw,64px) clamp(14px,3.2vw,28px); }
       .hero-quote::before { width:44px; margin-bottom:clamp(16px,3vw,26px); }
       .hero-q1 { font-size:clamp(1.45rem,5.6vw,2.7rem); line-height:1.12; letter-spacing:-.02em; overflow-wrap:break-word; }
       .hero-q2 { margin-top:clamp(14px,2.6vw,24px); font-size:clamp(.9rem,2.5vw,1.15rem); line-height:1.55; }
@@ -370,7 +377,7 @@
       .theme-grid { grid-template-columns:1fr; }
       .theme, .theme:nth-child(even), .theme:nth-child(odd) { padding-left:0; border-left:0; }
       .qa { --qa-num:1.7rem; }
-      .qa summary::after { width:32px; height:32px; }
+      .qa summary::after { width:34px; height:34px; }
       .qa-a { padding-left:var(--qa-pad); }
     }
     @media (prefers-reduced-motion:reduce) {
@@ -388,17 +395,17 @@
   <div class="scroll-progress" aria-hidden="true"></div>
   <a class="skip" href="#main" data-i18n="skip"></a>
   <main id="main" tabindex="-1">
-    <!-- 1. Hero: the author's photograph on one side, the quotation on the other. No labels, no buttons. -->
+    <!-- 1. Hero: the author's photograph on the left, the quotation on the right. No labels, no buttons. -->
     <section class="band band-deep hero" id="hero">
       <div class="hero-grid">
-        <div class="hero-quote">
-          <h1 class="hero-q1" data-i18n="hero.quote1"></h1>
-          <p class="hero-q2" data-i18n="hero.quote2"></p>
-        </div>
         <figure class="photo hero-photo">
           <img data-photo="portrait" data-i18n-alt="hero.alt" alt="" fetchpriority="high" decoding="async">
           <div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="32" cy="22" r="10"/><path d="M10 58c1-14 9-22 22-22s21 8 22 22"/></svg><span data-i18n="photoSoon"></span></div>
         </figure>
+        <div class="hero-quote">
+          <h1 class="hero-q1" data-i18n="hero.quote1"></h1>
+          <p class="hero-q2" data-i18n="hero.quote2"></p>
+        </div>
       </div>
     </section>
 
@@ -623,12 +630,11 @@
 
   <footer class="site-footer after-teal"><div class="container footer-inner"><p>© <span id="year">2026</span> <span data-i18n="footerName"></span> · <span data-i18n="footer.line"></span></p><div class="footer-links"><a href="privacy/" data-i18n="privacyFooter"></a><a href="#top" data-i18n="backToTop"></a></div></div><div class="container"><p class="footer-privacy" data-i18n="footer.privacy"></p></div></footer>
 
-  <button class="to-top" id="to-top" type="button" data-i18n-aria="backToTop"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg></button>
 
   <script>
     'use strict';
     // Contact channels and the form endpoint are injected by scripts/build.py from content/site.json.
-    const SETTINGS = { email:'', whatsapp:'', telegram:'', formEndpoint:'' };
+    const SETTINGS = { email:'', whatsapp:'', telegram:'', formEndpoint:'', inboxEndpoint:'', preview:false };
     const translations = { en:{} };
     // @@CMS_INJECTION@@
 
@@ -714,17 +720,18 @@
     watch('[data-fade]', 'in', { threshold: .15, rootMargin: '0px 0px -6% 0px' });
     watch('[data-finale]', 'in', { threshold: .45, rootMargin: '0px 0px -10% 0px' });    // closing statements appear slowly, once
 
-    /* ---------- Photo numbers: open the site with ?photos to see which slot is which ---------- */
-    if (/(?:^|[?&])photos(?:[=&]|$)/.test(location.search)) {
-      document.documentElement.classList.add('show-slots');
-      $$('img[data-slot]').forEach(image => {
-        const badge = document.createElement('span');
-        badge.className = 'slot-badge';
-        badge.setAttribute('aria-hidden', 'true');
-        badge.textContent = 'Фото ' + image.dataset.slot;
-        image.parentElement.appendChild(badge);
-      });
-    }
+    /* ---------- Photo numbers: every empty place is labelled until launch; ?photos labels all photos ---------- */
+    const showAllSlots = /(?:^|[?&])photos(?:[=&]|$)/.test(location.search);
+    if (showAllSlots) document.documentElement.classList.add('show-slots');
+    $$('img[data-slot]').forEach(image => {
+      const empty = !image.getAttribute('src') || image.hasAttribute('data-fallback');   // slot 3 borrows photo 1 while it is empty
+      if (!showAllSlots && !(SETTINGS.preview && empty)) return;          // after launch only ?photos shows numbers
+      const badge = document.createElement('span');
+      badge.className = 'slot-badge';
+      badge.setAttribute('aria-hidden', 'true');
+      badge.textContent = 'Фото ' + image.dataset.slot;
+      (image.closest('.quote-panel') || image.parentElement).appendChild(badge);
+    });
 
     /* ---------- Photos: placeholders stay until a real image loads ---------- */
     $$('.photo').forEach(frame => {
@@ -736,8 +743,7 @@
       if (image.complete) loaded();
     });
 
-    /* ---------- Going up and jumping between sections ---------- */
-    const toTop = $('#to-top');
+    /* ---------- Jumping between sections ---------- */
     const topAnchor = $('#top');
     const progressLine = $('.scroll-progress');
     const nativeProgress = !reduceMotion && window.CSS && CSS.supports && CSS.supports('animation-timeline', 'scroll()');
@@ -758,11 +764,9 @@
       const hash = link.getAttribute('href');
       if (hash.length > 1 && goTo(hash)) event.preventDefault();
     });
-    toTop.addEventListener('click', () => goTo('#top'));
     let scrollQueued = false;
     function onScroll() {
       scrollQueued = false;
-      toTop.classList.toggle('is-visible', scrollY > innerHeight * 1.2);
       if (!nativeProgress) {
         const max = root.scrollHeight - innerHeight;
         progressLine.style.setProperty('--p', max > 0 ? Math.min(1, scrollY / max).toFixed(4) : '0');
@@ -793,6 +797,7 @@
     const statusLine = $('#form-status');
     const sendButton = $('#form-send');
     const endpoint = /^https:\/\//i.test(SETTINGS.formEndpoint.trim()) ? SETTINGS.formEndpoint.trim() : '';
+    const inbox = /^https:\/\/script\.google\.com\//i.test((SETTINGS.inboxEndpoint || '').trim()) ? SETTINGS.inboxEndpoint.trim() : '';   // the owner's own requests sheet
     function say(key, isError) { statusLine.textContent = key ? t(key) : ''; statusLine.classList.toggle('is-error', !!isError); }
     form.addEventListener('submit', async event => {
       event.preventDefault();
@@ -812,7 +817,7 @@
       }
       const payload = { name, contact, message, language: lang, _subject: t('formSubject') + ' — ' + name };
       if (EMAIL_RE.test(contact)) { payload.email = contact; payload._replyto = contact; }
-      if (!endpoint) {                                                  // no form service configured: use the mail client
+      if (!endpoint && !inbox) {                                        // nothing configured: use the mail client
         if (links.email) {
           location.href = links.email + '?subject=' + encodeURIComponent(payload._subject) + '&body=' + encodeURIComponent(name + ' — ' + contact + '\n\n' + message);
           say('formMailto');
@@ -822,8 +827,11 @@
       sendButton.disabled = true;
       say('formSending');
       try {
-        const response = await fetch(endpoint, { method:'POST', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' }, body:JSON.stringify(payload) });
-        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const jobs = [];
+        if (endpoint) jobs.push(fetch(endpoint, { method:'POST', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' }, body:JSON.stringify(payload) }).then(response => { if (!response.ok) throw new Error('HTTP ' + response.status); }));
+        if (inbox) jobs.push(fetch(inbox, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body:JSON.stringify({ action:'submit', ...payload }) }).then(response => response.json()).then(answer => { if (!answer || answer.ok !== true) throw new Error('inbox refused'); }));
+        const results = await Promise.allSettled(jobs);                  // one working channel is enough
+        if (!results.some(result => result.status === 'fulfilled')) throw new Error('not delivered');
         form.reset();
         form.hidden = true;
         const sent = $('#form-sent');

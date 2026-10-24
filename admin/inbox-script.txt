@@ -1,0 +1,190 @@
+/**
+ * Sport Intuitive: приём заявок с сайта (Google Apps Script).
+ *
+ * Что делает:
+ *   1. Принимает сообщения из формы на сайте и записывает их в эту таблицу (лист «Заявки»).
+ *   2. Присылает вам письмо о каждой новой заявке (на почту вашего Google-аккаунта).
+ *   3. Отдаёт список заявок панели управления /admin/ (только по вашему паролю).
+ *
+ * Как подключить, подробно: панель /admin/ → вкладка «Заявки».
+ * Кратко: вставьте код → замените ADMIN_KEY → «Развернуть» → «Веб-приложение» → доступ «Все».
+ */
+
+// Пароль от панели заявок. Придумайте длинный (12 символов и больше) и запомните:
+// его же нужно будет один раз ввести в панели управления.
+var ADMIN_KEY = 'ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ';
+
+// Куда присылать уведомления. Пусто = на почту вашего Google-аккаунта.
+var NOTIFY_EMAIL = '';
+
+var SHEET_NAME = 'Заявки';
+var HEAD = ['id', 'created', 'name', 'contact', 'message', 'status', 'note', 'source'];
+var STATUSES = ['new', 'work', 'done'];
+var MAX = { name: 120, contact: 160, message: 4000, note: 2000 };
+
+function doGet() {
+  return json_({ ok: true, service: 'sport-intuitive-inbox' });
+}
+
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(20000);
+    var req = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+    var action = String(req.action || '');
+    if (action === 'submit') return json_(submit_(req));
+    if (['list', 'update', 'delete', 'add'].indexOf(action) === -1) return json_({ ok: false, error: 'bad' });
+    var denied = checkKey_(req.key);
+    if (denied) return json_({ ok: false, error: denied });
+    if (action === 'list') return json_(list_());
+    if (action === 'update') return json_(update_(req));
+    if (action === 'delete') return json_(remove_(req));
+    return json_(add_(req));
+  } catch (err) {
+    return json_({ ok: false, error: 'server' });
+  } finally {
+    try { lock.releaseLock(); } catch (x) {}
+  }
+}
+
+/* ---------- from the website ---------- */
+
+function submit_(req) {
+  var item = {
+    name: clean_(req.name, MAX.name),
+    contact: clean_(req.contact, MAX.contact),
+    message: clean_(req.message, MAX.message)
+  };
+  if (!item.name || !item.contact) return { ok: false, error: 'bad' };
+  var sheet = sheet_();
+  if (recentCount_(sheet) >= 10) return { ok: false, error: 'busy' };   // защита от потока спама
+  item.status = 'new';
+  item.note = '';
+  item.source = 'site';
+  append_(sheet, item);
+  notify_(item);
+  return { ok: true };
+}
+
+function notify_(item) {
+  try {
+    var to = NOTIFY_EMAIL || Session.getEffectiveUser().getEmail();
+    if (!to) return;
+    var options = { to: to, subject: 'Новая заявка с сайта: ' + item.name, body: [
+      'Имя: ' + item.name,
+      'Как связаться: ' + item.contact,
+      '',
+      item.message || '(без сообщения)',
+      '',
+      'Все заявки: ' + SpreadsheetApp.getActiveSpreadsheet().getUrl()
+    ].join('\n') };
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(item.contact)) options.replyTo = item.contact;
+    MailApp.sendEmail(options);
+  } catch (err) { /* письмо не ушло (лимит почты), заявка всё равно сохранена */ }
+}
+
+/* ---------- from the dashboard (password required) ---------- */
+
+function checkKey_(key) {
+  if (!ADMIN_KEY || ADMIN_KEY.length < 12 || ADMIN_KEY.indexOf('ЗАМЕНИТЕ') === 0) return 'nokey';
+  var cache = CacheService.getScriptCache();
+  var fails = Number(cache.get('fails') || 0);
+  if (fails >= 10) return 'locked';                                    // слишком много неверных паролей: пауза 10 минут
+  if (String(key || '') === ADMIN_KEY) return '';
+  cache.put('fails', String(fails + 1), 600);
+  return 'key';
+}
+
+function list_() {
+  var rows = sheet_().getDataRange().getValues();
+  var items = [];
+  for (var i = rows.length - 1; i >= 1 && items.length < 1000; i--) items.push(toItem_(rows[i]));
+  return { ok: true, items: items };
+}
+
+function update_(req) {
+  var row = find_(req.id);
+  if (!row) return { ok: false, error: 'notfound' };
+  var sheet = sheet_();
+  if (req.status !== undefined) {
+    if (STATUSES.indexOf(req.status) === -1) return { ok: false, error: 'bad' };
+    sheet.getRange(row, 6).setValue(req.status);
+  }
+  if (req.note !== undefined) sheet.getRange(row, 7).setValue(clean_(req.note, MAX.note));
+  return { ok: true };
+}
+
+function remove_(req) {
+  var row = find_(req.id);
+  if (!row) return { ok: false, error: 'notfound' };
+  sheet_().deleteRow(row);
+  return { ok: true };
+}
+
+function add_(req) {
+  var item = {
+    name: clean_(req.name, MAX.name),
+    contact: clean_(req.contact, MAX.contact),
+    message: clean_(req.message, MAX.message),
+    status: STATUSES.indexOf(req.status) === -1 ? 'new' : req.status,
+    note: '',
+    source: 'manual'
+  };
+  if (!item.name) return { ok: false, error: 'bad' };
+  append_(sheet_(), item);
+  return { ok: true };
+}
+
+/* ---------- the sheet ---------- */
+
+function sheet_() {
+  var book = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = book.getSheetByName(SHEET_NAME);
+  if (!sheet) {
+    sheet = book.insertSheet(SHEET_NAME);
+    sheet.getRange(1, 1, 1, HEAD.length).setValues([HEAD]).setFontWeight('bold');
+    sheet.setFrozenRows(1);
+    sheet.getRange(1, 1, sheet.getMaxRows(), HEAD.length).setNumberFormat('@');   // всё как простой текст: ни дат, ни формул
+  }
+  return sheet;
+}
+
+function append_(sheet, item) {
+  var id = Utilities.getUuid().slice(0, 8);
+  sheet.appendRow([id, new Date().toISOString(), item.name, item.contact, item.message, item.status, item.note, item.source]);
+}
+
+function toItem_(row) {
+  var created = row[1] instanceof Date ? row[1].toISOString() : String(row[1]);
+  return { id: String(row[0]), at: created, name: String(row[2]), contact: String(row[3]), message: String(row[4]),
+           status: STATUSES.indexOf(String(row[5])) === -1 ? 'new' : String(row[5]), note: String(row[6]), source: String(row[7]) };
+}
+
+function find_(id) {
+  id = String(id || '');
+  if (!id) return 0;
+  var ids = sheet_().getRange(1, 1, sheet_().getLastRow(), 1).getValues();
+  for (var i = 1; i < ids.length; i++) if (String(ids[i][0]) === id) return i + 1;
+  return 0;
+}
+
+function recentCount_(sheet) {
+  var last = sheet.getLastRow();
+  if (last < 2) return 0;
+  var from = Math.max(2, last - 11);
+  var values = sheet.getRange(from, 2, last - from + 1, 1).getValues();
+  var limit = Date.now() - 60000, count = 0;
+  for (var i = 0; i < values.length; i++) {
+    var t = new Date(values[i][0]).getTime();
+    if (t > limit) count++;
+  }
+  return count;
+}
+
+function clean_(value, max) {
+  return String(value === undefined || value === null ? '' : value).replace(/\r\n/g, '\n').trim().slice(0, max);
+}
+
+function json_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}

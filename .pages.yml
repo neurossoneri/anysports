@@ -102,6 +102,10 @@ content:
     label: Адрес формы связи / Contact form endpoint (https://...)
     description: Адрес из сервиса форм (например Formspree), который пересылает сообщения на вашу почту. Подробности в README.
     type: string
+  - name: inbox_endpoint
+    label: Адрес приёма заявок (Google Apps Script, https://script.google.com/...)
+    description: Заполняется в панели /admin/ на вкладке «Заявки». Сообщения из формы на сайте попадают в вашу Google-таблицу.
+    type: string
   - name: public_url
     label: Public site URL (optional, https://...)
     type: string
@@ -110,7 +114,7 @@ content:
     description: 'Показывается в разделе «Who is responsible» на странице privacy/. Можно оставить пустым: тогда указываются имя и email.'
     type: string
   - name: portrait
-    label: Фото 1 · Главное фото (первый экран, правая половина экрана; вертикальный кадр, например половина лица)
+    label: Фото 1 · Главное фото (первый экран, левая половина экрана; вертикальный кадр, например половина лица)
     type: image
   - name: eyes_photo
     label: Фото 3 · Крупный план (рядом с «Intuition sessions»; если пусто — фото 1)
