@@ -12,7 +12,7 @@
   <meta property="og:description" content="">
   <link rel="icon" type="image/svg+xml" sizes="any" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22%3E%3CclipPath id=%22c%22%3E%3Crect width=%2248%22 height=%2248%22 rx=%2211%22/%3E%3C/clipPath%3E%3Cg clip-path=%22url(%23c)%22%3E%3Crect width=%2248%22 height=%2214%22 fill=%22%23cfe0f5%22/%3E%3Crect y=%2214%22 width=%2248%22 height=%2210%22 fill=%22%23dce8f8%22/%3E%3Crect y=%2224%22 width=%2248%22 height=%228%22 fill=%22%23e8ecf9%22/%3E%3Ccircle cx=%2237%22 cy=%2211%22 r=%224.6%22 fill=%22%23fff%22 opacity=%22.85%22/%3E%3Cpath d=%22M-2 31 13 12l8 9 8-12 21 22z%22 fill=%22%23aab9e4%22/%3E%3Cpath d=%22M9.7 16 13 12l3.6 4-1.8-1.1-1.6 1.7-1.6-1.7zM25.9 13.6 29 9l4.6 4.6-2.3-1.2-2.1 2-1.6-1.9z%22 fill=%22%23fff%22 opacity=%22.93%22/%3E%3Cpath d=%22M-2 31v-4l8-5 9 9zM19 31l11-9 10 6 10-4v7z%22 fill=%22%237f9fd3%22/%3E%3Crect y=%2231%22 width=%2248%22 height=%2217%22 fill=%22%2386c4bc%22/%3E%3Crect y=%2231%22 width=%2248%22 height=%226%22 fill=%22%23c3e2e0%22 opacity=%22.55%22/%3E%3Cpath d=%22M12 34.5h9M27 37.5h11M8 40h7%22 stroke=%22%23fff%22 stroke-width=%221.2%22 stroke-linecap=%22round%22 opacity=%22.6%22/%3E%3Cpath d=%22M-2 48v-8c8-4 15-1 22 3 8 4 18 3 30-2v7z%22 fill=%22%238ec99b%22/%3E%3Cpath d=%22M14 48c10-3 22-2 36-7v7z%22 fill=%22%2364aa8b%22/%3E%3Cpath d=%22M36 46.5l-.6-4.2M39 46.5l.3-5M42 46.5l1.3-4%22 stroke=%22%234f9a7a%22 stroke-width=%221%22 stroke-linecap=%22round%22 fill=%22none%22/%3E%3C/g%3E%3C/svg%3E">
   <!--@@FONTS@@-->
-  <script>document.documentElement.classList.add('js')</script>
+  <script>document.documentElement.classList.add('js');setTimeout(function(){if(!window.__ready)document.documentElement.classList.remove('js')},5000)</script>
   <style>
     /* ===== Cold redesign: dark and light bands, square edges, blue and green accents ===== */
     /* ---------- Tokens ---------- */
@@ -24,8 +24,6 @@
       /* Cold palette. Deep tones open the page; sand and dune are the soft light bands. */
       --abyss:#06121e; --deep:#08192a; --teal:#0c2a3d; --sand:#e5dac4; --dune:#dccfb4; --blend:clamp(112px,14vw,216px);
       --blue:#2f6fb3; --blue-hi:#8dbdf0; --green:#1f8a74; --green-hi:#6fd2b8;
-      /* Photo grading: one knob. 0 = off (use when every photograph is already cold-graded), 1 = strongest. */
-      --photo-grade:0;
       /* Shared with article pages */
       --bg:#e5dac4; --bg-soft:#ddd1ba; --paper:#efe6d3; --paper-alt:#e8dec9;
       --text:#10243a; --text-muted:#46607a; --blue-deep:#1f5f9e; --mint-strong:#1f7a67;
@@ -74,7 +72,7 @@
     /* ---------- Base ---------- */
     * { box-sizing:border-box; }
     html { scroll-behavior:smooth; scroll-padding-top:0; }
-    body { margin:0; min-width:320px; color:var(--text); background:var(--bg); font-family:var(--sans); line-height:1.65; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; overflow-x:hidden; }
+    body { margin:0; min-width:320px; color:var(--text); background:var(--bg); font-family:var(--sans); line-height:1.65; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
     main { overflow-x:clip; }
     main:focus { outline:none; }
     figure { margin:0; }
@@ -98,7 +96,7 @@
     .sticky { position:sticky; top:32px; }
 
     /* ---------- Buttons and fields ---------- */
-    .button { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:52px; padding:13px 32px; border:1px solid var(--border); border-radius:var(--r-pill); background:var(--glass); color:var(--text); font-weight:650; font-size:.95rem; letter-spacing:.005em; text-align:center; box-shadow:var(--float); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); transition:transform .5s var(--ease),box-shadow .5s var(--ease),background-color .3s,border-color .3s,filter .3s; }
+    .button { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:52px; padding:13px 32px; border:1px solid var(--border); border-radius:var(--r-pill); background:var(--glass); color:var(--text); font-weight:650; font-size:.95rem; letter-spacing:.005em; text-align:center; box-shadow:var(--float); transition:transform .5s var(--ease),box-shadow .5s var(--ease),background-color .3s,border-color .3s,filter .3s; }
     .button:hover { transform:translateY(-3px); box-shadow:var(--float-hi); }
     .button:active { transform:translateY(-1px) scale(.985); transition-duration:.12s; }
     .button:disabled { opacity:.6; cursor:progress; transform:none; box-shadow:var(--float); }
@@ -118,17 +116,18 @@
 
     /* ---------- Photographs: square frames, cold grading ---------- */
     .photo { position:relative; overflow:hidden; isolation:isolate; background:linear-gradient(135deg,#0f3148,#1b4d63 55%,#1d5f5b); }
-    .photo > img { position:absolute; inset:0; opacity:0; filter:saturate(calc(1 - var(--photo-grade) * .7)) contrast(calc(1 + var(--photo-grade) * .1)); transition:opacity 1.2s var(--ease); }
+    .photo > img { position:absolute; inset:0; opacity:0; transition:opacity 1.2s var(--ease); }
     .photo.has-photo > img { opacity:1; }
     .photo.has-photo .ph { display:none; }
-    .photo::before, .photo::after { content:""; position:absolute; inset:0; z-index:1; pointer-events:none; }
-    .photo::before { background:linear-gradient(160deg,#2b6aa8,#1b5a6a); mix-blend-mode:color; opacity:calc(var(--photo-grade) * 1.1); }
-    .photo::after { background:linear-gradient(160deg,#2f6aa6,#124057); mix-blend-mode:soft-light; opacity:var(--photo-grade); }
     .slot-badge { position:absolute; left:12px; top:12px; z-index:30; padding:8px 15px; border-radius:var(--r-pill); background:#ffd23f; color:#111; font:800 .95rem/1 Inter,system-ui,sans-serif; letter-spacing:.02em; box-shadow:0 10px 22px -8px rgba(0,0,0,.55); pointer-events:none; }
     .plate .slot-badge { left:50%; top:26%; transform:translateX(-50%); white-space:nowrap; }   /* the story photos have feathered edges: keep the number in the clear middle */
     .show-slots .photo { outline:3px dashed #ffd23f; outline-offset:-3px; }
     .ph { position:absolute; inset:0; display:grid; place-content:center; justify-items:center; gap:10px; padding:24px; text-align:center; color:var(--blue-hi); font-size:.82rem; font-weight:600; opacity:.85; }
     .ph svg { width:48px; height:48px; opacity:.7; }
+    /* A place that is still empty on the live site is removed together with its frame. It is never filled with another photograph. */
+    .hero-grid:has(> .hero-photo[hidden]) { grid-template-columns:minmax(0,1fr); }
+    .sessions .split:has(.side-pair > .eyes[hidden]) { grid-template-columns:minmax(0,1fr); }
+    .side-pair:has(> .eyes[hidden]) { display:none; }
 
     /* ---------- 1. Hero: a vertical photograph on the left half, the quotation on the right half (phones included) ---------- */
     .hero { padding:0; }
@@ -165,8 +164,8 @@
     /* ---------- Handwriting: text is written in real time ---------- */
     .js [data-write]:not(.is-split) { visibility:hidden; }
     .w { display:inline-block; white-space:nowrap; }
-    .js .ch { display:inline-block; opacity:0; filter:blur(5px); transform:translateY(.2em) rotate(-3deg); clip-path:inset(-.4em 100% -.4em -.1em); transition:opacity .7s var(--ease),filter .7s var(--ease),transform .9s var(--ease),clip-path .9s var(--ease); transition-delay:calc(var(--i) * var(--step,45ms)); }
-    .js .is-written .ch { opacity:1; filter:none; transform:none; clip-path:inset(-.4em -.4em -.4em -.1em); }
+    .js .ch { display:inline-block; opacity:0; transform:translateY(.22em) rotate(-3deg); transition:opacity .7s var(--ease),transform .9s var(--ease); transition-delay:calc(var(--i) * var(--step,45ms)); }
+    .js .is-written .ch { opacity:1; transform:none; }
     .js [data-fade] { opacity:0; transition:opacity 1.4s ease var(--d,0s); }
     .js [data-fade].in { opacity:1; }
 
@@ -196,10 +195,10 @@
     .finale { position:relative; isolation:isolate; max-width:46rem; margin:clamp(56px,8vw,112px) auto 0; padding:clamp(32px,5vw,64px) clamp(8px,3vw,32px); text-align:center; }
     .finale::before { content:""; position:absolute; inset:-18% -14%; z-index:-1; background:radial-gradient(closest-side,rgba(141,189,240,.16),transparent 72%); opacity:0; transition:opacity 2.8s ease .2s; }
     .finale.in::before { opacity:1; }
-    .finale > * { transition:opacity 1.8s var(--ease),transform 2s var(--ease),filter 1.8s var(--ease); }
+    .finale > * { transition:opacity 1.8s var(--ease),transform 2s var(--ease); }
     .finale > :nth-child(1) { transition-delay:.1s; } .finale > :nth-child(2) { transition-delay:.5s; } .finale > :nth-child(3) { transition-delay:.9s; } .finale > :nth-child(4) { transition-delay:1.5s; }
-    .js .finale:not(.in) > :not(.finale-note):not(.quote-stroke) { opacity:0; transform:translateY(22px); filter:blur(7px); }
-    .js .finale:not(.in) > .finale-line { transform:scaleX(0); filter:none; opacity:1; }
+    .js .finale:not(.in) > :not(.finale-note):not(.quote-stroke) { opacity:0; transform:translateY(22px); }
+    .js .finale:not(.in) > .finale-line { transform:scaleX(0); opacity:1; }
     .finale-line { display:block; width:72px; height:3px; margin:0 auto clamp(22px,3vw,34px); background:linear-gradient(90deg,var(--c-a),var(--c-b)); }
     .finale .glyph { margin:0 auto 18px; width:40px; height:40px; }
     .finale h3 { margin:0 0 clamp(14px,2vw,24px); font:500 clamp(2rem,4.4vw,3.4rem)/1.12 var(--serif); letter-spacing:-.025em; color:var(--c-text); }
@@ -215,7 +214,7 @@
     /* ---------- 4. Transformation ---------- */
     .change .split { grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); }
     .change .title { max-width:9em; }
-    .mm { display:block; width:min(100%,400px); height:auto; overflow:visible; margin:clamp(8px,2vw,24px) 0 0; }
+    .mm { display:block; width:min(100%,400px); height:auto; overflow:visible; margin:clamp(8px,2vw,24px) 0 0; will-change:transform; }
     .mm .s1, .mm .s2, .mm .s3 { opacity:0; }
     .mm .s1 { animation:mm1 16s ease-in-out infinite; }
     .mm .s2 { animation:mm2 16s ease-in-out infinite; }
@@ -328,7 +327,7 @@
 
     /* ---------- Jumping between sections ---------- */
     #top:focus, section[tabindex="-1"]:focus, .form-sent:focus { outline:none; }
-    .is-idle, .is-idle * { animation-play-state:paused!important; }
+    .mm.is-idle, .mm.is-idle * { animation-play-state:paused!important; }
 
     /* ---------- Shared with article pages ---------- */
     .scroll-progress { position:fixed; inset:0 0 auto 0; height:3px; z-index:140; transform:scaleX(var(--p,0)); transform-origin:0 50%; background:linear-gradient(90deg,var(--blue-hi),var(--green-hi)); pointer-events:none; }
@@ -701,9 +700,9 @@
       $('meta[name="description"]').content = t('meta.description');
       $('meta[property="og:title"]').content = t('meta.fullTitle');
       $('meta[property="og:description"]').content = t('meta.description');
-      $$('[data-i18n]').forEach(node => { node.textContent = t(node.dataset.i18n); });
+      $$('[data-i18n]').forEach(node => { const text = t(node.dataset.i18n); if (node.textContent !== text) node.textContent = text; });   // the build already wrote this text: touch only what differs
       $$('[data-i18n-aria]').forEach(node => node.setAttribute('aria-label', t(node.dataset.i18nAria)));
-      $$('[data-i18n-alt]').forEach(node => { node.alt = t(node.dataset.i18nAlt); });
+      $$('[data-i18n-alt]').forEach(node => { const text = t(node.dataset.i18nAlt); if (node.alt !== text) node.alt = text; });
       $$('[data-qa]').forEach(node => { node.hidden = !t('qa.q' + node.dataset.qa).trim(); });
       $$('[data-post-lang]').forEach(node => { node.hidden = node.dataset.postLang !== lang; });
       const notes = $('#notes');
@@ -719,12 +718,13 @@
     watch('[data-write]', 'is-written', { threshold: .4, rootMargin: '0px 0px -8% 0px' });
     watch('[data-fade]', 'in', { threshold: .15, rootMargin: '0px 0px -6% 0px' });
     watch('[data-finale]', 'in', { threshold: .45, rootMargin: '0px 0px -10% 0px' });    // closing statements appear slowly, once
+    window.__ready = true;                                                              // the page script is running: the safety net in <head> stands down
 
     /* ---------- Photo numbers: every empty place is labelled until launch; ?photos labels all photos ---------- */
     const showAllSlots = /(?:^|[?&])photos(?:[=&]|$)/.test(location.search);
     if (showAllSlots) document.documentElement.classList.add('show-slots');
     $$('img[data-slot]').forEach(image => {
-      const empty = !image.getAttribute('src') || image.hasAttribute('data-fallback');   // slot 3 borrows photo 1 while it is empty
+      const empty = !image.getAttribute('src');                           // an empty place is never filled with another photograph
       if (!showAllSlots && !(SETTINGS.preview && empty)) return;          // after launch only ?photos shows numbers
       const badge = document.createElement('span');
       badge.className = 'slot-badge';
@@ -764,20 +764,22 @@
       const hash = link.getAttribute('href');
       if (hash.length > 1 && goTo(hash)) event.preventDefault();
     });
-    let scrollQueued = false;
-    function onScroll() {
-      scrollQueued = false;
-      if (!nativeProgress) {
-        const max = root.scrollHeight - innerHeight;
-        progressLine.style.setProperty('--p', max > 0 ? Math.min(1, scrollY / max).toFixed(4) : '0');
+    if (!nativeProgress) {                               // browsers without scroll-driven animations: the page height is measured on resize, never while scrolling
+      let scrollQueued = false, scrollMax = 0;
+      function onScroll() {
+        scrollQueued = false;
+        progressLine.style.setProperty('--p', scrollMax > 0 ? Math.min(1, scrollY / scrollMax).toFixed(4) : '0');
       }
+      const measure = () => { scrollMax = Math.max(0, root.scrollHeight - innerHeight); onScroll(); };
+      addEventListener('scroll', () => { if (!scrollQueued) { scrollQueued = true; requestAnimationFrame(onScroll); } }, { passive: true });
+      addEventListener('resize', measure);
+      addEventListener('load', measure);
+      if ('ResizeObserver' in window) new ResizeObserver(measure).observe(document.body);
+      measure();
     }
-    addEventListener('scroll', () => { if (!scrollQueued) { scrollQueued = true; requestAnimationFrame(onScroll); } }, { passive: true });
-    addEventListener('resize', onScroll);
-    onScroll();
-    if (hasObserver && !reduceMotion) {                  // endless loops rest while their section is off screen
+    if (hasObserver && !reduceMotion) {                  // the endless butterfly rests while it is off screen
       const rest = new IntersectionObserver(entries => entries.forEach(entry => entry.target.classList.toggle('is-idle', !entry.isIntersecting)), { rootMargin: '160px 0px' });
-      $$('main > section').forEach(section => rest.observe(section));
+      $$('.mm').forEach(graphic => rest.observe(graphic));
     }
 
     /* ---------- Contact links: only genuinely configured channels are shown ---------- */

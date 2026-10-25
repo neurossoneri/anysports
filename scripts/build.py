@@ -52,6 +52,7 @@ UI = {
 FONT_CSS = 'assets/fonts/fonts.css'
 FONT_PRELOAD = ('inter-normal-latin', 'source-serif-4-normal-latin', 'source-serif-4-italic-latin')   # used above the fold
 FONT_LINKS = ''.join(f'<link rel="preload" href="assets/fonts/{name}.woff2" as="font" type="font/woff2" crossorigin>' for name in FONT_PRELOAD) + f'<link rel="stylesheet" href="{FONT_CSS}">'
+HOME_FONT_LINKS = ''.join(f'<link rel="preload" href="assets/fonts/{name}.woff2" as="font" type="font/woff2" crossorigin>' for name in FONT_PRELOAD + ('caveat-normal-latin',)) + f'<link rel="stylesheet" href="{FONT_CSS}">'
 PROGRESS_JS = "<script>(function(){if(window.CSS&&CSS.supports&&CSS.supports('animation-timeline','scroll()')&&!matchMedia('(prefers-reduced-motion: reduce)').matches)return;var b=document.querySelector('.scroll-progress');function u(){var m=document.documentElement.scrollHeight-innerHeight;b.style.setProperty('--p',m>0?Math.min(1,scrollY/m).toFixed(4):0)}addEventListener('scroll',u,{passive:true});u()})()</script>"
 VALID_SLUG = re.compile(r'^[a-z0-9]+(?:-[a-z0-9]+)*$')
 SAFE_IMAGE = re.compile(r'^(?:media/|images/)[\w\-/%.]+\.(?:jpe?g|png|gif|webp|avif)$', re.I)
@@ -63,13 +64,27 @@ ALLOWED_ATTRS = {'a': ['href', 'title'], 'img': ['src', 'alt', 'title', 'loading
 PHOTO_SLOTS = (
     {'field': 'portrait', 'num': 1, 'title': 'Главное фото', 'where': 'Первый экран: левая половина экрана (и на компьютере, и на телефоне)', 'anchor': 'hero', 'shape': 'вертикаль, например половина лица; по краям кадр обрежется по центру'},
     {'field': 'quote_photo', 'num': 2, 'title': 'Атмосферное фото', 'where': 'Фон за цитатой А «You can only control yourself» (необязательно)', 'anchor': 'intro', 'shape': 'пейзаж, горизонталь'},
-    {'field': 'eyes_photo', 'num': 3, 'title': 'Крупный план', 'where': 'Рядом с «Intuition sessions» (если пусто — берётся фото 1)', 'anchor': 'sessions', 'shape': 'вертикаль 3:4'},
+    {'field': 'eyes_photo', 'num': 3, 'title': 'Крупный план', 'where': 'Рядом с «Intuition sessions»', 'anchor': 'sessions', 'shape': 'вертикаль 3:4'},
     {'field': 'story_photo_1', 'num': 4, 'title': 'Моя история', 'where': 'Справа, после первого абзаца', 'anchor': 'about', 'shape': 'вертикаль 4:5'},
     {'field': 'story_photo_2', 'num': 5, 'title': 'Моя история', 'where': 'Слева, после второго абзаца и выделенной фразы', 'anchor': 'about', 'shape': 'вертикаль 4:5'},
     {'field': 'story_photo_3', 'num': 6, 'title': 'Моя история', 'where': 'Справа, после третьего абзаца', 'anchor': 'about', 'shape': 'вертикаль 4:5'},
     {'field': 'story_photo_4', 'num': 7, 'title': 'Моя история', 'where': 'Слева, после четвёртого абзаца', 'anchor': 'about', 'shape': 'вертикаль 4:5'},
 )
 PHOTO_FIELDS = tuple(slot['field'] for slot in PHOTO_SLOTS)
+# Which size the browser needs for each place (used for srcset): the hero is half of the screen, story frames are small.
+PHOTO_SIZES = {
+    'portrait': '50vw',
+    'quote_photo': '(max-width:900px) 100vw, 600px',
+    'eyes_photo': '(max-width:900px) 100vw, 45vw',
+    'story_photo_1': '(max-width:700px) 78vw, 320px',
+    'story_photo_2': '(max-width:700px) 78vw, 320px',
+    'story_photo_3': '(max-width:700px) 78vw, 320px',
+    'story_photo_4': '(max-width:700px) 78vw, 320px',
+}
+SRCSET_WIDTHS = (640, 1080, 1600)   # smaller copies (WebP) for phones and small windows; the original is always the largest choice
+# Places that carry a frame with a placeholder. On the live site an empty one is hidden together with its frame.
+# (The photograph behind quotation A has no placeholder: it is just a soft colour when empty.)
+HIDE_WHEN_EMPTY = ('portrait', 'eyes_photo', 'story_photo_1', 'story_photo_2', 'story_photo_3', 'story_photo_4')
 QA_SLOTS = 8
 BRAND_DEFAULT = 'Sport Intuitive'
 # The logo (also the favicon design) for article pages. The home page has no top bar any more.
@@ -287,23 +302,74 @@ def notes_section(posts):
             '</div></section>')
 
 
+def make_variants(out_root, rel):
+    """Smaller WebP copies of one page photograph: [(url, width), ...] from small to large, the original last.
+    Needs Pillow. Without it, or for a file it cannot read, the original is used on its own and the build goes on."""
+    try:
+        from PIL import Image, ImageOps
+    except ImportError:
+        return []
+    source = out_root / rel
+    if not source.is_file():
+        return []
+    variants = []
+    try:
+        with Image.open(source) as opened:
+            image = ImageOps.exif_transpose(opened)
+            width, height = image.size
+            if width < SRCSET_WIDTHS[0] * 1.2:
+                return []
+            image = image.convert('RGBA' if image.mode in ('RGBA', 'LA') or 'transparency' in image.info else 'RGB')
+            stem = re.sub(r'[^A-Za-z0-9]+', '-', rel).strip('-').lower()
+            for target in SRCSET_WIDTHS:
+                if target >= width * 0.85:
+                    break
+                name = f'media/opt/{stem}-{target}.webp'
+                (out_root / name).parent.mkdir(parents=True, exist_ok=True)
+                image.resize((target, max(1, round(height * target / width))), Image.LANCZOS).save(out_root / name, 'WEBP', quality=80, method=4)
+                variants.append((name, target))
+    except Exception as exc:   # an unusual file must never break the build
+        print(f'NOTE: no smaller copies for {rel} ({exc.__class__.__name__}); the original is used.', file=sys.stderr)
+        return []
+    return variants + [(rel, width)] if variants else []
+
+
+def copy_media():
+    """Copy the uploaded photographs next to the page. Done before the page is built: the page looks for their smaller copies."""
+    if not (ROOT / 'media').exists():
+        return
+    shutil.copytree(ROOT / 'media', OUT / 'media', dirs_exist_ok=True, ignore=shutil.ignore_patterns('.gitkeep'))
+    for photo in sorted((OUT / 'media').rglob('*')):
+        if photo.is_file() and photo.stat().st_size > 1_500_000:
+            print(f'WARNING: {photo.relative_to(OUT)} is {photo.stat().st_size // 1024} KB. Smaller copies are made for the page (when Pillow is installed), '
+                  'but compress the original to about 300-400 KB anyway: the admin panel does that by itself.', file=sys.stderr)
+
+
 def build_home(site, posts, public_url, ready):
     template = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
     values = collect_values(site)
     copy = values['en']
 
     template = replace_required(template, '<!--@@NOTES@@-->', notes_section(posts), 'notes marker')
-    template = replace_required(template, '<!--@@FONTS@@-->', FONT_LINKS, 'fonts marker')
+    template = replace_required(template, '<!--@@FONTS@@-->', HOME_FONT_LINKS, 'fonts marker')
     if posts:   # the notes band is light sand and sits last, so the footer fades from sand instead of from teal
         template = replace_required(template, 'site-footer after-teal', 'site-footer after-sand', 'footer tone')
     # Builder-managed image src attributes; a missing photo keeps its soft placeholder.
-    paths = {field: photo_path(site.get(field)) for field in PHOTO_FIELDS}
-    paths['eyes_photo'] = paths['eyes_photo'] or paths['portrait']
-    for field in PHOTO_FIELDS:
-        slot = next(item['num'] for item in PHOTO_SLOTS if item['field'] == field)
-        template = replace_required(template, f'data-photo="{field}"',
-                                    f'data-slot="{slot}"' + (f' src="{esc(paths[field])}"' if paths[field] else '')
-                                    + (' data-fallback' if field == 'eyes_photo' and paths[field] and not photo_path(site.get('eyes_photo')) else ''), f'photo {field}')   # slot 3 borrows photo 1 while empty
+    # Every numbered place shows its own photograph or stays empty: a place never borrows the picture of another one.
+    for slot in PHOTO_SLOTS:
+        field = slot['field']
+        path = photo_path(site.get(field))
+        attributes = f'data-slot="{slot["num"]}"'
+        if path:
+            attributes += f' src="{esc(path)}"'
+            variants = make_variants(OUT, path)
+            if variants:
+                attributes += ' srcset="' + ', '.join(f'{esc(name)} {size}w' for name, size in variants) + f'" sizes="{esc(PHOTO_SIZES[field])}"'
+        elif ready and field in HIDE_WHEN_EMPTY:   # live site: an empty place disappears together with its frame
+            template, found = re.subn(r'(<figure\b[^>]*)(>\s*<img data-photo="' + field + '")', r'\1 hidden\2', template, count=1)
+            if not found:
+                raise RuntimeError(f'Template frame not found: {field}')
+        template = replace_required(template, f'data-photo="{field}"', attributes, f'photo {field}')
     settings = {
         'email': str(site.get('email') or ''),
         'whatsapp': str(site.get('whatsapp') or ''),
@@ -564,16 +630,12 @@ def main():
     if OUT.exists():
         shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
+    copy_media()
     build_home(site, posts, public_url, ready)
     build_fonts()
     build_articles(site, posts, public_url, ready)
     has_privacy = privacy_page(site, public_url, ready)
     has_admin = build_admin(site)
-    if (ROOT / 'media').exists():
-        shutil.copytree(ROOT / 'media', OUT / 'media', dirs_exist_ok=True, ignore=shutil.ignore_patterns('.gitkeep'))
-        for photo in sorted((OUT / 'media').rglob('*')):
-            if photo.is_file() and photo.stat().st_size > 600_000:
-                print(f'WARNING: {photo.relative_to(OUT)} is {photo.stat().st_size // 1024} KB. Compress it to about 300-400 KB so the page opens quickly on a phone.', file=sys.stderr)
     (OUT / '.nojekyll').write_text('', encoding='utf-8')
     sitemap = []
     if public_url and ready:

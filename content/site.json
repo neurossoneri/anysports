@@ -7,5 +7,10 @@
   "quote_photo": "",
   "privacy_address": "",
   "inbox_endpoint": "",
-  "portrait": "media/photo-1.jpg"
+  "portrait": "media/photo-1.jpg",
+  "eyes_photo": "",
+  "story_photo_1": "",
+  "story_photo_2": "",
+  "story_photo_3": "",
+  "story_photo_4": ""
 }

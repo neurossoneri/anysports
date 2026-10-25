@@ -237,7 +237,8 @@ def check_brand_and_dashboard(builder, destination):
     assert 'banned' in schema and schema['required'] == list(builder.REQUIRED_COPY)
     admin = (destination / 'admin/index.html').read_text(encoding='utf-8')
     assert 'noindex' in admin and 'fonts.googleapis' not in admin and 'localStorage' in admin
-    assert 'quick-num' in admin and 'takeMany' in admin and 'numberFromName' in admin, 'dashboard: add photos by number'
+    assert 'takeMany' in admin and 'numberFromName' in admin and 'photo-row' in admin, 'dashboard: one row per numbered photo; several files can be dropped by number'
+    assert 'quickBar' not in admin and 'photoMap' not in admin and 'backdrop-filter' not in admin, 'dashboard: a plain list, no page map, no blur'
     assert 'data-tab' in admin and "['requests', 'Заявки'" in admin, 'dashboard: the Requests tab'
     for field in builder.PHOTO_FIELDS:
         assert any(p['field'] == field for p in schema['photos'])
@@ -270,9 +271,27 @@ def check_soft_controls(destination):
 def check_photo_numbers(destination):
     """Photo places carry numbers: empty places before launch, every photo with ?photos."""
     home = (destination / 'index.html').read_text(encoding='utf-8')
-    assert 'const showAllSlots' in home and 'SETTINGS.preview' in home and "hasAttribute('data-fallback')" in home and "'Фото ' + image.dataset.slot" in home
+    assert 'const showAllSlots' in home and 'SETTINGS.preview' in home and "'Фото ' + image.dataset.slot" in home
+    assert 'data-fallback' not in home, "an empty place is never filled with another photograph"
     assert "image.closest('.quote-panel')" in home, 'the badge of the quotation background must stay visible'
     assert '"preview":' in home, 'the page knows whether it is still a preview'
+
+
+def check_smooth(destination):
+    """Smooth scrolling: only cheap properties move while the page is read, and nothing heavy runs per letter or per scroll event."""
+    home = (destination / 'index.html').read_text(encoding='utf-8')
+    css = (destination / 'assets/site.css').read_text(encoding='utf-8')
+    letter = re.search(r'\.js \.ch \{([^}]*)\}', css).group(1)
+    assert 'filter' not in letter and 'clip-path' not in letter, 'every letter may only fade and rise (opacity, transform)'
+    assert not re.search(r'\.finale[^{}]*\{[^}]*filter', css), 'closing statements appear without blur'
+    assert 'photo-grade' not in css and 'mix-blend-mode' not in css and 'backdrop-filter' not in css, 'no full-size filters, blend modes or backdrop blur'
+    assert 'optimizeLegibility' not in css, 'text-rendering stays at the browser default'
+    assert '.mm.is-idle' in css and '.is-idle, .is-idle *' not in css, 'only the butterfly rests off screen, not whole sections'
+    assert "$$('.mm')" in home and "$$('main > section').forEach(section => rest" not in home
+    assert 'window.__ready = true' in home and 'window.__ready' in home.split('<style>')[0], 'safety net: the page shows itself even if its script fails'
+    assert 'scrollMax' in home, 'the progress fallback measures the page on resize, not on every scroll'
+    assert 'data-fallback' not in home, 'no place borrows the photograph of another place'
+    assert 'preload" href="assets/fonts/caveat-normal-latin.woff2"' in home, 'the handwriting font is preloaded'
 
 
 def check_inbox(builder, destination):
@@ -281,7 +300,7 @@ def check_inbox(builder, destination):
     for needle in ('function doPost', 'ADMIN_KEY', "'submit'", 'LockService', 'setNumberFormat'):
         assert needle in script, f'inbox script lacks {needle}'
     admin = (destination / 'admin/index.html').read_text(encoding='utf-8')
-    for needle in ('panelRequests', 'inboxCall', 'inbox-script.txt', 'csvOf', 'photoMap'):
+    for needle in ('panelRequests', 'inboxCall', 'inbox-script.txt', 'csvOf', 'panelPhotos'):
         assert needle in admin, f'dashboard lacks {needle}'
     home = (destination / 'index.html').read_text(encoding='utf-8')
     assert "action:'submit'" in home and 'Promise.allSettled' in home, 'the form must also write to the inbox'
@@ -347,6 +366,7 @@ def main():
     check_about_and_questions(ROOT / '_site')
     check_scripts(ROOT / '_site')
     check_photo_numbers(ROOT / '_site')
+    check_smooth(ROOT / '_site')
     check_inbox(builder, ROOT / '_site')
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
@@ -365,7 +385,11 @@ def main():
         privacy = (work / '_site/privacy/index.html').read_text(encoding='utf-8')
         assert 'Test Person' in home and 'hello@example.com' in home and 'Sport Intuitive' in home
         assert 'Disallow: /admin/' in (work / '_site/robots.txt').read_text(encoding='utf-8')
-        assert home.count('src="media/test-cover.webp"') == 4, 'hero, eyes fallback, story frame 2 and one note cover'
+        assert home.count('src="media/test-cover.webp"') == 3, 'hero, story frame 2 and one note cover: no place borrows another photograph'
+        eyes = re.search(r'<img data-slot="3"[^>]*>', home).group(0)
+        assert 'src=' not in eyes, 'photo 3 stays empty instead of repeating photo 1'
+        assert '<figure class="photo eyes" hidden>' in home and '<figure class="photo plate plate-r" hidden>' in home, 'live site: empty places are hidden with their frames'
+        assert '<figure class="photo hero-photo">' in home and '<figure class="photo plate plate-l">' in home, 'places that have a photograph stay visible'
         assert '"formEndpoint":"https://formspree.io/f/abc123"' in home
         assert '"inboxEndpoint":"https://script.google.com/macros/s/AKfycbTEST_123/exec"' in home and '"preview":false' in home
         assert 'Google Sheets' in privacy and 'formspree.io' in privacy, 'privacy notice names the form service and the spreadsheet'
@@ -398,8 +422,25 @@ def main():
         assert '"inboxEndpoint":""' in home and 'evil.example' not in home and 'Google Sheets' not in privacy and '"preview":true' in home
         assert 'id="notes"' not in home and 'noindex,nofollow' in home and '<footer class="site-footer after-teal"' in home
         assert 'through the contact form on this website' in privacy and 'opens your own email program' in privacy
+        assert '<figure class="photo eyes">' in home and ' hidden>' not in re.search(r'<figure class="photo hero-photo"[^>]*>', home).group(0), 'before launch every place stays visible'
         assert 'Disallow: /' in (work / '_site/robots.txt').read_text(encoding='utf-8')
-    print('OK: English-only copy and CMS in sync, warm sand bands and transitions, self-hosted fonts, one Q&A block, photo-left hero, soft floating buttons, numbered photo places, requests inbox, highlighted phrases, closing statements, preface, privacy notice, photos, form, notes, safety and publish mode')
+    # Smaller copies of the photographs (needs Pillow, which the workflow installs).
+    if importlib.util.find_spec('PIL'):
+        def photographed(work, site):
+            from PIL import Image
+            Image.new('RGB', (2400, 3000), (40, 90, 140)).save(work / 'media/big.jpg', quality=85)
+            Image.new('RGB', (500, 600), (90, 40, 140)).save(work / 'media/small.jpg', quality=85)
+            site.update({'portrait': 'media/big.jpg', 'story_photo_1': 'media/small.jpg', 'publish_ready': False})
+        temporary, work = build_fixture(builder, photographed, posts=False)
+        with temporary:
+            home = (work / '_site/index.html').read_text(encoding='utf-8')
+            expected = ', '.join(f'media/opt/media-big-jpg-{w}.webp {w}w' for w in (640, 1080, 1600)) + ', media/big.jpg 2400w'
+            assert f'srcset="{expected}" sizes="50vw"' in home, 'the hero photograph offers smaller copies'
+            for width in (640, 1080, 1600):
+                assert (work / f'_site/media/opt/media-big-jpg-{width}.webp').stat().st_size > 0
+            assert (work / '_site/media/big.jpg').exists(), 'the original stays'
+            assert 'media-small' not in home and 'src="media/small.jpg"' in home, 'a small photograph needs no copies'
+    print('OK: smooth scrolling rules, own photo for every number, smaller photo copies, plain dashboard, English-only copy and CMS in sync, warm sand bands and transitions, self-hosted fonts, one Q&A block, photo-left hero, soft floating buttons, numbered photo places, requests inbox, highlighted phrases, closing statements, preface, privacy notice, photos, form, notes, safety and publish mode')
 
 
 if __name__ == '__main__':
