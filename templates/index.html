@@ -30,7 +30,7 @@
       --border:rgba(16,36,58,.16); --shadow-strong:0 30px 70px -44px rgba(6,18,30,.55);
       --glass:rgba(247,241,228,.6); --focus:#2f6fb3;
       --header-muted:#a3b9cc;
-      /* admin-crm-update: soft controls that hover above the page */
+      /* Soft controls that hover above the page */
       --r-pill:999px; --r-soft:14px;
       --float:0 1px 0 rgba(255,255,255,.3) inset,0 14px 28px -16px rgba(6,18,30,.55),0 4px 10px -5px rgba(6,18,30,.28);
       --float-hi:0 1px 0 rgba(255,255,255,.4) inset,0 22px 36px -16px rgba(6,18,30,.6),0 8px 16px -8px rgba(6,18,30,.3);
@@ -312,7 +312,6 @@
     .blog-body h3 { font:500 1.3rem/1.35 var(--serif); margin:8px 0 10px; }
     .blog-body > p { margin:0 0 12px; font-size:.93rem; color:#46607a; }
     .article-link { margin-top:auto; font-weight:700; color:#1f5f9e; }
-    .blog-empty { padding:28px; background:var(--glass); color:var(--text-muted); }
     .notes-all { margin-top:26px; }
     .notes .button-outline { background:transparent; border-color:var(--c-line); color:var(--c-text); }
 
@@ -334,7 +333,6 @@
     @supports (animation-timeline:scroll()) { .scroll-progress { animation:growBar linear both; animation-timeline:scroll(root block); } }
     @view-transition { navigation:auto; }
     ::view-transition-old(root), ::view-transition-new(root) { animation-duration:.5s; animation-timing-function:var(--ease); }
-    .article-nav { margin-left:auto; }
 
     /* ---------- Motion ---------- */
     @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }

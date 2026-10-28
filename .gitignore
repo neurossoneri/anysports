@@ -5,9 +5,4 @@ __pycache__/
 .env
 .venv/
 repomix-output.xml
-.backup-intuition/
-.backup-cold-redesign/
-.backup-qa/
-.backup-sand-fonts/
-.backup-admin-crm/
-.backup-smooth-photos/
+.backup-*/

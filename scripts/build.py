@@ -51,8 +51,16 @@ UI = {
 # Fonts are stored on this site (fonts/ is copied to assets/fonts/), so a visitor's browser never contacts a font provider.
 FONT_CSS = 'assets/fonts/fonts.css'
 FONT_PRELOAD = ('inter-normal-latin', 'source-serif-4-normal-latin', 'source-serif-4-italic-latin')   # used above the fold
-FONT_LINKS = ''.join(f'<link rel="preload" href="assets/fonts/{name}.woff2" as="font" type="font/woff2" crossorigin>' for name in FONT_PRELOAD) + f'<link rel="stylesheet" href="{FONT_CSS}">'
-HOME_FONT_LINKS = ''.join(f'<link rel="preload" href="assets/fonts/{name}.woff2" as="font" type="font/woff2" crossorigin>' for name in FONT_PRELOAD + ('caveat-normal-latin',)) + f'<link rel="stylesheet" href="{FONT_CSS}">'
+
+
+def font_links(preload):
+    """Preload hints and the stylesheet of the self-hosted fonts. The hrefs are relative: on pages with <base> that tag must come first."""
+    hints = ''.join(f'<link rel="preload" href="assets/fonts/{name}.woff2" as="font" type="font/woff2" crossorigin>' for name in preload)
+    return hints + f'<link rel="stylesheet" href="{FONT_CSS}">'
+
+
+FONT_LINKS = font_links(FONT_PRELOAD)
+HOME_FONT_LINKS = font_links(FONT_PRELOAD + ('caveat-normal-latin',))
 PROGRESS_JS = "<script>(function(){if(window.CSS&&CSS.supports&&CSS.supports('animation-timeline','scroll()')&&!matchMedia('(prefers-reduced-motion: reduce)').matches)return;var b=document.querySelector('.scroll-progress');function u(){var m=document.documentElement.scrollHeight-innerHeight;b.style.setProperty('--p',m>0?Math.min(1,scrollY/m).toFixed(4):0)}addEventListener('scroll',u,{passive:true});u()})()</script>"
 VALID_SLUG = re.compile(r'^[a-z0-9]+(?:-[a-z0-9]+)*$')
 SAFE_IMAGE = re.compile(r'^(?:media/|images/)[\w\-/%.]+\.(?:jpe?g|png|gif|webp|avif)$', re.I)
@@ -352,6 +360,7 @@ def build_home(site, posts, public_url, ready):
 
     template = replace_required(template, '<!--@@NOTES@@-->', notes_section(posts), 'notes marker')
     template = replace_required(template, '<!--@@FONTS@@-->', HOME_FONT_LINKS, 'fonts marker')
+    template = replace_required(template, '<span id="year">2026</span>', f'<span id="year">{dt.date.today().year}</span>', 'year marker')
     if posts:   # the notes band is light sand and sits last, so the footer fades from sand instead of from teal
         template = replace_required(template, 'site-footer after-teal', 'site-footer after-sand', 'footer tone')
     # Builder-managed image src attributes; a missing photo keeps its soft placeholder.
@@ -449,10 +458,10 @@ def article_shell(*, title, description, lang, css_prefix, body, public_url, rea
     article_header = f'<p class="post-meta">{esc(date)} · {esc(LANG_LABEL[lang])}</p>' if date else ''
     return f'''<!DOCTYPE html>
 <html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light dark"><meta name="theme-color" content="#06121e">{favicon_html}{FONT_LINKS}<meta name="robots" content="{'index,follow' if ready else 'noindex,nofollow'}">
+<meta name="color-scheme" content="light dark"><meta name="theme-color" content="#06121e"><base href="{route}">{favicon_html}{FONT_LINKS}<meta name="robots" content="{'index,follow' if ready else 'noindex,nofollow'}">
 <meta name="description" content="{desc}"><meta property="og:type" content="{'article' if kind == 'article' else 'website'}"><meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{desc}"><title>{esc(title)} — {name}</title>
-<base href="{route}"><link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/articles.css">
+<link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/articles.css">
 {canonical_html}{json_ld}<script>(function(){{try{{var t=localStorage.getItem('sport-site-theme');document.documentElement.dataset.theme=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}}catch(e){{}}}})()</script></head>
 <body><div class="scroll-progress" aria-hidden="true"></div><a class="skip" href="{css_prefix}/#content">{esc(SKIP_LABEL[lang])}</a><header class="site-header"><div class="container header-inner">
 <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">{brand_html}</span><span class="brand-name">{name}</span></a>
@@ -466,8 +475,9 @@ def article_shell(*, title, description, lang, css_prefix, body, public_url, rea
 
 
 ARTICLES_CSS = '''
-.brand-name { font-family:var(--serif); font-size:1.12rem; font-weight:600; letter-spacing:.01em; white-space:nowrap; }
-.article-nav { display:flex; align-items:center; gap:22px; margin-left:auto; font-weight:650; color:var(--header-muted); font-size:.91rem; }
+.brand { min-width:0; }
+.brand-name { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.article-nav { display:flex; align-items:center; gap:22px; flex:none; margin-left:auto; white-space:nowrap; font-weight:650; color:var(--header-muted); font-size:.91rem; }
 .article-layout { min-height:65vh; padding:clamp(72px,9vw,128px) 0 clamp(56px,8vw,100px); }
 .article-wrap { max-width:760px; }
 .article-wrap h1 { font:500 clamp(2.5rem,6vw,4.3rem)/1.08 var(--serif); letter-spacing:-.035em; margin:10px 0 23px; text-wrap:balance; }
@@ -501,6 +511,9 @@ ARTICLES_CSS = '''
   .article-nav { gap:12px; font-size:.8rem; }
   .article-nav a:nth-child(2) { display:none; }
   .archive-grid { grid-template-columns:1fr; }
+}
+@media (max-width:420px) {
+  .article-nav a:first-child { display:none; }   /* the site name on the left already links home */
 }
 '''
 

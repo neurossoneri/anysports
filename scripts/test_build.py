@@ -316,6 +316,19 @@ def check_inbox(builder, destination):
     assert builder.inbox_endpoint_quiet({'inbox_endpoint': 'http://script.google.com/macros/s/x/exec'}) == ''
 
 
+def check_page_polish(destination):
+    """Guards for the small fixes: <base> before the font links, a header that fits narrow phones, a current year, no dead CSS."""
+    import datetime
+    privacy = (destination / 'privacy/index.html').read_text(encoding='utf-8')
+    assert privacy.index('<base ') < privacy.index('assets/fonts/'), 'the <base> tag must precede the font links, or the fonts 404 on inner pages'
+    articles_css = (destination / 'assets/articles.css').read_text(encoding='utf-8')
+    for rule in ('text-overflow:ellipsis', 'white-space:nowrap', '@media (max-width:420px)'):
+        assert rule in articles_css, f'the article header keeps to one line on narrow phones ({rule})'
+    home = (destination / 'index.html').read_text(encoding='utf-8')
+    assert f'<span id="year">{datetime.date.today().year}</span>' in home, 'the footer year is filled in at build time'
+    assert '.blog-empty' not in home and (destination / 'assets/site.css').read_text(encoding='utf-8').count('.brand-name {') == 1, 'no dead or repeated CSS'
+
+
 def write_post(work, lang, body, name='published'):
     metadata = {'title': f'Example {lang}', 'slug': 'sample', 'lang': lang, 'published': True, 'date': '2026-10-13',
                 'category': 'Sport', 'summary': f'Summary {lang}', 'cover': 'media/test-cover.webp'}
@@ -368,6 +381,7 @@ def main():
     check_photo_numbers(ROOT / '_site')
     check_smooth(ROOT / '_site')
     check_inbox(builder, ROOT / '_site')
+    check_page_polish(ROOT / '_site')
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
     def full(work, site):
@@ -405,6 +419,7 @@ def main():
         assert 'https://demo.github.io/athlete-support/en/articles/sample/' in article
         assert 'assets/fonts/fonts.css' in article and 'fonts.googleapis' not in article and (work / '_site/assets/fonts/fonts.css').exists(), 'article pages use the self-hosted fonts'
         assert 'href="en/articles/sample/#content"' in article, 'with <base>, the skip link must point back at the article itself'
+        assert article.index('<base ') < article.index('assets/fonts/'), 'the <base> tag must precede the font links in articles too'
         assert 'Test Person' in privacy and 'hello@example.com' in privacy and 'Example Street 1' in privacy and 'formspree.io' in privacy
         assert 'https://demo.github.io/athlete-support/privacy/' in privacy, 'privacy page has its canonical address'
         sitemap = (work / '_site/sitemap.xml').read_text(encoding='utf-8')
