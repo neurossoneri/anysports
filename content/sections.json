@@ -198,6 +198,15 @@
           "type": "quote",
           "text": "If you are walking this path and don’t have that support, you can reach out.",
           "size": "auto"
+        },
+        {
+          "type": "photos",
+          "s1": "7",
+          "s2": "2",
+          "s3": "",
+          "place": "inline",
+          "caption": "",
+          "alt": ""
         }
       ]
     },
