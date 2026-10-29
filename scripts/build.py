@@ -66,42 +66,30 @@ VALID_SLUG = re.compile(r'^[a-z0-9]+(?:-[a-z0-9]+)*$')
 SAFE_IMAGE = re.compile(r'^(?:media/|images/)[\w\-/%.]+\.(?:jpe?g|png|gif|webp|avif)$', re.I)
 ALLOWED_TAGS = ['p', 'br', 'strong', 'em', 'b', 'i', 'a', 'ul', 'ol', 'li', 'blockquote', 'h2', 'h3', 'h4', 'hr', 'img', 'code', 'pre', 'table', 'thead', 'tbody', 'tr', 'th', 'td']
 ALLOWED_ATTRS = {'a': ['href', 'title'], 'img': ['src', 'alt', 'title', 'loading'], 'th': ['align'], 'td': ['align']}
-# Page photos: data-photo marker in the template -> field in content/site.json.
-# Numbered in page order, top to bottom. The same numbers appear on the live site (open it with ?photos)
-# and in the dashboard, so the owner always knows which photo she is replacing.
 PHOTO_SLOTS = (
-    {'field': 'portrait', 'num': 1, 'title': 'Главное фото', 'where': 'Первый экран: левая половина экрана (и на компьютере, и на телефоне)', 'anchor': 'hero', 'shape': 'вертикаль, например половина лица; по краям кадр обрежется по центру'},
-    {'field': 'quote_photo', 'num': 2, 'title': 'Атмосферное фото', 'where': 'Фон за цитатой А «You can only control yourself» (необязательно)', 'anchor': 'intro', 'shape': 'пейзаж, горизонталь'},
-    {'field': 'eyes_photo', 'num': 3, 'title': 'Крупный план', 'where': 'Рядом с «Intuition sessions»', 'anchor': 'sessions', 'shape': 'вертикаль 3:4'},
-    {'field': 'story_photo_1', 'num': 4, 'title': 'Моя история', 'where': 'Справа, после первого абзаца', 'anchor': 'about', 'shape': 'вертикаль 4:5'},
-    {'field': 'story_photo_2', 'num': 5, 'title': 'Моя история', 'where': 'Слева, после второго абзаца и выделенной фразы', 'anchor': 'about', 'shape': 'вертикаль 4:5'},
-    {'field': 'story_photo_3', 'num': 6, 'title': 'Моя история', 'where': 'Справа, после третьего абзаца', 'anchor': 'about', 'shape': 'вертикаль 4:5'},
-    {'field': 'story_photo_4', 'num': 7, 'title': 'Моя история', 'where': 'Слева, после четвёртого абзаца', 'anchor': 'about', 'shape': 'вертикаль 4:5'},
+    {'field': 'portrait', 'num': 1, 'title': 'Главное фото'},
+    {'field': 'quote_photo', 'num': 2, 'title': 'Фото для страницы'},
+    {'field': 'eyes_photo', 'num': 3, 'title': 'Фото для страницы'},
+    {'field': 'story_photo_1', 'num': 4, 'title': 'Фото для страницы'},
+    {'field': 'story_photo_2', 'num': 5, 'title': 'Фото для страницы'},
+    {'field': 'story_photo_3', 'num': 6, 'title': 'Фото для страницы'},
+    {'field': 'story_photo_4', 'num': 7, 'title': 'Фото для страницы'},
 )
 PHOTO_FIELDS = tuple(slot['field'] for slot in PHOTO_SLOTS)
-# Which size the browser needs for each place (used for srcset): the hero is half of the screen, story frames are small.
-PHOTO_SIZES = {
-    'portrait': '50vw',
-    'quote_photo': '(max-width:900px) 100vw, 600px',
-    'eyes_photo': '(max-width:900px) 100vw, 45vw',
-    'story_photo_1': '(max-width:700px) 78vw, 320px',
-    'story_photo_2': '(max-width:700px) 78vw, 320px',
-    'story_photo_3': '(max-width:700px) 78vw, 320px',
-    'story_photo_4': '(max-width:700px) 78vw, 320px',
-}
+SLOT_FIELD = {str(slot['num']): slot['field'] for slot in PHOTO_SLOTS}
+PLACE_SLOTS = tuple(str(n) for n in range(2, 8))   # photos 2..7 can be put into blocks; photo 1 is the first screen
 SRCSET_WIDTHS = (640, 1080, 1600)   # smaller copies (WebP) for phones and small windows; the original is always the largest choice
-# Places that carry a frame with a placeholder. On the live site an empty one is hidden together with its frame.
-# (The photograph behind quotation A has no placeholder: it is just a soft colour when empty.)
-HIDE_WHEN_EMPTY = ('portrait', 'eyes_photo', 'story_photo_1', 'story_photo_2', 'story_photo_3', 'story_photo_4')
+# Only the first-screen photograph is a fixed place in the template. An empty one is hidden together with its frame on the live site.
+HIDE_WHEN_EMPTY = ('portrait',)
+
 QA_SLOTS = 8
 BRAND_DEFAULT = 'Sport Intuitive'
 # The logo (also the favicon design) for article pages. The home page has no top bar any more.
 BRAND_MARK_SVG = '''<svg viewBox="0 0 48 48" width="35" height="35" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><rect width="48" height="14" fill="#cfe0f5"/><rect y="14" width="48" height="10" fill="#dce8f8"/><rect y="24" width="48" height="8" fill="#e8ecf9"/><circle cx="37" cy="11" r="4.6" fill="#fff" opacity=".85"/><path d="M-2 31 13 12l8 9 8-12 21 22z" fill="#aab9e4"/><path d="M9.7 16 13 12l3.6 4-1.8-1.1-1.6 1.7-1.6-1.7zM25.9 13.6 29 9l4.6 4.6-2.3-1.2-2.1 2-1.6-1.9z" fill="#fff" opacity=".93"/><path d="M-2 31v-4l8-5 9 9zM19 31l11-9 10 6 10-4v7z" fill="#7f9fd3"/><rect y="31" width="48" height="17" fill="#86c4bc"/><rect y="31" width="48" height="6" fill="#c3e2e0" opacity=".55"/><path d="M12 34.5h9M27 37.5h11M8 40h7" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".6"/><path d="M-2 48v-8c8-4 15-1 22 3 8 4 18 3 30-2v7z" fill="#8ec99b"/><path d="M14 48c10-3 22-2 36-7v7z" fill="#64aa8b"/><path d="M36 46.5l-.6-4.2M39 46.5l.3-5M42 46.5l1.3-4" stroke="#4f9a7a" stroke-width="1" stroke-linecap="round" fill="none"/></svg>'''
 # Dashboard: which page section a group of copy lives in (for the "show on the site" link).
-SECTION_ANCHORS = {'hero': 'hero', 'story': 'intro', 'quotes': 'intro', 'sessions': 'sessions', 'client': 'sessions',
-                   'change': 'change', 'about': 'about', 'contact': 'contact', 'qa': 'qa', 'free': 'free'}
+SECTION_ANCHORS = {'hero': 'hero', 'contact': 'contact', 'qa': 'qa', 'free': 'free', 'notes': 'notes'}
 # Copy that must never be blank (tests check it; the dashboard enforces it before saving).
-REQUIRED_COPY = ('qa.q1', 'about.lead', 'sessions.photoAlt')
+REQUIRED_COPY = ('qa.q1',)
 # Promise-like wording the site must never carry (checked by the tests and, before saving, by the dashboard).
 BANNED_PHRASES = {
     'en': [r'risk of (?:physical )?injur', r'\bprevent', r'burn-?out', r'guarantee', r'\bcures?\b', r'\btreat(?:s|ment)?\b'],
@@ -296,13 +284,13 @@ def collect_values(site):
     return values
 
 
-def notes_section(posts):
+def notes_section(posts, tone='sand'):
     """Notes appear on the home page only once at least one article is published."""
     if not posts:
         return ''
     cards = ''.join(card(p, hidden=p['lang'] != 'en') for p in posts[:1000])
     hidden = '' if any(p['lang'] == 'en' for p in posts) else ' hidden'
-    return ('<section class="band band-sand notes" id="notes" aria-labelledby="notes-title"' + hidden + '>'
+    return ('<section class="band band-' + tone + ' notes" id="notes" aria-labelledby="notes-title"' + hidden + '>'
             '<div class="container"><h2 class="title" id="notes-title" data-i18n="notes.title"></h2>'
             '<p class="lead" data-i18n="notes.lead"></p>'
             f'<div class="notes-grid">{cards}</div>'
@@ -353,19 +341,382 @@ def copy_media():
                   'but compress the original to about 300-400 KB anyway: the admin panel does that by itself.', file=sys.stderr)
 
 
+# ---------------------------------------------------------------------------------------------
+# Page sections. content/sections.json is an ordered list of sections; a text section is a title
+# plus an ordered list of blocks (text, quote, statement set aside, photos, list of themes).
+# The owner reorders, adds and deletes them in the dashboard; the site is drawn from this list.
+# ---------------------------------------------------------------------------------------------
+SECTIONS_FILE = 'content/sections.json'
+SECTION_TYPES = ('text', 'contact', 'qa')
+RESERVED_IDS = {'hero', 'contact', 'qa', 'notes', 'free', 'top', 'main', 'content'}
+# Background tones follow the position, so neighbouring sections always differ and every transition exists in the CSS.
+# The first screen is deep; then sand, teal, dune, deep, sand, teal ... (the same rhythm the page has always had).
+TONE_CYCLE = ('sand', 'teal', 'dune', 'deep')
+NOTES_TONE = {'deep': 'sand', 'sand': 'teal', 'teal': 'sand', 'dune': 'deep'}   # tone of the notes band that follows the last section
+LAYOUTS = (
+    ('rail-right', 'Текст слева, боковая колонка справа'),
+    ('rail-left', 'Боковая колонка слева, текст справа'),
+    ('column', 'Одна колонка у левого края'),
+    ('centered', 'Одна колонка по центру (как предисловие)'),
+)
+TEXT_LOOKS = (
+    ('plain', 'Обычный текст (с подзаголовком выглядит как раздел, без него как абзац)'),
+    ('lead', 'Крупная вводная фраза'),
+    ('panel', 'Плашка с линией слева'),
+    ('dropcap', 'Обычный текст, первая буква крупно'),
+    ('finale', 'Итоговая фраза по центру'),
+    ('hand', 'Рукописная строка по центру'),
+)
+ASIDE_LOOKS = (('panel', 'Тёмная плашка (можно с фото за текстом)'), ('hand', 'Рукописная фраза без плашки'))
+QUOTE_SIZES = (('auto', 'Автоматически (длинные фразы мельче)'), ('large', 'Крупно'), ('small', 'Помельче'))
+PHOTO_PLACES = (('inline', 'В тексте'), ('side', 'Сбоку, в боковой колонке'))
+THEME_COUNT = 6
+
+
+def _opts(pairs):
+    return [[value, label] for value, label in pairs]
+
+
+SLOT_OPTIONS = [['', '— нет —']] + [[n, f'Фото {n}'] for n in PLACE_SLOTS]
+BLOCK_TYPES = {
+    'text': {
+        'label': 'Текст', 'add': 'Текст',
+        'hint': 'Абзацы разделяйте пустой строкой. Подзаголовок необязателен.',
+        'fields': [
+            {'name': 'heading', 'label': 'Подзаголовок (необязательно)', 'type': 'string'},
+            {'name': 'body', 'label': 'Текст', 'type': 'text'},
+            {'name': 'note', 'label': 'Мелкая приписка под текстом (необязательно)', 'type': 'text'},
+            {'name': 'look', 'label': 'Оформление', 'type': 'select', 'options': _opts(TEXT_LOOKS), 'default': 'plain'},
+        ],
+    },
+    'quote': {
+        'label': 'Цитата в тексте', 'add': 'Цитата',
+        'hint': 'Выделенная фраза внутри текста: курсив и цветная линия слева.',
+        'fields': [
+            {'name': 'text', 'label': 'Цитата', 'type': 'text'},
+            {'name': 'size', 'label': 'Размер', 'type': 'select', 'options': _opts(QUOTE_SIZES), 'default': 'auto'},
+        ],
+    },
+    'aside': {
+        'label': 'Фраза сбоку', 'add': 'Фраза сбоку',
+        'hint': 'Рукописная фраза, вынесенная в сторону, как фото. В разделе с боковой колонкой стоит сбоку, в остальных прямо в тексте. Перенос строки здесь это перенос строки во фразе.',
+        'fields': [
+            {'name': 'text', 'label': 'Фраза', 'type': 'text'},
+            {'name': 'look', 'label': 'Оформление', 'type': 'select', 'options': _opts(ASIDE_LOOKS), 'default': 'panel'},
+            {'name': 'photo', 'label': 'Фото за фразой (необязательно)', 'type': 'slot', 'options': SLOT_OPTIONS, 'default': '', 'showIf': {'look': ['panel']}},
+        ],
+    },
+    'photos': {
+        'label': 'Фото', 'add': 'Фото',
+        'hint': 'Выберите, какие из пронумерованных фото показать (сами фото загружаются на вкладке «Фотографии»). Два фото встают рядом.',
+        'fields': [
+            {'name': 's1', 'label': 'Первое фото', 'type': 'slot', 'options': SLOT_OPTIONS, 'default': ''},
+            {'name': 's2', 'label': 'Второе фото (необязательно)', 'type': 'slot', 'options': SLOT_OPTIONS, 'default': ''},
+            {'name': 's3', 'label': 'Третье фото (необязательно)', 'type': 'slot', 'options': SLOT_OPTIONS, 'default': ''},
+            {'name': 'place', 'label': 'Где показать', 'type': 'select', 'options': _opts(PHOTO_PLACES), 'default': 'inline'},
+            {'name': 'caption', 'label': 'Подпись под фото (необязательно)', 'type': 'string'},
+            {'name': 'alt', 'label': 'Описание фото для скринридеров (необязательно)', 'type': 'string'},
+        ],
+    },
+    'themes': {
+        'label': 'Список тем со значками', 'add': 'Список тем',
+        'hint': 'Шесть тем со значками и итоговая фраза. Тему с пустым названием и пояснением сайт не показывает.',
+        'fields': ([{'name': 'title', 'label': 'Заголовок', 'type': 'string'},
+                    {'name': 'intro', 'label': 'Вступление', 'type': 'text'}]
+                   + [f for n in range(1, THEME_COUNT + 1) for f in (
+                       {'name': f't{n}', 'label': f'Тема {n} · фраза', 'type': 'string'},
+                       {'name': f'd{n}', 'label': f'Тема {n} · пояснение', 'type': 'text'})]
+                   + [{'name': 'finalTitle', 'label': 'Итоговая фраза · заголовок (по центру, крупно)', 'type': 'string'},
+                      {'name': 'finalText', 'label': 'Итоговая фраза · текст (по центру)', 'type': 'text'}]),
+    },
+}
+WIDE_BLOCKS = ('themes',)   # these take the full width of the page and close the two-column part of a section
+THEME_GLYPHS = (
+    '<path d="M4 9h24M8 16h16M12 23h8"/>',
+    '<circle cx="16" cy="16" r="2.6"/><path d="M10.5 10.5a7.8 7.8 0 0 0 0 11M21.5 10.5a7.8 7.8 0 0 1 0 11M6 6a14 14 0 0 0 0 20M26 6a14 14 0 0 1 0 20"/>',
+    '<circle cx="16" cy="6.5" r="3"/><path d="M16 11v10M8.5 15.5h15M16 21l-5 8M16 21l5 8"/>',
+    '<path d="M3 24c5 0 5-8 10-8s5 6 9 0 4-12 7-13" stroke-dasharray="1.5 3.5"/>',
+    '<path d="M16 3l11 13-11 13L5 16z"/><circle cx="16" cy="16" r="2.6"/>',
+    '<path d="M3 23h26M9 23a7 7 0 0 1 14 0M16 8v4M7.5 12l2.5 2.5M24.5 12L22 14.5"/>',
+)
+COMPASS_GLYPH = '<svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12"/><path d="M16 8l3.2 8L16 24l-3.2-8z"/></svg>'
+STROKE_SVG = '<svg class="quote-stroke" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M2 11 C40 2 72 17 112 9 S190 3 232 10 S282 15 298 7"/></svg>'
+PHOTO_PLACEHOLDER = '<div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div>'
+SECTION_DEFAULT_LAYOUT = 'column'
+
+
+def default_block(kind):
+    """A new empty block with the default value of every field."""
+    block = {'type': kind}
+    for field in BLOCK_TYPES[kind]['fields']:
+        block[field['name']] = field.get('default', '')
+    return block
+
+
+def _warn(message):
+    print(f'WARNING: {message}', file=sys.stderr)
+
+
+def clean_block(raw, where):
+    """One block from sections.json. Cosmetic mistakes (an unknown look, a wrong photo number) fall back to the default and never stop the build."""
+    if not isinstance(raw, dict) or raw.get('type') not in BLOCK_TYPES:
+        _warn(f'{where}: unknown block skipped')
+        return None
+    kind = raw['type']
+    block = {'type': kind}
+    for field in BLOCK_TYPES[kind]['fields']:
+        value = raw.get(field['name'], field.get('default', ''))
+        value = '' if value is None else str(value)
+        if field['type'] in ('select', 'slot') and value not in [o[0] for o in field['options']]:
+            if value:
+                _warn(f'{where}: "{value}" is not a valid {field["name"]}; the default is used')
+            value = field.get('default', '')
+        block[field['name']] = value
+    return block
+
+
+def load_sections():
+    """The ordered sections of the page. Contact and Q&A are always present (added at the end if the file lost them)."""
+    path = ROOT / SECTIONS_FILE
+    if not path.exists():
+        raise ValueError(f'{SECTIONS_FILE} is missing')
+    data = json.loads(path.read_text(encoding='utf-8'))
+    if not isinstance(data, dict) or not isinstance(data.get('sections'), list):
+        raise ValueError(f'{SECTIONS_FILE}: expected {{"sections": [...]}}')
+    sections, seen = [], set()
+    for index, raw in enumerate(data['sections'], 1):
+        if not isinstance(raw, dict) or raw.get('type') not in SECTION_TYPES:
+            _warn(f'section {index}: unknown type skipped')
+            continue
+        kind = raw['type']
+        sid = kind if kind != 'text' else str(raw.get('id') or '').strip()
+        if kind == 'text' and (not VALID_SLUG.fullmatch(sid) or sid in RESERVED_IDS):
+            _warn(f'section {index}: invalid or reserved id "{sid}" skipped')
+            continue
+        if sid in seen:
+            _warn(f'section {index}: duplicate id "{sid}" skipped')
+            continue
+        seen.add(sid)
+        section = {'id': sid, 'type': kind}
+        if kind == 'text':
+            layout = str(raw.get('layout') or SECTION_DEFAULT_LAYOUT)
+            if layout not in [l[0] for l in LAYOUTS]:
+                _warn(f'section {sid}: unknown layout "{layout}"; "{SECTION_DEFAULT_LAYOUT}" is used')
+                layout = SECTION_DEFAULT_LAYOUT
+            blocks = raw.get('blocks') if isinstance(raw.get('blocks'), list) else []
+            section.update({'title': str(raw.get('title') or ''), 'layout': layout,
+                            'blocks': [clean_block(b, f'section {sid}, block {n}') for n, b in enumerate(blocks, 1)]})
+        sections.append(section)
+    for kind in ('contact', 'qa'):
+        if kind not in seen:
+            _warn(f'section "{kind}" was missing from {SECTIONS_FILE}; it is added at the end')
+            sections.append({'id': kind, 'type': kind})
+    return sections
+
+
+def paragraphs(text):
+    return [p.strip() for p in re.split(r'\n[ \t]*\n', str(text or '').strip()) if p.strip()]
+
+
+def para_html(text, cls=''):
+    attr = f' class="{cls}"' if cls else ''
+    return ''.join(f'<p{attr}>{esc(p)}</p>' for p in paragraphs(text))
+
+
+def block_has_content(block):
+    kind = block['type']
+    if kind == 'text':
+        return bool(block['heading'].strip() or block['body'].strip() or block['note'].strip())
+    if kind in ('quote', 'aside'):
+        return bool(block['text'].strip())
+    if kind == 'photos':
+        return any(block[k] for k in ('s1', 's2', 's3'))
+    if kind == 'themes':
+        return any(v.strip() for k, v in block.items() if k != 'type')
+    return False
+
+
+def is_rail_block(block):
+    return block['type'] == 'aside' or (block['type'] == 'photos' and block['place'] == 'side')
+
+
+class PageContext:
+    """What the block renderers need: the settings, whether the site is live, and the photo copies already made."""
+    def __init__(self, site, ready):
+        self.site, self.ready, self.cache = site, ready, {}
+
+    def photo(self, num, alt, sizes, frame_class='', bg=False):
+        """The frame of numbered photo `num`. An empty place is drawn with a number before launch and left out on the live site."""
+        path = photo_path(self.site.get(SLOT_FIELD[num]))
+        if not path and self.ready:
+            return ''
+        attributes = f'data-slot="{num}"'
+        if path:
+            attributes += f' src="{esc(path)}"'
+            if path not in self.cache:
+                self.cache[path] = make_variants(OUT, path)
+            if self.cache[path]:
+                attributes += ' srcset="' + ', '.join(f'{esc(name)} {size}w' for name, size in self.cache[path]) + f'" sizes="{esc(sizes)}"'
+        if bg:
+            return f'<figure class="photo quote-bg" aria-hidden="true"><img {attributes} alt="" loading="lazy" decoding="async"></figure>'
+        return (f'<figure class="photo {frame_class}"><img {attributes} alt="{esc(alt)}" loading="lazy" decoding="async">'
+                f'{PHOTO_PLACEHOLDER}</figure>')
+
+
+def render_block(block, label, ctx, in_rail):
+    """HTML of one block, or '' when it is empty or has nothing to show. `label` is its number, like 4.2 (the same as in the dashboard)."""
+    if not block or not block_has_content(block):
+        return ''
+    kind, number = block['type'], f'data-blk="{label}"'
+    if kind == 'text':
+        heading = f'<h3>{esc(block["heading"].strip())}</h3>' if block['heading'].strip() else ''
+        note = f'<p class="b-note">{esc(block["note"].strip())}</p>' if block['note'].strip() else ''
+        look = block['look']
+        if look == 'lead':
+            return f'<div class="b b-lead" {number} data-fade>{para_html(block["body"])}{note}</div>'
+        if look == 'panel':
+            return f'<div class="b b-panel" {number} data-fade>{heading}{para_html(block["body"])}{note}</div>'
+        if look == 'finale':
+            return (f'<div class="b b-finale finale" {number} data-finale><span class="finale-line" aria-hidden="true"></span>{COMPASS_GLYPH}'
+                    f'{heading}{para_html(block["body"])}</div>')
+        if look == 'hand':
+            return (f'<div class="b b-hand finale finale-hand" {number} data-finale><span class="finale-line" aria-hidden="true"></span>'
+                    f'<p class="finale-note" data-write>{esc(block["body"].strip())}</p>{STROKE_SVG}</div>')
+        classes = 'b b-text' + (' has-h' if heading else '') + (' b-dropcap' if look == 'dropcap' else '')
+        return f'<div class="{classes}" {number} data-fade>{heading}{para_html(block["body"])}{note}</div>'
+    if kind == 'quote':
+        text = block['text'].strip()
+        small = block['size'] == 'small' or (block['size'] == 'auto' and len(text) > 70)
+        return f'<blockquote class="b b-quote pull{" pull-long" if small else ""}" {number} data-fade>{esc(text)}</blockquote>'
+    if kind == 'aside':
+        text = block['text'].strip()
+        if block['look'] == 'hand':
+            return f'<div class="b b-aside aside-hand" {number}><blockquote class="quote-text" data-write>{esc(text)}</blockquote>{STROKE_SVG}</div>'
+        figure = ctx.photo(block['photo'], '', '(max-width:900px) 100vw, 600px', bg=True) if block['photo'] else ''
+        return f'<div class="b b-aside quote-panel" {number}>{figure}<blockquote class="quote-text" data-write>{esc(text)}</blockquote>{STROKE_SVG}</div>'
+    if kind == 'photos':
+        slots = [block[k] for k in ('s1', 's2', 's3') if block[k]]
+        count = len(slots)
+        sizes = ('(max-width:900px) 100vw, 45vw' if in_rail else '(max-width:700px) 90vw, 420px') if count == 1 else '(max-width:700px) 45vw, 480px'
+        alt = block['alt'].strip() or block['caption'].strip()
+        figures = [f for f in (ctx.photo(n, alt, sizes, 'frame') for n in slots) if f]
+        if not figures:
+            return ''
+        caption = f'<p class="b-cap">{esc(block["caption"].strip())}</p>' if block['caption'].strip() else ''
+        return f'<div class="b b-photos n{len(figures)}{" b-side" if in_rail else ""}" {number} data-fade>{"".join(figures)}{caption}</div>'
+    if kind == 'themes':
+        items = ''
+        for n in range(1, THEME_COUNT + 1):
+            title, detail = block[f't{n}'].strip(), block[f'd{n}'].strip()
+            if title or detail:
+                items += (f'<li class="theme" data-fade><svg class="glyph" viewBox="0 0 32 32" aria-hidden="true">{THEME_GLYPHS[n - 1]}</svg>'
+                          f'<strong>{esc(title)}</strong><span>{esc(detail)}</span></li>')
+        head = (f'<h3 class="themes-title" data-fade>{esc(block["title"].strip())}</h3>' if block['title'].strip() else '')
+        intro = f'<p class="lead" data-fade>{esc(block["intro"].strip())}</p>' if block['intro'].strip() else ''
+        grid = f'<ul class="theme-grid">{items}</ul>' if items else ''
+        final = ''
+        if block['finalTitle'].strip() or block['finalText'].strip():
+            final = ('<div class="finale" data-finale><span class="finale-line" aria-hidden="true"></span>' + COMPASS_GLYPH
+                     + (f'<h3>{esc(block["finalTitle"].strip())}</h3>' if block['finalTitle'].strip() else '')
+                     + (f'<p>{esc(block["finalText"].strip())}</p>' if block['finalText'].strip() else '') + '</div>')
+        return f'<div class="b b-themes themes" {number}>{head}{intro}{grid}{final}</div>'
+    return ''
+
+
+def render_text_section(section, number, tone, ctx):
+    """One text section: a title above, then its blocks. Statements set aside and side photos go to a sticky side column when the layout has one."""
+    blocks = section['blocks']
+    layout = section['layout']
+    has_rail_layout = layout in ('rail-left', 'rail-right')
+    labelled = list(enumerate(blocks, 1))
+    rail_html = ''
+    if has_rail_layout:
+        rail_html = ''.join(render_block(b, f'{number}.{n}', ctx, True) for n, b in labelled if b and is_rail_block(b))
+    if not rail_html and has_rail_layout:
+        layout = 'column'   # nothing to put aside (for example a photo that is not uploaded yet): one column
+    segments, current, grid_done = [], [], False
+
+    def flush():
+        nonlocal current, grid_done
+        if current:
+            grid = bool(rail_html) and not grid_done
+            body = f'<div class="blocks{"" if grid else " col"}">{"".join(current)}</div>'
+            if grid:
+                rail = f'<div class="rail">{rail_html}</div>'
+                body = f'<div class="sec-grid">{rail + body if layout == "rail-left" else body + rail}</div>'
+                grid_done = True
+            segments.append(body)
+            current = []
+
+    for n, block in labelled:
+        if not block:
+            continue
+        if has_rail_layout and rail_html and is_rail_block(block):
+            continue
+        html_block = render_block(block, f'{number}.{n}', ctx, False)
+        if not html_block:
+            continue
+        if block['type'] in WIDE_BLOCKS:
+            flush()
+            segments.append(html_block)
+        else:
+            current.append(html_block)
+    flush()
+    if rail_html and not grid_done:
+        segments.insert(0, f'<div class="sec-grid"><div class="rail">{rail_html}</div></div>')
+    title = section['title'].strip()
+    head = ''
+    if title:
+        head = f'<header class="sec-head"><h2 class="title{" title-long" if len(title) > 60 else ""}" id="{section["id"]}-title" data-fade>{esc(title)}</h2></header>'
+    labelled_by = f' aria-labelledby="{section["id"]}-title"' if title else ''
+    return (f'<section class="band band-{tone} sec sec-{layout}" id="{section["id"]}"{labelled_by} data-sec="{number}">'
+            f'<div class="container">{head}{"".join(segments)}</div></section>')
+
+
+def take_section(template, sid):
+    """Cut a fixed section (contact, qa) out of the template; it is put back at its place in the page order."""
+    pattern = re.compile(r'[ \t]*<section class="band band-(?:sand|teal|dune|deep)[^"]*" id="' + sid + r'"[^>]*>.*?</section>[ \t]*\n?', re.S)
+    found = pattern.findall(template)
+    if len(found) != 1:
+        raise RuntimeError(f'Template section not found exactly once: {sid}')
+    return pattern.sub('', template, count=1), found[0].strip('\n')
+
+
+def place_sections(template, sections, ctx):
+    """Replace the sections marker with every section in order. Returns the new template and the tone of the last section."""
+    fixed = {}
+    for kind in ('contact', 'qa'):
+        template, fixed[kind] = take_section(template, kind)
+    parts, tone = [], 'deep'
+    for index, section in enumerate(sections):
+        tone, number = TONE_CYCLE[index % len(TONE_CYCLE)], index + 1
+        if section['type'] == 'text':
+            parts.append(render_text_section(section, number, tone, ctx))
+        else:
+            html_part = fixed[section['type']]
+            html_part = re.sub(r'band-(?:sand|teal|dune|deep)', f'band-{tone}', html_part, count=1)
+            html_part = html_part.replace(f'id="{section["type"]}"', f'id="{section["type"]}" data-sec="{number}"', 1)
+            parts.append('    ' + html_part.lstrip())
+    return replace_required(template, '<!--@@SECTIONS@@-->', '\n\n'.join(parts), 'sections marker'), tone
+
+
 def build_home(site, posts, public_url, ready):
     template = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
     values = collect_values(site)
     copy = values['en']
 
-    template = replace_required(template, '<!--@@NOTES@@-->', notes_section(posts), 'notes marker')
+    sections = load_sections()
+    context = PageContext(site, ready)
+    template, last_tone = place_sections(template, sections, context)
+    notes_tone = NOTES_TONE[last_tone]
+    template = replace_required(template, '<!--@@NOTES@@-->', notes_section(posts, notes_tone), 'notes marker')
     template = replace_required(template, '<!--@@FONTS@@-->', HOME_FONT_LINKS, 'fonts marker')
     template = replace_required(template, '<span id="year">2026</span>', f'<span id="year">{dt.date.today().year}</span>', 'year marker')
-    if posts:   # the notes band is light sand and sits last, so the footer fades from sand instead of from teal
-        template = replace_required(template, 'site-footer after-teal', 'site-footer after-sand', 'footer tone')
-    # Builder-managed image src attributes; a missing photo keeps its soft placeholder.
-    # Every numbered place shows its own photograph or stays empty: a place never borrows the picture of another one.
-    for slot in PHOTO_SLOTS:
+    # the footer fades from the tone of the last band (the notes band when there are articles)
+    template = replace_required(template, 'site-footer after-teal', f'site-footer after-{notes_tone if posts else last_tone}', 'footer tone')
+    # The first-screen photograph is the only fixed place in the template; every other photograph sits in a block of a section.
+    # A numbered place shows its own photograph or stays empty: it never borrows the picture of another one.
+    for slot in PHOTO_SLOTS[:1]:
         field = slot['field']
         path = photo_path(site.get(field))
         attributes = f'data-slot="{slot["num"]}"'
@@ -373,7 +724,7 @@ def build_home(site, posts, public_url, ready):
             attributes += f' src="{esc(path)}"'
             variants = make_variants(OUT, path)
             if variants:
-                attributes += ' srcset="' + ', '.join(f'{esc(name)} {size}w' for name, size in variants) + f'" sizes="{esc(PHOTO_SIZES[field])}"'
+                attributes += ' srcset="' + ', '.join(f'{esc(name)} {size}w' for name, size in variants) + '" sizes="50vw"'
         elif ready and field in HIDE_WHEN_EMPTY:   # live site: an empty place disappears together with its frame
             template, found = re.subn(r'(<figure\b[^>]*)(>\s*<img data-photo="' + field + '")', r'\1 hidden\2', template, count=1)
             if not found:
@@ -592,6 +943,17 @@ def form_endpoint_quiet(site):
     return value if value.lower().startswith('https://') and urlparse(value).netloc else ''
 
 
+def page_schema():
+    """What the dashboard needs to draw the page structure (sections and blocks). Comes from the constants above: one source of truth."""
+    return {
+        'blockTypes': [{'type': name, 'label': spec['label'], 'add': spec['add'], 'hint': spec['hint'], 'fields': spec['fields']}
+                       for name, spec in BLOCK_TYPES.items()],
+        'layouts': _opts(LAYOUTS),
+        'sectionLabels': {'contact': 'Контакты и форма', 'qa': 'Вопросы и ответы (Q&A) и карточка «вводная беседа бесплатно»'},
+        'slots': list(PLACE_SLOTS),
+    }
+
+
 def admin_schema(site):
     """Everything the dashboard needs to draw its forms, generated from .pages.yml so there is one source of truth."""
     config = yaml.safe_load((ROOT / '.pages.yml').read_text(encoding='utf-8'))
@@ -603,13 +965,13 @@ def admin_schema(site):
             item['description'] = field['description']
         return item
 
-    sections = []
+    groups = []
     for group in entries['home_en']['fields']:
         if group.get('type') != 'object':
             continue
-        sections.append({'name': group['name'], 'label': group.get('label', group['name']),
-                         'anchor': SECTION_ANCHORS.get(group['name'], ''),
-                         'fields': [leaf(f) for f in group['fields']]})
+        groups.append({'name': group['name'], 'label': group.get('label', group['name']),
+                       'anchor': SECTION_ANCHORS.get(group['name'], ''),
+                       'fields': [leaf(f) for f in group['fields']]})
     skip = set(PHOTO_FIELDS) | {'publish_ready'}
     contacts = [leaf(f) for f in entries['site']['fields'] if f['name'] not in skip]
     return {
@@ -617,7 +979,7 @@ def admin_schema(site):
         'branch': os.environ.get('GITHUB_REF_NAME', '') or 'main',
         'brand': brand_name(site),
         'langs': list(LANGS), 'langLabels': LANG_LABEL,
-        'sections': sections, 'contacts': contacts,
+        'groups': groups, 'contacts': contacts, 'page': page_schema(),
         'photos': [dict(slot) for slot in PHOTO_SLOTS],
         'banned': BANNED_PHRASES, 'required': list(REQUIRED_COPY),
         'publishReady': bool(site.get('publish_ready')),

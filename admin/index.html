@@ -107,6 +107,29 @@ details.sec>summary .go{margin-left:auto;font-weight:500;font-size:.84rem}
 .chk{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:16px;cursor:pointer}
 .chk input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:var(--green)}
 
+/* ---- страница: разделы и блоки ---- */
+.subh{font:600 1.02rem/1.3 var(--serif);margin:22px 0 10px;color:var(--ink)}
+h2.subh:first-of-type{margin-top:6px}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:10px}
+.pcard.fixed{background:#fbfaf6}
+.phead{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:8px 12px}
+.ptitle{flex:1;min-width:150px;display:flex;align-items:center;gap:10px;border:0;background:none;cursor:pointer;text-align:left;padding:8px 4px;font-weight:650;font-size:1rem;color:var(--ink)}
+.ptitle::before{content:"";flex:none;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);margin:0 4px 0 2px;transition:transform .15s}
+.ptitle[aria-expanded=true]::before{transform:rotate(45deg)}
+.ptitle small{font-weight:500;color:var(--muted);font-size:.8rem}
+.phead .go{font-size:.84rem}
+.ctl{display:inline-flex;align-items:center;gap:6px}
+.pos{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:600}
+button.mini{min-width:36px;padding:5px 9px}
+.pbody{padding:2px 18px 18px;border-top:1px solid var(--line)}
+.blk{border:1px solid var(--line);border-radius:10px;background:#fcfbf8;margin:12px 0;padding:12px 14px}
+.bhead{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-bottom:10px}
+.bhead .bname{font-weight:650}
+.bhead .bprev{flex:1;min-width:100px;color:var(--muted);font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.addrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 0}
+.fld select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.fld input[type=search]{width:100%}
+
 /* ---- заявки ---- */
 .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 16px}
 .filters .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:7px 12px;font-weight:600;cursor:pointer}
@@ -143,7 +166,7 @@ code{background:var(--soft);padding:1px 6px;border-radius:6px;font-size:.9em}
 /* ---- панель сохранения: простая полоса внизу ---- */
 .save{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding:10px max(clamp(14px,3vw,24px),calc((100vw - 1040px) / 2 + 24px))}
 .save .msg{font-weight:600}.save .msg small{display:block;font-weight:400;color:var(--muted)}
-@media (max-width:620px){.brand small{display:none}.photo-row{grid-template-columns:56px minmax(0,1fr)}.thumb{width:56px;height:70px}.photo-row .acts{grid-column:1/-1;justify-content:flex-start}.save .row{width:100%;margin:0}.save .btn{flex:1}}
+@media (max-width:620px){.phead .go{display:none}.pbody{padding:2px 12px 14px}.brand small{display:none}.photo-row{grid-template-columns:56px minmax(0,1fr)}.thumb{width:56px;height:70px}.photo-row .acts{grid-column:1/-1;justify-content:flex-start}.save .row{width:100%;margin:0}.save .btn{flex:1}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -159,7 +182,7 @@ const LS = {
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   del(k) { try { localStorage.removeItem(k); } catch (e) {} },
 };
-const S = { schema: null, token: '', repo: '', branch: 'main', site: {}, home: {}, raw: {}, orig: { site: {}, home: {} },
+const S = { schema: null, token: '', repo: '', branch: 'main', site: {}, home: {}, page: { sections: [] }, uid: 0, raw: {}, orig: { site: {}, home: {}, page: { sections: [] } },
             pending: {}, tab: 'photos', lang: 'en', filter: '', run: null, busy: '', notice: null, dirty: 0,
             open: new Set(), req: { items: null, loaded: false, loading: false, error: '', code: '', keyProblem: '', filter: 'new', q: '' } };
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -195,12 +218,14 @@ const readFile = path => gh(`/repos/${S.repo}/contents/${enc(path)}?ref=${encode
 
 async function loadAll() {
   const langs = S.schema.langs;
-  const paths = ['content/site.json', ...langs.map(l => `content/home_${l}.json`)];
+  const paths = ['content/site.json', ...langs.map(l => `content/home_${l}.json`), 'content/sections.json'];
   const texts = await Promise.all(paths.map(readFile));
   S.raw = {}; paths.forEach((p, i) => { S.raw[p] = texts[i]; });
   S.site = JSON.parse(texts[0]);
   S.home = {}; langs.forEach((l, i) => { S.home[l] = JSON.parse(texts[i + 1]); });
-  S.orig = { site: clone(S.site), home: clone(S.home) };
+  S.page = JSON.parse(texts[texts.length - 1]);
+  if (!S.page || !Array.isArray(S.page.sections)) throw new Error('Файл content/sections.json повреждён: нет списка разделов.');
+  S.orig = { site: clone(S.site), home: clone(S.home), page: clone(S.page) };
 }
 
 const photoFields = () => S.schema.photos.map(p => p.field);
@@ -211,13 +236,13 @@ const readyChanged = () => !!S.site.publish_ready !== !!S.orig.site.publish_read
 
 /** Everything that differs from what is saved on GitHub, grouped for the UI and the commit message. */
 function changes() {
-  const out = { text: {}, textCount: 0, contacts: [], photos: [], ready: readyChanged() };
-  for (const lang of S.schema.langs) for (const sec of S.schema.sections) for (const f of sec.fields) {
+  const out = { text: {}, textCount: 0, pageCount: pageChangeCount(), contacts: [], photos: [], ready: readyChanged() };
+  for (const lang of S.schema.langs) for (const sec of S.schema.groups) for (const f of sec.fields) {
     if (textChanged(lang, sec.name, f.name)) { out.text[lang] = (out.text[lang] || 0) + 1; out.textCount++; }
   }
   for (const f of S.schema.contacts) if (contactChanged(f.name)) out.contacts.push(f.name);
   for (const p of S.schema.photos) if (photoChanged(p.field)) out.photos.push(p.num);
-  out.total = out.textCount + out.contacts.length + out.photos.length + (out.ready ? 1 : 0);
+  out.total = out.textCount + out.pageCount + out.contacts.length + out.photos.length + (out.ready ? 1 : 0);
   return out;
 }
 
@@ -226,15 +251,19 @@ function validate() {
   const out = [];
   for (const lang of S.schema.langs) {
     const patterns = (S.schema.banned[lang] || []).map(p => new RegExp(p, 'i'));
-    for (const sec of S.schema.sections) for (const f of sec.fields) {
+    const promise = (where, v) => { for (const re of patterns) { const m = String(v || '').match(re); if (m) { out.push(`${where}: слово «${m[0]}» звучит как обещание результата. Такие формулировки на сайте запрещены, перефразируйте.`); return; } } };
+    for (const sec of S.schema.groups) for (const f of sec.fields) {
       const v = getv(S.home[lang], sec.name, f.name);
-      for (const re of patterns) {
-        const m = v.match(re);
-        if (m) { out.push(`«${f.label}» (${lang.toUpperCase()}): слово «${m[0]}» звучит как обещание результата. Такие формулировки на сайте запрещены, перефразируйте.`); break; }
-      }
+      promise(`«${f.label}» (${lang.toUpperCase()})`, v);
       if (S.schema.required.includes(`${sec.name}.${f.name}`) && !v.trim()) out.push(`«${f.label}» (${lang.toUpperCase()}): поле обязательное, оно не может быть пустым.`);
     }
+    S.page.sections.forEach((sec, si) => {
+      promise(`Раздел ${si + 1}, заголовок`, sec.title);
+      (sec.blocks || []).forEach((b, bi) => Object.entries(b).forEach(([k, v]) => { if (k !== 'type' && typeof v === 'string') promise(`Блок ${si + 1}.${bi + 1} («${blockName(b)}»)`, v); }));
+    });
   }
+  const ids = S.page.sections.map(s => s.id);
+  if (new Set(ids).size !== ids.length || !ids.includes('contact') || !ids.includes('qa')) out.push('В списке разделов должны остаться «Контакты и форма» и «Вопросы и ответы», каждый по одному разу. Нажмите «Отменить всё» и повторите правки.');
   const form = String(S.site.form_endpoint || '').trim();
   if (form && !/^https:\/\/[^\s/]+/i.test(form)) out.push('«Адрес формы связи» должен начинаться с https://');
   const pub = String(S.site.public_url || '').trim();
@@ -265,6 +294,7 @@ async function toBase64(blob) {
 function commitMessage(c) {
   const parts = [];
   if (c.textCount) parts.push('тексты (' + Object.keys(c.text).map(l => l.toUpperCase()).join(', ') + ')');
+  if (c.pageCount) parts.push('разделы и блоки страницы');
   if (c.photos.length) parts.push('фото ' + c.photos.join(', '));
   if (c.contacts.length) parts.push('контакты и имя');
   if (c.ready) parts.push(S.site.publish_ready ? 'индексация включена' : 'индексация выключена');
@@ -279,6 +309,7 @@ async function commitChanges(step) {
   const add = (path, obj, orig) => { if (JSON.stringify(obj) !== JSON.stringify(orig)) files.push({ path, text: JSON.stringify(obj, null, 2) + '\n' }); };
   add('content/site.json', S.site, S.orig.site);
   S.schema.langs.forEach(l => add(`content/home_${l}.json`, S.home[l], S.orig.home[l]));
+  add('content/sections.json', S.page, S.orig.page);
   if (!files.length) return null;
   const photos = usedPending();
   step('check');
@@ -300,7 +331,7 @@ async function commitChanges(step) {
     ...blobs.map(b => ({ path: b.path, mode: '100644', type: 'blob', sha: b.sha })) ] } });
   const commit = await gh(`/repos/${S.repo}/git/commits`, { method: 'POST', body: { message: commitMessage(c), tree: tree.sha, parents: [head] } });
   await gh(`/repos/${S.repo}/git/refs/heads/${enc(S.branch)}`, { method: 'PATCH', body: { sha: commit.sha } });
-  S.orig = { site: clone(S.site), home: clone(S.home) };
+  S.orig = { site: clone(S.site), home: clone(S.home), page: clone(S.page) };
   files.forEach(f => { S.raw[f.path] = f.text; });
   blobs.forEach(b => { if (S.pending[b.path]) S.pending[b.path].saved = true; });
   return { sha: commit.sha, files: files.map(f => f.path), photos: blobs.length };
@@ -419,7 +450,39 @@ function csvOf(items) {
   return '\ufeff' + rows.map(r => r.map(q).join(',')).join('\r\n');
 }
 
-root.__dash = { S, gh, loadAll, changes, validate, commitChanges, photoPath, usedPending, watchDeploy, latestRun, setv, getv, explain, commitMessage,
+/* ----- page structure: sections and blocks (pure functions, no DOM, so they can be tested) ----- */
+const blockSpec = type => ((S.schema.page && S.schema.page.blockTypes) || []).find(b => b.type === type);
+function newBlock(type) {
+  const b = { type };
+  (blockSpec(type) ? blockSpec(type).fields : []).forEach(f => { b[f.name] = f.default !== undefined ? f.default : ''; });
+  return b;
+}
+function moveItem(list, from, to) {
+  if (from === to || from < 0 || to < 0 || from >= list.length || to >= list.length) return false;
+  const [item] = list.splice(from, 1); list.splice(to, 0, item); return true;
+}
+const secOrig = id => ((S.orig.page && S.orig.page.sections) || []).find(s => s.id === id);
+const secChanged = sec => { const o = secOrig(sec.id); return !o || JSON.stringify(o) !== JSON.stringify(sec); };
+const orderChanged = () => S.page.sections.map(s => s.id).join('|') !== ((S.orig.page && S.orig.page.sections) || []).map(s => s.id).join('|');
+const pageChangeCount = () => S.page.sections.filter(secChanged).length + (orderChanged() ? 1 : 0);
+const blockName = b => (blockSpec(b.type) ? blockSpec(b.type).label : String(b.type));
+function blockPreview(b) {
+  const photos = [b.s1, b.s2, b.s3].filter(Boolean).map(n => 'Фото ' + n).join(', ');
+  const s = String(b.heading || b.body || b.text || b.title || photos || '').replace(/\s+/g, ' ').trim();
+  return s.length > 70 ? s.slice(0, 70) + '…' : s;
+}
+/** Where a numbered photo is shown right now (live: follows the unsaved page structure). */
+function slotUsage(num) {
+  const n = String(num), uses = [];
+  S.page.sections.forEach((sec, i) => (sec.blocks || []).forEach((b, j) => {
+    const where = `раздел ${i + 1} «${sec.title || sec.id}», блок ${i + 1}.${j + 1}`;
+    if (b.type === 'photos' && [b.s1, b.s2, b.s3].includes(n)) uses.push({ text: where + (b.place === 'side' ? ' (сбоку)' : ' (в тексте)'), shape: 'вертикаль 4:5 (по краям кадр обрежется)' });
+    if (b.type === 'aside' && b.look === 'panel' && b.photo === n) uses.push({ text: where + ' (фон за фразой)', shape: 'горизонталь, пейзаж' });
+  }));
+  return uses;
+}
+
+root.__dash = { S, newBlock, moveItem, pageChangeCount, secChanged, slotUsage, blockPreview, gh, loadAll, changes, validate, commitChanges, photoPath, usedPending, watchDeploy, latestRun, setv, getv, explain, commitMessage,
                 inboxCall, requestCounts, contactAction, timeAgo, csvOf, INBOX_URL_RE };
 if (typeof document === 'undefined') { if (typeof module !== 'undefined') module.exports = root.__dash; return; }
 
@@ -499,7 +562,7 @@ function paintTabs(known) {
   if (!tabsBar) return;
   const c = known || changes();
   const fresh = S.req.loaded ? requestCounts(S.req.items).new : 0;
-  const badge = { photos: [c.photos.length, ''], texts: [c.textCount, ''], settings: [c.contacts.length + (c.ready ? 1 : 0), ''], requests: [fresh, ' green'] };
+  const badge = { photos: [c.photos.length, ''], texts: [c.textCount + c.pageCount, ''], settings: [c.contacts.length + (c.ready ? 1 : 0), ''], requests: [fresh, ' green'] };
   tabsBar.querySelectorAll('button').forEach(b => {
     b.setAttribute('aria-selected', String(b.dataset.tab === S.tab));
     const old = b.querySelector('.n'); if (old) old.remove();
@@ -509,7 +572,7 @@ function paintTabs(known) {
 }
 function discard() {
   if (!confirm('Отменить все несохранённые правки? Новые фото тоже не будут добавлены.')) return;
-  S.site = clone(S.orig.site); S.home = clone(S.orig.home);
+  S.site = clone(S.orig.site); S.home = clone(S.orig.home); S.page = clone(S.orig.page);
   for (const p of Object.values(S.pending)) if (!p.saved) URL.revokeObjectURL(p.url);
   S.pending = Object.fromEntries(Object.entries(S.pending).filter(([, p]) => p.saved));
   setNotice('ok', null); renderPanel(); paintBar();
@@ -578,6 +641,12 @@ async function takeMany(files) {
 }
 const keyClick = id => e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); document.getElementById(id).click(); } };
 /** Seven numbered rows, one per photograph on the site. Several files named by number can be dropped onto the list at once. */
+function usageText(slot) {
+  if (slot.num === 1) return 'Первый экран: левая половина экрана (и на компьютере, и на телефоне).';
+  const uses = slotUsage(slot.num);
+  return uses.length ? 'Показывается: ' + uses.map(u => u.text).join('; ') + '.' : 'Пока нигде не показывается. Добавьте блок «Фото» в нужный раздел (вкладка «Тексты»).';
+}
+function usageShape(slot) { if (slot.num === 1) return 'вертикаль, например половина лица; по краям кадр обрежется по центру'; const u = slotUsage(slot.num)[0]; return u ? u.shape : 'вертикаль 4:5'; }
 function panelPhotos() {
   const rows = S.schema.photos.map(slot => {
     const src = photoSrc(slot.field), changed = photoChanged(slot.field), pend = S.pending[S.site[slot.field]];
@@ -586,8 +655,8 @@ function panelPhotos() {
       el('div', { class: 'thumb' }, src ? el('img', { src, alt: '', loading: 'lazy', decoding: 'async' }) : 'пусто'),
       el('div', {},
         el('h3', {}, el('span', { class: 'num' }, String(slot.num)), slot.title, changed ? el('span', { class: 'tag new' }, 'не сохранено') : null),
-        el('p', {}, slot.where),
-        el('p', {}, 'Формат: ' + slot.shape + (pend ? `. Новое: ${pend.w}×${pend.h}, после сжатия ${pend.kb} КБ` : ''))),
+        el('p', {}, usageText(slot)),
+        el('p', {}, 'Формат: ' + usageShape(slot) + (pend ? `. Новое: ${pend.w}×${pend.h}, после сжатия ${pend.kb} КБ` : ''))),
       el('div', { class: 'acts' }, input,
         el('label', { class: 'btn small', for: 'file-' + slot.num, tabindex: 0, onkeydown: keyClick('file-' + slot.num) }, src ? 'Заменить' : 'Загрузить'),
         src ? el('button', { class: 'btn ghost small', onclick: () => { S.site[slot.field] = ''; renderPanel(); paintBar(); } }, 'Убрать') : null,
@@ -604,60 +673,173 @@ function panelPhotos() {
       if (files.length === 1 && slot) takeFile(slot, files[0]); else if (files.length) takeMany(files);
     } }, rows);
   return el('div', {}, el('h1', {}, 'Фотографии'),
-    el('p', { class: 'lead' }, 'Семь мест, у каждого свой номер: тот же жёлтый номер виден на сайте по ссылке с «?photos». Нажмите «Заменить» или перетащите файл на строку, большие файлы сожмутся сами. Файлы с номером в названии (1.jpg, фото-3.png) можно перетащить на список сразу несколько.'),
+    el('p', { class: 'lead' }, 'Семь мест, у каждого свой номер: тот же жёлтый номер виден на сайте по ссылке с «?photos». Где показывать фото, выбирается блоком «Фото» в разделе (вкладка «Тексты»): так фото можно ставить в любое место страницы. Нажмите «Заменить» или перетащите файл на строку, большие файлы сожмутся сами. Файлы с номером в названии (1.jpg, фото-3.png) можно перетащить на список сразу несколько.'),
     el('p', { class: 'muted' }, el('a', { href: '../?photos', target: '_blank', rel: 'noopener' }, 'Открыть сайт с номерами фото ↗')),
     list);
 }
 
-/* ---------- texts ---------- */
+/* ---------- texts: the page by sections and blocks, then the remaining texts ---------- */
+let focusAfter = null;
+const autoRows = v => Math.min(12, Math.max(2, Math.ceil(String(v).length / 72) + (String(v).match(/\n/g) || []).length));
+/** One labelled control. Typing never redraws the page (the cursor would jump); only a real change of a choice may. */
+function makeField({ label, value, type, options, hint, required, onSet, redraw, extra }) {
+  const id = 'f' + (++S.uid), v = String(value == null ? '' : value);
+  let input;
+  if (type === 'select' || type === 'slot') {
+    input = el('select', { id }, options.map(([val, text]) => el('option', { value: val }, text)));
+    input.value = v;
+  } else if (type === 'text' || v.length > 90 || v.includes('\n')) input = el('textarea', { id, rows: autoRows(v) }, v);
+  else input = el('input', { id, type: 'text', value: v });
+  const wrap = el('div', { class: 'fld', 'data-find': (label + ' ' + v).toLowerCase() },
+    el('label', { for: id }, label, required ? el('span', { class: 'req' }, ' *') : null, extra || null), input, hint ? el('p', { class: 'hint' }, hint) : null);
+  input.addEventListener(input.tagName === 'SELECT' ? 'change' : 'input', () => {
+    onSet(input.value);
+    wrap.dataset.find = (label + ' ' + input.value).toLowerCase();
+    paintBar(); paintDots();
+    if (redraw) renderPanel();
+  });
+  return wrap;
+}
+const miniBtn = (text, label, onclick, disabled) => el('button', { class: 'btn ghost small mini', type: 'button', 'aria-label': label, title: label, disabled: !!disabled, onclick }, text);
+
+/* a field of the fixed text groups (first screen, contact form, Q&A, notes, footer) */
+function groupField(group, f) {
+  const lang = S.lang, value = getv(S.home[lang], group.name, f.name);
+  const required = S.schema.required.includes(`${group.name}.${f.name}`);
+  const changed = () => textChanged(lang, group.name, f.name);
+  const undo = el('button', { class: 'undo', type: 'button', hidden: !changed(),
+    onclick: () => { setv(S.home[lang], group.name, f.name, getv(S.orig.home[lang], group.name, f.name)); renderPanel(); paintBar(); } }, '↩ вернуть как было');
+  const wrap = makeField({ label: f.label, value, type: f.type, required, extra: undo,
+    hint: /^q\d+$/.test(f.name) ? 'Очистите вопрос, и он исчезнет с сайта. Пустой слот можно заполнить в любой момент.' : '',
+    onSet: val => { setv(S.home[lang], group.name, f.name, val); wrap.classList.toggle('chg', changed()); undo.hidden = !changed(); } });
+  wrap.classList.toggle('chg', changed());
+  return wrap;
+}
+const groupChangedCount = g => g.fields.filter(f => textChanged(S.lang, g.name, f.name)).length;
+const groupByName = name => S.schema.groups.find(g => g.name === name);
+
+function setCardOpen(card, open) {
+  card.querySelector('.pbody').hidden = !open;
+  card.querySelector('.ptitle').setAttribute('aria-expanded', String(open));
+}
+/** Updates the yellow dots of the cards without redrawing anything. */
+function paintDots() {
+  document.querySelectorAll('.phead').forEach(head => {
+    const dot = head.querySelector('.dot'); if (!dot) return;
+    let n = 0;
+    if (head.dataset.sid) { const sec = S.page.sections.find(s => s.id === head.dataset.sid); n = sec && secChanged(sec) ? 1 : 0; }
+    else if (head.dataset.gids) n = head.dataset.gids.split(',').reduce((sum, name) => sum + (groupByName(name) ? groupChangedCount(groupByName(name)) : 0), 0);
+    dot.hidden = !n; dot.textContent = head.dataset.sid ? 'изменён' : String(n);
+  });
+}
+function card({ key, num, title, sub, sid, gids, link, controls, body, open }) {
+  const toggle = el('button', { class: 'ptitle', type: 'button', 'aria-expanded': String(open), onclick: () => {
+    const now = card_.querySelector('.pbody').hidden; setCardOpen(card_, now); if (now) S.open.add(key); else S.open.delete(key);
+  } }, title, sub ? el('small', {}, sub) : null);
+  const head = el('div', { class: 'phead', 'data-sid': sid || null, 'data-gids': gids ? gids.join(',') : null },
+    num != null ? el('span', { class: 'num' }, String(num)) : null, toggle, el('span', { class: 'dot', hidden: true }, ''),
+    link ? el('a', { class: 'go', href: '../#' + link, target: '_blank', rel: 'noopener' }, 'на сайте ↗') : null, controls || null);
+  const card_ = el('div', { class: 'pcard' + (num == null ? ' fixed' : ''), 'data-key': key }, head, el('div', { class: 'pbody', hidden: !open }, body));
+  return card_;
+}
+
+/* ----- moving, adding, deleting ----- */
+function afterStructure(focus) { focusAfter = focus || null; renderPanel(); paintBar(); }
+function moveSection(from, to) { const id = S.page.sections[from].id; if (moveItem(S.page.sections, from, to)) afterStructure({ sid: id }); }
+function moveBlock(sec, from, to) { if (moveItem(sec.blocks, from, to)) afterStructure({ sid: sec.id, block: to }); }
+function addBlock(sec, type) { sec.blocks.push(newBlock(type)); S.open.add(sec.id); afterStructure({ sid: sec.id, block: sec.blocks.length - 1, fresh: true }); }
+function deleteBlock(sec, si, bi) {
+  const b = sec.blocks[bi];
+  if (!confirm(`Удалить блок ${si + 1}.${bi + 1} («${blockName(b)}»${blockPreview(b) ? ': ' + blockPreview(b) : ''})?\n\nПока вы не нажали «Сохранить и опубликовать», его можно вернуть кнопкой «Вернуть раздел как было».`)) return;
+  sec.blocks.splice(bi, 1); afterStructure({ sid: sec.id });
+}
+
+function blockCard(sec, si, b, bi) {
+  const spec = blockSpec(b.type), last = sec.blocks.length - 1, label = `${si + 1}.${bi + 1}`;
+  const fields = spec.fields.filter(f => !f.showIf || Object.entries(f.showIf).every(([k, vals]) => vals.includes(b[k]))).map(f => makeField({
+    label: f.label, value: b[f.name], type: f.type, options: f.options, redraw: f.name === 'look' && !!spec.fields.some(x => x.showIf),
+    hint: f.name === 'text' && b.type === 'aside' ? 'Перенос строки здесь это перенос строки во фразе.' : '', onSet: val => { b[f.name] = val; } }));
+  return el('div', { class: 'blk', 'data-bi': String(bi) },
+    el('div', { class: 'bhead' }, el('span', { class: 'num' }, label), el('span', { class: 'bname' }, blockName(b)), el('span', { class: 'bprev' }, blockPreview(b)),
+      miniBtn('▲', `Поднять блок ${label} выше`, () => moveBlock(sec, bi, bi - 1), bi === 0),
+      miniBtn('▼', `Опустить блок ${label} ниже`, () => moveBlock(sec, bi, bi + 1), bi === last),
+      el('button', { class: 'btn danger small', type: 'button', 'aria-label': `Удалить блок ${label}`, onclick: () => deleteBlock(sec, si, bi) }, 'Удалить')),
+    spec.hint ? el('p', { class: 'hint', style: 'margin:0 0 10px' }, spec.hint) : null,
+    el('div', { class: 'flds' }, fields));
+}
+
+function textSectionBody(sec, si) {
+  const layoutField = makeField({ label: 'Расположение раздела', value: sec.layout, type: 'select', options: S.schema.page.layouts,
+    hint: 'Боковая колонка нужна блокам «Фраза сбоку» и фото с пометкой «сбоку»; если таких блоков нет, раздел идёт одной колонкой.', onSet: val => { sec.layout = val; } });
+  const titleField = makeField({ label: 'Заголовок раздела', value: sec.title, type: 'string', onSet: val => { sec.title = val; } });
+  const adds = S.schema.page.blockTypes.map(spec => el('button', { class: 'btn small', type: 'button', onclick: () => addBlock(sec, spec.type) }, '+ ' + spec.add));
+  const original = secOrig(sec.id);
+  return el('div', {},
+    el('div', { class: 'flds' }, titleField, layoutField),
+    el('h3', { class: 'subh' }, sec.blocks.length ? 'Блоки раздела (идут сверху вниз)' : 'В разделе пока нет блоков'),
+    ...sec.blocks.map((b, bi) => blockCard(sec, si, b, bi)),
+    el('div', { class: 'addrow' }, el('span', { class: 'muted' }, 'Добавить в конец раздела:'), ...adds),
+    original && secChanged(sec) ? el('div', { class: 'row' }, el('button', { class: 'btn ghost small', type: 'button',
+      onclick: () => { S.page.sections[si] = clone(original); afterStructure({ sid: sec.id }); } }, '↩ Вернуть раздел как было')) : null);
+}
+
+function sectionCard(sec, si) {
+  const total = S.page.sections.length, isText = sec.type === 'text';
+  const pos = el('select', { class: 'pos', 'aria-label': `Положение раздела «${isText ? sec.title : sec.type}» в списке`, onchange: e => moveSection(si, Number(e.target.value)) },
+    S.page.sections.map((_, k) => el('option', { value: String(k) }, '№ ' + (k + 1))));
+  pos.value = String(si);
+  const controls = el('span', { class: 'ctl' }, pos, miniBtn('▲', `Поднять раздел ${si + 1} выше`, () => moveSection(si, si - 1), si === 0),
+    miniBtn('▼', `Опустить раздел ${si + 1} ниже`, () => moveSection(si, si + 1), si === total - 1));
+  let body;
+  if (isText) body = textSectionBody(sec, si);
+  else if (sec.type === 'contact') body = el('div', { class: 'flds' }, groupByName('contact').fields.map(f => groupField(groupByName('contact'), f)));
+  else body = el('div', {}, el('div', { class: 'flds' }, groupByName('qa').fields.map(f => groupField(groupByName('qa'), f))),
+    el('h3', { class: 'subh' }, groupByName('free').label), el('div', { class: 'flds' }, groupByName('free').fields.map(f => groupField(groupByName('free'), f))));
+  return card({ key: sec.id, num: si + 1, title: isText ? (sec.title || '(без заголовка)') : S.schema.page.sectionLabels[sec.type],
+    sub: isText ? sec.blocks.length + ' бл.' : 'форма', sid: sec.id, link: sec.id, controls, body, open: S.open.has(sec.id) });
+}
+function groupCard(name, num) {
+  const g = groupByName(name); if (!g) return null;
+  return card({ key: 'g:' + name, num: null, title: g.label, gids: [name], link: g.anchor || null, open: S.open.has('g:' + name),
+    body: el('div', { class: 'flds' }, g.fields.map(f => groupField(g, f))) });
+}
+
 function panelTexts() {
-  const lang = S.lang;
   const search = el('input', { type: 'search', placeholder: 'Найти поле или слово…', value: S.filter, 'aria-label': 'Поиск по текстам',
     oninput: e => { S.filter = e.target.value; applyFilter(); } });
-  const sections = S.schema.sections.map(sec => {
-    const count = sec.fields.filter(f => textChanged(lang, sec.name, f.name)).length;
-    const body = el('div', { class: 'flds' }, sec.fields.map(f => {
-      const id = `t-${lang}-${sec.name}-${f.name}`, value = getv(S.home[lang], sec.name, f.name);
-      const required = S.schema.required.includes(`${sec.name}.${f.name}`);
-      const long = f.type === 'text' || value.length > 90 || value.includes('\n');
-      const field = long
-        ? el('textarea', { id, rows: Math.min(12, Math.max(2, Math.ceil(value.length / 72) + (value.match(/\n/g) || []).length)) }, value)
-        : el('input', { id, type: 'text', value });
-      const changed = () => textChanged(lang, sec.name, f.name);
-      const undo = el('button', { class: 'undo', type: 'button', hidden: !changed(),
-        onclick: () => { setv(S.home[lang], sec.name, f.name, getv(S.orig.home[lang], sec.name, f.name)); renderPanel(); paintBar(); } }, '↩ вернуть как было');
-      const wrap = el('div', { class: 'fld' + (changed() ? ' chg' : ''), 'data-find': (f.label + ' ' + value).toLowerCase() },
-        el('label', { for: id }, f.label, required ? el('span', { class: 'req' }, ' *') : null, undo), field,
-        sec.name === 'quotes' ? el('p', { class: 'hint' }, 'Перенос строки здесь — перенос строки в цитате.') : null,
-        /^q\d+$/.test(f.name) ? el('p', { class: 'hint' }, 'Очистите вопрос, и он исчезнет с сайта. Пустой слот можно заполнить в любой момент.') : null);
-      field.addEventListener('input', () => {
-        setv(S.home[lang], sec.name, f.name, field.value);
-        wrap.classList.toggle('chg', changed()); undo.hidden = !changed();
-        paintBar();
-      });
-      return wrap;
-    }));
-    const box = el('details', { class: 'sec', open: S.open.size ? S.open.has(sec.name) : S.schema.sections[0] === sec },
-      el('summary', {}, sec.label, count ? el('span', { class: 'dot' }, String(count)) : null,
-        sec.anchor ? el('a', { class: 'go', href: '../#' + sec.anchor, target: '_blank', rel: 'noopener', onclick: e => e.stopPropagation() }, 'на сайте ↗') : null),
-      body);
-    box.addEventListener('toggle', () => { if (box.open) S.open.add(sec.name); else S.open.delete(sec.name); });
-    return box;
-  });
-  setTimeout(applyFilter, 0);
+  const hero = groupCard('hero');
+  const sections = S.page.sections.map(sectionCard);
+  const rest = ['meta', 'notes', 'footer'].map(n => groupCard(n)).filter(Boolean);
+  setTimeout(() => { applyFilter(); paintDots(); runFocus(); }, 0);
   return el('div', {}, el('h1', {}, 'Тексты'),
-    el('p', { class: 'lead' }, 'Блоки идут в том же порядке, что и на сайте. Откройте нужный, поправьте текст, затем нажмите «Сохранить и опубликовать» внизу. Изменённые поля отмечены жёлтой чертой.'),
-    el('div', { class: 'bar2' }, search), el('p', { class: 'lead', id: 'nofind', hidden: true }, 'Ничего не найдено. Попробуйте другое слово.'), ...sections);
+    el('p', { class: 'lead' }, 'Страница состоит из разделов, а раздел из блоков (текст, цитата, фраза сбоку, фото). Всё пронумеровано: раздел 3, его блок 3.2. Номер можно выбрать в списке или двигать стрелками ▲▼, блоки добавляются и удаляются внутри раздела. Затем нажмите «Сохранить и опубликовать» внизу.'),
+    el('p', { class: 'muted' }, el('a', { href: '../?blocks', target: '_blank', rel: 'noopener' }, 'Открыть сайт с теми же номерами разделов и блоков ↗')),
+    el('div', { class: 'bar2' }, search), el('p', { class: 'lead', id: 'nofind', hidden: true }, 'Ничего не найдено. Попробуйте другое слово.'),
+    el('h2', { class: 'subh' }, 'Первый экран'), ...[hero],
+    el('h2', { class: 'subh' }, 'Разделы страницы (сверху вниз)'), ...sections,
+    el('h2', { class: 'subh' }, 'Остальные тексты'), ...rest);
+}
+function runFocus() {
+  const f = focusAfter; focusAfter = null;
+  if (!f) return;
+  const cardNode = document.querySelector(`.pcard[data-key="${f.sid}"]`); if (!cardNode) return;
+  let target = cardNode.querySelector('.ptitle');
+  if (f.block != null) {
+    const blk = cardNode.querySelector(`.blk[data-bi="${f.block}"]`);
+    if (blk) target = f.fresh ? (blk.querySelector('textarea, input, select') || blk) : (blk.querySelector('.bhead button:not([disabled])') || blk);
+  }
+  if (target) { target.focus({ preventScroll: true }); target.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
 }
 function applyFilter() {
   const q = S.filter.trim().toLowerCase();
   let any = false;
-  document.querySelectorAll('details.sec').forEach(d => {
+  document.querySelectorAll('.pcard').forEach(c => {
     let shown = 0;
-    d.querySelectorAll('.fld').forEach(f => { const hit = !q || f.dataset.find.includes(q); f.hidden = !hit; if (hit) shown++; });
-    d.hidden = !shown;
-    if (shown) any = true;
-    if (q && shown) d.open = true;
+    c.querySelectorAll('.blk').forEach(blk => { const hits = [...blk.querySelectorAll('.fld')].filter(f => !q || f.dataset.find.includes(q)); blk.hidden = !!q && !hits.length; });
+    c.querySelectorAll('.fld').forEach(f => { const hit = !q || f.dataset.find.includes(q); f.hidden = !hit; if (hit) shown++; });
+    c.hidden = !!q && !shown;
+    if (shown || !q) any = true;
+    setCardOpen(c, q ? !!shown : S.open.has(c.dataset.key));
   });
   const none = document.getElementById('nofind'); if (none) none.hidden = any;
 }

@@ -117,22 +117,22 @@ content:
     label: Фото 1 · Главное фото (первый экран, левая половина; вертикальный кадр, например половина лица)
     type: image
   - name: quote_photo
-    label: Фото 2 · Атмосферное фото за цитатой А (необязательно)
+    label: Фото 2 · место выбирается в блоке «Фото» раздела страницы (лучше править в /admin/)
     type: image
   - name: eyes_photo
-    label: Фото 3 · Крупный план (рядом с «Intuition sessions»; пусто = место остаётся пустым)
+    label: Фото 3 · место выбирается в блоке «Фото» раздела страницы (лучше править в /admin/)
     type: image
   - name: story_photo_1
-    label: Фото 4 · Моя история (справа, после первого абзаца)
+    label: Фото 4 · место выбирается в блоке «Фото» раздела страницы (лучше править в /admin/)
     type: image
   - name: story_photo_2
-    label: Фото 5 · Моя история (слева, после второго абзаца)
+    label: Фото 5 · место выбирается в блоке «Фото» раздела страницы (лучше править в /admin/)
     type: image
   - name: story_photo_3
-    label: Фото 6 · Моя история (справа, после третьего абзаца)
+    label: Фото 6 · место выбирается в блоке «Фото» раздела страницы (лучше править в /admin/)
     type: image
   - name: story_photo_4
-    label: Фото 7 · Моя история (слева, после четвёртого абзаца)
+    label: Фото 7 · место выбирается в блоке «Фото» раздела страницы (лучше править в /admin/)
     type: image
   - name: publish_ready
     label: Готов к индексации / Allow search indexing
@@ -164,6 +164,248 @@ content:
     options:
       format: markdown
       switcher: true
+- name: sections
+  label: 'Страница: разделы и блоки (порядок, цитаты, фото; удобнее в /admin/)'
+  type: file
+  path: content/sections.json
+  format: json
+  operations:
+    delete: false
+  fields:
+  - name: sections
+    label: Разделы (порядок = порядок на сайте)
+    type: object
+    list: true
+    fields:
+    - name: id
+      label: Служебное имя раздела (не меняйте)
+      type: string
+    - name: type
+      label: Вид раздела
+      type: select
+      options:
+        values:
+        - value: text
+          label: Текстовый
+        - value: contact
+          label: Контакты и форма
+        - value: qa
+          label: Вопросы и ответы
+    - name: title
+      label: Заголовок раздела
+      type: string
+    - name: layout
+      label: Расположение
+      type: select
+      options:
+        values:
+        - value: rail-right
+          label: Текст слева, боковая колонка справа
+        - value: rail-left
+          label: Боковая колонка слева, текст справа
+        - value: column
+          label: Одна колонка у левого края
+        - value: centered
+          label: Одна колонка по центру (как предисловие)
+    - name: blocks
+      label: Блоки (порядок = порядок в разделе)
+      type: object
+      list: true
+      fields:
+      - name: type
+        label: Тип блока
+        type: select
+        options:
+          values:
+          - value: text
+            label: Текст
+          - value: quote
+            label: Цитата в тексте
+          - value: aside
+            label: Фраза сбоку
+          - value: photos
+            label: Фото
+          - value: themes
+            label: Список тем со значками
+      - name: heading
+        label: Подзаголовок (необязательно)
+        type: string
+      - name: body
+        label: Текст
+        type: text
+      - name: note
+        label: Мелкая приписка под текстом (необязательно)
+        type: text
+      - name: look
+        label: Оформление
+        type: select
+        options:
+          values:
+          - value: plain
+            label: Обычный текст (с подзаголовком выглядит как раздел, без него как абзац)
+          - value: lead
+            label: Крупная вводная фраза
+          - value: panel
+            label: Тёмная плашка (можно с фото за текстом)
+          - value: dropcap
+            label: Обычный текст, первая буква крупно
+          - value: finale
+            label: Итоговая фраза по центру
+          - value: hand
+            label: Рукописная фраза без плашки
+      - name: text
+        label: Цитата
+        type: text
+      - name: size
+        label: Размер
+        type: select
+        options:
+          values:
+          - value: auto
+            label: Автоматически (длинные фразы мельче)
+          - value: large
+            label: Крупно
+          - value: small
+            label: Помельче
+      - name: photo
+        label: Фото за фразой (необязательно)
+        type: select
+        options:
+          values:
+          - value: ''
+            label: — нет —
+          - value: '2'
+            label: Фото 2
+          - value: '3'
+            label: Фото 3
+          - value: '4'
+            label: Фото 4
+          - value: '5'
+            label: Фото 5
+          - value: '6'
+            label: Фото 6
+          - value: '7'
+            label: Фото 7
+      - name: s1
+        label: Первое фото
+        type: select
+        options:
+          values:
+          - value: ''
+            label: — нет —
+          - value: '2'
+            label: Фото 2
+          - value: '3'
+            label: Фото 3
+          - value: '4'
+            label: Фото 4
+          - value: '5'
+            label: Фото 5
+          - value: '6'
+            label: Фото 6
+          - value: '7'
+            label: Фото 7
+      - name: s2
+        label: Второе фото (необязательно)
+        type: select
+        options:
+          values:
+          - value: ''
+            label: — нет —
+          - value: '2'
+            label: Фото 2
+          - value: '3'
+            label: Фото 3
+          - value: '4'
+            label: Фото 4
+          - value: '5'
+            label: Фото 5
+          - value: '6'
+            label: Фото 6
+          - value: '7'
+            label: Фото 7
+      - name: s3
+        label: Третье фото (необязательно)
+        type: select
+        options:
+          values:
+          - value: ''
+            label: — нет —
+          - value: '2'
+            label: Фото 2
+          - value: '3'
+            label: Фото 3
+          - value: '4'
+            label: Фото 4
+          - value: '5'
+            label: Фото 5
+          - value: '6'
+            label: Фото 6
+          - value: '7'
+            label: Фото 7
+      - name: place
+        label: Где показать
+        type: select
+        options:
+          values:
+          - value: inline
+            label: В тексте
+          - value: side
+            label: Сбоку, в боковой колонке
+      - name: caption
+        label: Подпись под фото (необязательно)
+        type: string
+      - name: alt
+        label: Описание фото для скринридеров (необязательно)
+        type: string
+      - name: title
+        label: Заголовок
+        type: string
+      - name: intro
+        label: Вступление
+        type: text
+      - name: t1
+        label: Тема 1 · фраза
+        type: string
+      - name: d1
+        label: Тема 1 · пояснение
+        type: text
+      - name: t2
+        label: Тема 2 · фраза
+        type: string
+      - name: d2
+        label: Тема 2 · пояснение
+        type: text
+      - name: t3
+        label: Тема 3 · фраза
+        type: string
+      - name: d3
+        label: Тема 3 · пояснение
+        type: text
+      - name: t4
+        label: Тема 4 · фраза
+        type: string
+      - name: d4
+        label: Тема 4 · пояснение
+        type: text
+      - name: t5
+        label: Тема 5 · фраза
+        type: string
+      - name: d5
+        label: Тема 5 · пояснение
+        type: text
+      - name: t6
+        label: Тема 6 · фраза
+        type: string
+      - name: d6
+        label: Тема 6 · пояснение
+        type: text
+      - name: finalTitle
+        label: Итоговая фраза · заголовок (по центру, крупно)
+        type: string
+      - name: finalText
+        label: Итоговая фраза · текст (по центру)
+        type: text
 - name: home_en
   label: Тексты сайта (English)
   type: file
@@ -183,7 +425,7 @@ content:
       label: Описание для поисковиков и соцсетей
       type: text
   - name: hero
-    label: '1 · Главный экран: фото и цитата'
+    label: 'Главный экран: цитата на главном фото (всегда первый)'
     type: object
     fields:
     - name: alt
@@ -195,239 +437,8 @@ content:
     - name: quote2
       label: Цитата, строка 2 (меньше, рядом)
       type: text
-  - name: story
-    label: '2 · Введение: почему страница для спортсменов'
-    type: object
-    fields:
-    - name: title
-      label: Центральный вопрос (заголовок)
-      type: text
-    - name: p1
-      label: Абзац 1
-      type: text
-    - name: p2
-      label: Абзац 2
-      type: text
-    - name: p3
-      label: Выделенная цитата (курсив с линией слева)
-      type: text
-    - name: p4
-      label: Абзац 4
-      type: text
-    - name: p5
-      label: Абзац 5
-      type: text
-  - name: quotes
-    label: Цитаты
-    type: object
-    fields:
-    - name: a
-      label: 'Цитата А: рукописная, на фото во введении'
-      type: text
-    - name: b
-      label: 'Цитата Б: выделенная, в «Intuition sessions» после первого блока'
-      type: text
-    - name: c
-      label: 'Цитата В: рукописная, в «Transformation»'
-      type: text
-  - name: sessions
-    label: 3 · Интуитивные сессии
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Вводная фраза
-      type: text
-    - name: h1
-      label: Блок 1 · заголовок
-      type: string
-    - name: p1
-      label: Блок 1 · текст
-      type: text
-    - name: h2
-      label: Блок 2 · заголовок
-      type: string
-    - name: p2
-      label: Блок 2 · текст
-      type: text
-    - name: h3
-      label: Блок 3 · заголовок
-      type: string
-    - name: p3
-      label: Блок 3 · текст
-      type: text
-    - name: h4
-      label: Блок «Как проходят сессии» · заголовок
-      type: string
-    - name: p4
-      label: Блок «Как проходят сессии» · абзац 1
-      type: text
-    - name: p5
-      label: Блок «Как проходят сессии» · абзац 2
-      type: text
-    - name: note
-      label: Мелкая оговорка про медицину и терапию
-      type: text
-    - name: bring
-      label: 'Выделенная цитата: что принести с собой (после блока «Where we begin»)'
-      type: text
-    - name: photoAlt
-      label: Описание фото крупным планом (для скринридеров)
-      type: string
-  - name: client
-    label: '3 · Intuition sessions: темы для исследования (шесть символов и итоговая фраза)'
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: intro
-      label: Вступление
-      type: text
-    - name: l1
-      label: Тема 1 · фраза
-      type: string
-    - name: l1t
-      label: Тема 1 · пояснение
-      type: text
-    - name: l2
-      label: Тема 2 · фраза
-      type: string
-    - name: l2t
-      label: Тема 2 · пояснение
-      type: text
-    - name: l3
-      label: Тема 3 · фраза
-      type: string
-    - name: l3t
-      label: Тема 3 · пояснение
-      type: text
-    - name: l4
-      label: Тема 4 · фраза
-      type: string
-    - name: l4t
-      label: Тема 4 · пояснение
-      type: text
-    - name: l5
-      label: Тема 5 · фраза
-      type: string
-    - name: l5t
-      label: Тема 5 · пояснение
-      type: text
-    - name: l6
-      label: Тема 6 · фраза
-      type: string
-    - name: l6t
-      label: Тема 6 · пояснение
-      type: text
-    - name: l7
-      label: Итоговая фраза · заголовок (по центру, крупно)
-      type: string
-    - name: l7t
-      label: Итоговая фраза · текст (по центру)
-      type: text
-  - name: change
-    label: 4 · Трансформация
-    type: object
-    fields:
-    - name: title
-      label: Заголовок раздела
-      type: string
-    - name: s1Title
-      label: Сцена 1 · заголовок
-      type: string
-    - name: s1Text
-      label: Сцена 1 · текст
-      type: text
-    - name: s2Title
-      label: Сцена 2 · заголовок
-      type: string
-    - name: s2Text
-      label: Сцена 2 · текст
-      type: text
-    - name: s2Pull
-      label: Сцена 2 · выделенная фраза (после текста; пусто = не показывать)
-      type: text
-    - name: s3Title
-      label: Сцена 3 · заголовок
-      type: string
-    - name: s3Text
-      label: Сцена 3 · текст
-      type: text
-    - name: s4Title
-      label: Сцена 4 · заголовок
-      type: string
-    - name: s4Text
-      label: Сцена 4 · текст
-      type: text
-    - name: bTitle
-      label: Сцена с бабочкой · заголовок
-      type: string
-    - name: bText
-      label: Сцена с бабочкой · текст
-      type: text
-    - name: mTitle
-      label: Сцена «когда не понимают» · заголовок
-      type: string
-    - name: mText
-      label: Сцена «когда не понимают» · текст
-      type: text
-    - name: wTitle
-      label: Сцена «свидетель» · заголовок
-      type: string
-    - name: wText
-      label: Сцена «свидетель» · текст
-      type: text
-    - name: wNote
-      label: Выделенная строка в конце
-      type: text
-  - name: about
-    label: 5 · Моя история (читается как предисловие к книге; четыре фото — в «Контакты, фото, имя»)
-    type: object
-    fields:
-    - name: title
-      label: Заголовок
-      type: string
-    - name: lead
-      label: Вводная фраза (крупно, под заголовком)
-      type: text
-    - name: c1Text
-      label: Абзац 1
-      type: text
-    - name: c1Alt
-      label: Фото 4 · описание для скринридеров
-      type: string
-    - name: c2Text
-      label: Абзац 2
-      type: text
-    - name: pull
-      label: Выделенная фраза после абзаца 2 (курсив с линией слева; пусто — не показывается)
-      type: text
-    - name: c2Alt
-      label: Фото 5 · описание для скринридеров
-      type: string
-    - name: c3Text
-      label: Абзац 3
-      type: text
-    - name: c3Alt
-      label: Фото 6 · описание для скринридеров
-      type: string
-    - name: c4Text
-      label: Абзац 4
-      type: text
-    - name: c4Alt
-      label: Фото 7 · описание для скринридеров
-      type: string
-    - name: c5Text
-      label: Абзац 5 (после четырёх фото, перед итоговой фразой)
-      type: text
-    - name: note
-      label: Итоговая фраза (по центру, рукописная)
-      type: text
   - name: contact
-    label: 6 · Контакты и форма (сразу после «Обо мне»)
+    label: Контакты и форма (раздел страницы, его место меняется в /admin/)
     type: object
     fields:
     - name: title
@@ -455,7 +466,7 @@ content:
       label: Согласие под формой (после текста сама добавляется ссылка «privacy notice»)
       type: text
   - name: qa
-    label: 7 · Q&A (пустой вопрос скрывает слот)
+    label: Q&A (раздел страницы; пустой вопрос скрывает слот)
     type: object
     fields:
     - name: title
@@ -536,7 +547,7 @@ content:
       label: Ответ 8
       type: text
   - name: free
-    label: '7 · Q&A: блок «вводная беседа бесплатно» (в конце страницы, после вопросов)'
+    label: 'Q&A: блок «вводная беседа бесплатно» (под вопросами)'
     type: object
     fields:
     - name: title

@@ -37,7 +37,7 @@ def cms_keys(fields, prefix=''):
 
 
 def check_consistency(builder):
-    """Every key the template asks for has copy; CMS config and JSON agree; the site really has one language."""
+    """Every key the template asks for has copy; CMS config and JSON agree; the site really has one language; the sections file is sound."""
     template = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
     wanted = set(re.findall(r'data-(?:i18n|i18n-aria|i18n-alt)="([^"]+)"', template))
     site = json.loads((ROOT / 'content/site.json').read_text(encoding='utf-8'))
@@ -47,17 +47,34 @@ def check_consistency(builder):
     assert builder.LANGS == ('en',), 'the site is English only'
     assert not (ROOT / 'content/home_ru.json').exists() and not (ROOT / 'content/home_fr.json').exists(), 'RU/FR copy must stay removed'
     assert 'home_ru' not in entries and 'home_fr' not in entries, 'RU/FR forms must stay removed from .pages.yml'
-    flat = builder.flatten(json.loads((ROOT / 'content/home_en.json').read_text(encoding='utf-8')), 'en')
+    home_en = json.loads((ROOT / 'content/home_en.json').read_text(encoding='utf-8'))
+    flat = builder.flatten(home_en, 'en')
     missing = wanted - set(values['en']) - {'notes.title', 'notes.lead'}
     assert not missing, f'template keys without copy: {sorted(missing)}'
     assert cms_keys(entries['home_en']['fields']) == set(flat), '.pages.yml and content/home_en.json differ'
     unused = {k for k in flat if k not in wanted and not k.startswith(('meta.', 'notes.'))}
     assert not unused, f'copy that the template never shows: {sorted(unused)}'
+    for group in ('story', 'quotes', 'sessions', 'client', 'change', 'about'):
+        assert group not in home_en, f'{group} now lives in content/sections.json'
     for key in ('form_endpoint', 'inbox_endpoint', 'portrait', 'eyes_photo', 'story_photo_1', 'story_photo_4', 'privacy_address'):
         assert key in cms_keys(entries['site']['fields']), f'site settings lack {key}'
     for key in ('name_ru', 'name_fr', 'role_ru', 'role_fr'):
         assert key not in site and key not in cms_keys(entries['site']['fields']), f'old language field is back: {key}'
     assert 'privacy' in entries and (ROOT / 'content/privacy.md').exists(), 'the privacy notice must stay editable'
+    # the page structure: the CMS form knows every field of every block type; the file itself is sound (without judging what the owner wrote)
+    form = entries['sections']
+    assert form['path'] == 'content/sections.json'
+    block_form = [f for f in form['fields'][0]['fields'] if f['name'] == 'blocks'][0]['fields']
+    needed = {'type'} | {f['name'] for spec in builder.BLOCK_TYPES.values() for f in spec['fields']}
+    assert needed <= {f['name'] for f in block_form}, 'the CMS form lacks block fields'
+    data = json.loads((ROOT / 'content/sections.json').read_text(encoding='utf-8'))
+    ids = [s['id'] for s in data['sections']]
+    assert len(ids) == len(set(ids)) and ids.count('contact') == 1 and ids.count('qa') == 1, 'section ids are unique; contact and Q&A are present once'
+    for section in data['sections']:
+        assert section['type'] in builder.SECTION_TYPES
+        for block in section.get('blocks', []):
+            assert block['type'] in builder.BLOCK_TYPES, f'unknown block type {block["type"]}'
+    assert builder.TONE_CYCLE == ('sand', 'teal', 'dune', 'deep') and set(builder.NOTES_TONE) == set(builder.TONE_CYCLE)
 
 
 def check_static(builder, destination):
@@ -65,12 +82,14 @@ def check_static(builder, destination):
     css = (destination / 'assets/site.css').read_text(encoding='utf-8')
     assert '<html lang="en">' in home and 'const CMS_OVERRIDES' in home
     assert '@@' not in home and 'data-photo=' not in home, 'unresolved template marker'
-    for section in SECTION_IDS:
-        assert f'id="{section}"' in home, f'section missing: {section}'
-    positions = [home.index(f'id="{section}"') for section in SECTION_IDS]
-    assert positions == sorted(positions), 'sections are out of the agreed order'
+    sections = builder.load_sections()
+    expected = ['hero'] + [s['id'] for s in sections]
+    ids = re.findall(r'<section class="band[^"]*" id="(\w+)"', home)
+    assert [i for i in ids if i != 'notes'] == expected, 'the page follows the order of content/sections.json, hero first'
+    assert re.findall(r'data-sec="(\d+)"', home) == [str(n) for n in range(1, len(sections) + 1)], 'sections are numbered in page order'
+    for index, section in enumerate(sections):
+        assert re.search(r'band-' + builder.TONE_CYCLE[index % 4] + r'[^"]*" id="' + section['id'] + '"', home), f'tone of section {index + 1}'
     assert home.index('id="qa"') < home.index('id="free"') < home.index('class="site-footer'), 'the introductory-conversation card closes the Q&A'
-    assert home.index('id="contact"') > home.index('id="about"') and home.index('id="contact"') < home.index('id="qa"'), 'the form goes right after "My story"'
 
     # one language, no top bar, favicon stays
     assert 'id="language"' not in home and '<header class="site-header">' not in home and 'langSelect' not in home, 'language switch / top bar must stay removed'
@@ -89,41 +108,29 @@ def check_static(builder, destination):
     assert '--sand:#e5dac4' in css and '--dune:#dccfb4' in css, 'warm sand tokens'
     assert not any(old in css for old in ('#e6e3d8', '#d9dfd6', '#f4f2ea', '#f2f0e7', '#e8e5da')), 'the cool near-white greys must not return'
     for pair in ('.band-deep + .band-sand::before', '.band-sand + .band-teal::before', '.band-teal + .band-dune::before',
-                 '.band-dune + .band-deep::before', '.band-teal + .band-sand::before', '.site-footer.after-teal::before', '.site-footer.after-sand::before'):
+                 '.band-dune + .band-deep::before', '.band-teal + .band-sand::before', '.site-footer.after-teal::before', '.site-footer.after-sand::before',
+                 '.site-footer.after-dune::before', '.site-footer.after-deep::before'):
         assert pair in css, f'transition missing: {pair}'
 
-    # copy changes
-    assert 'Intuition speaks differently to everyone' in home and 'It speaks differently' not in home
-    assert 'Leave your message' in home and '(optional)' not in home and 'sensitive information here' not in home
+    # the form, privacy links, no old promises
     assert 'By sending this form you agree' in home and home.count('href="privacy/"') >= 2, 'consent text and privacy links (form and footer)'
     assert '30 minutes' not in home.lower() and '30-minute' not in home.lower() and 'free-num' not in home, 'no 30-minute limit'
-    assert 'An introductory conversation costs you nothing' in home
     assert re.search(r'<a class="button" href="#contact" data-i18n="free\.cta">', home), 'the card leads back to the form'
-    assert re.search(r'<p class="mid"[^>]*data-i18n="story\.p1"', home) and re.search(r'<p class="mid"[^>]*data-i18n="story\.p5"', home), 'intro lines use the main text style'
 
-    # highlighted phrases, in the text where they belong
-    assert len(re.findall(r'class="pull[ "]', home)) >= 5, 'key phrases are highlighted in every block'
-    order = [home.index(f'data-i18n="{k}"') for k in ('sessions.p1', 'quotes.b', 'sessions.p2', 'sessions.bring', 'sessions.p3')]
-    assert order == sorted(order), 'quote B follows the first sessions text, "bring" follows "Where we begin"'
-    assert home.index('data-i18n="change.s2Text"') < home.index('data-i18n="change.s2Pull"')
-    assert home.count('<blockquote class="quote-text" data-write ') == 2, 'two handwritten quotations (A and C)'
-
-    # closing statements
-    finales = re.findall(r'<div class="finale[^"]*" data-finale>', home)
-    assert len(finales) == 2, 'two centred closing statements'
-    assert home.index('data-i18n="client.l6t"') < home.index('data-i18n="client.l7"') < home.index('id="change"')
-    assert 'data-write data-i18n="about.note"' in home
-
-    # my story: one flowing preface
-    assert 'about.c1Title' not in home and 'mosaic' not in home and 'class="chap dropcap"' in home
-    assert home.count('class="photo plate plate-') == 4, 'four numbered photographs inside the story'
+    # blocks of the page: one set of shared formats, no leftovers of the fixed layout
+    assert len(re.findall(r'class="b b-', home)) >= 1 and 'class="blocks' in home
+    for gone in ('class="mm"', 'plate-r', 'preface-body', 'class="s-block"', 'class="scene"', 'quote-inline'):
+        assert gone not in home, f'old fixed markup is back: {gone}'
+    assert '.mm' not in css and '.plate' not in css and '.scene' not in css and '.sessions' not in css, 'the butterfly and the fixed section styles stay removed'
+    for needed in ('.pull {', '.b-photos', '.rail {', '.sec-grid', '.b-panel', '.aside-hand', '.finale {', '.b-dropcap'):
+        assert needed in css, f'block style missing: {needed}'
 
     assert 'id="contact-form"' in home and 'name="_gotcha"' in home
     assert 'id="close-page"' not in home and 'farewell' not in home, 'no forced choice and no farewell dialog'
     assert 'id="to-top"' not in home and 'class="scroll-progress"' in home, 'no up button, but the progress line stays'
     assert re.search(r'<div id="top"', home)
-    en = json.loads((ROOT / 'content/home_en.json').read_text(encoding='utf-8'))
-    assert esc(en['story']['title']) in home and esc(en['quotes']['a'].split('\n')[0]) in home, 'English copy must be baked into the static HTML'
+    first = [s for s in sections if s['type'] == 'text'][0]
+    assert esc(first['title']) in home or not first['title'].strip(), 'section titles are baked into the static HTML'
     assert ('id="notes"' in home) == bool(builder.parse_posts()), 'notes appear exactly when an article is published'
     for gone in ('review-grid', 'quiz', 'credential', 'mobile-cta', 'hero-floating', 'hero-tag', 'hero-hint', 'contact-booking', 'id="check"', 'id="fork"', 'id="invite"'):
         assert gone not in home, f'old template block is back: {gone}'
@@ -154,14 +161,26 @@ def check_integrity(builder):
     template = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
     assert 'window.close' not in template, 'a web page must not pretend it can close the tab'
     assert builder.QA_SLOTS == 8 and template.count('<details name="qa" data-qa=') == 8, 'Q&A must have 8 editable slots'
-    assert 'quote_photo' in builder.PHOTO_FIELDS and 'id="sessions"' in template
+    assert '<!--@@SECTIONS@@-->' in template and 'id="contact"' in template and 'id="qa"' in template, 'the template keeps the marker for the sections, the form and the Q&A'
+    assert 'id="sessions"' not in template and 'id="intro"' not in template, 'text sections come from content/sections.json, not from the template'
     assert 'aria-describedby="form-status"' in template and 'data-write' in template
     assert template.count('<h1') == 1, 'exactly one h1 (the opening quotation)'
+    data = json.loads((ROOT / 'content/home_en.json').read_text(encoding='utf-8'))
+    sections = json.loads((ROOT / 'content/sections.json').read_text(encoding='utf-8'))
+
+    def strings(node):
+        if isinstance(node, str):
+            yield node
+        elif isinstance(node, dict):
+            for value in node.values():
+                yield from strings(value)
+        elif isinstance(node, list):
+            for value in node:
+                yield from strings(value)
     for lang, patterns in builder.BANNED_PHRASES.items():
-        text = json.dumps(json.loads((ROOT / f'content/home_{lang}.json').read_text(encoding='utf-8')), ensure_ascii=False).lower()
+        text = (json.dumps(data, ensure_ascii=False) + ' ' + ' '.join(strings(sections))).lower()
         for pattern in patterns:
             assert not re.search(pattern, text), f'{lang}: promise-like wording must not return: {pattern}'
-    data = json.loads((ROOT / 'content/home_en.json').read_text(encoding='utf-8'))
     for dotted in builder.REQUIRED_COPY:
         group, key = dotted.split('.')
         assert data[group][key].strip(), f'{dotted} must not be blank'
@@ -189,17 +208,11 @@ def check_fonts(destination):
     assert 'preconnect' not in home, 'no connection to a third party is opened'
 
 
-def check_about_and_questions(destination):
-    """One question block (Q&A), the new story text in the preface layout, warm sand."""
+def check_questions(destination):
+    """One question block (Q&A), warm sand."""
     home = (destination / 'index.html').read_text(encoding='utf-8')
     data = json.loads((ROOT / 'content/home_en.json').read_text(encoding='utf-8'))
     assert 'faq' not in data and 'id="faq"' not in home and 'data-faq' not in home and 'Questions and answers' not in home, 'the old question block must stay removed'
-    keys = ('about.lead', 'about.c1Text', 'about.c2Text', 'about.pull', 'about.c3Text', 'about.c4Text', 'about.c5Text', 'about.note')
-    order = [home.index(f'data-i18n="{key}"') for key in keys]
-    assert order == sorted(order), 'the story keeps its order: lead, four paragraphs with photos, highlighted phrase, closing line'
-    assert re.search(r'<p class="pull pull-long"[^>]*data-i18n="about\.pull"', home), 'the highlighted phrase uses the shared format'
-    assert data['about']['lead'].startswith('Although I am not an athlete myself') and 'FIFA' in data['about']['c2Text']
-    assert data['about']['note'].startswith('Guiding others'), 'the closing line is the last sentence of the new text'
     assert home.index('id="qa"') < home.index('id="free"'), 'the free card closes the Q&A'
     css = (destination / 'assets/site.css').read_text(encoding='utf-8')
     assert '.faq' not in css, 'no leftover styles of the old block'
@@ -227,17 +240,21 @@ def check_brand_and_dashboard(builder, destination):
     brand = builder.BRAND_DEFAULT
     assert brand in re.search(r'<title>(.*?)</title>', home).group(1), 'brand missing from <title>'
     assert brand in re.search(r'<footer.*?</footer>', home, re.S).group(0), 'brand missing from the footer'
-    slots = sorted(int(n) for n in re.findall(r'data-slot="(\d+)"', home))
-    assert slots == list(range(1, 8)), f'photo slots must be numbered 1..7, got {slots}'
+    assert '<img data-slot="1"' in home, 'the first-screen photograph keeps its number'
     assert 'slot-badge' in home and 'photos' in home, 'the ?photos mode is missing'
+    assert 'num-badge' in home and 'show-blocks' in home and 'blocks' in home, 'the ?blocks mode (section and block numbers) is missing'
     schema = json.loads((destination / 'admin/schema.json').read_text(encoding='utf-8'))
     assert [p['num'] for p in schema['photos']] == list(range(1, 8)) and schema['brand'] == brand
     assert schema['langs'] == ['en'], 'the dashboard edits one language'
-    assert {s['name'] for s in schema['sections']} >= {'hero', 'story', 'sessions', 'about', 'qa'}
+    assert {s['name'] for s in schema['groups']} >= {'hero', 'contact', 'qa', 'free'} and not {s['name'] for s in schema['groups']} & {'story', 'sessions', 'about'}
+    page = schema['page']
+    assert {b['type'] for b in page['blockTypes']} == set(builder.BLOCK_TYPES) and page['slots'] == ['2', '3', '4', '5', '6', '7']
     assert 'banned' in schema and schema['required'] == list(builder.REQUIRED_COPY)
     admin = (destination / 'admin/index.html').read_text(encoding='utf-8')
     assert 'noindex' in admin and 'fonts.googleapis' not in admin and 'localStorage' in admin
     assert 'takeMany' in admin and 'numberFromName' in admin and 'photo-row' in admin, 'dashboard: one row per numbered photo; several files can be dropped by number'
+    for needed in ('moveSection', 'moveBlock', 'addBlock', 'deleteBlock', 'slotUsage', "content/sections.json"):
+        assert needed in admin, f'dashboard lacks {needed}'
     assert 'quickBar' not in admin and 'photoMap' not in admin and 'backdrop-filter' not in admin, 'dashboard: a plain list, no page map, no blur'
     assert 'data-tab' in admin and "['requests', 'Заявки'" in admin, 'dashboard: the Requests tab'
     for field in builder.PHOTO_FIELDS:
@@ -247,10 +264,10 @@ def check_brand_and_dashboard(builder, destination):
 
 
 def check_soft_controls(destination):
-    """Rounded corners belong to buttons and fields only; photos, panels and sections stay square. No \"up\" button."""
+    """Rounded corners belong to buttons and fields only; photos, panels and sections stay square. No "up" button."""
     css = (destination / 'assets/site.css').read_text(encoding='utf-8')
     articles_css = (destination / 'assets/articles.css').read_text(encoding='utf-8')
-    allowed = ('.button', '.icon-button', '.contact-links', 'summary::after', '.field', '.slot-badge', '.skip')
+    allowed = ('.button', '.icon-button', '.contact-links', 'summary::after', '.field', '.slot-badge', '.num-badge', '.skip')
     for sheet in (css, articles_css):
         for selector, body in re.findall(r'([^{}]+)\{([^{}]*border-radius[^{}]*)\}', sheet):
             values = re.findall(r'border-radius\s*:\s*([^;}]+)', body)
@@ -260,7 +277,7 @@ def check_soft_controls(destination):
     for must in ('.button { display:inline-flex', '.qa summary::after {', '.contact-links a {'):
         rule = css[css.index(must):].split('}', 1)[0]
         assert 'border-radius' in rule, f'{must} should be soft'
-    for square in ('.photo {', '.plate {', '.quote-panel {', '.free {', '.blog-card {', '.s-honest {'):
+    for square in ('.photo {', '.quote-panel {', '.free {', '.blog-card {', '.b-panel {', '.b-photos .photo {'):
         rule = css[css.index(square):].split('}', 1)[0]
         assert 'border-radius' not in rule, f'{square} stays square'
     home = (destination / 'index.html').read_text(encoding='utf-8')
@@ -286,8 +303,8 @@ def check_smooth(destination):
     assert not re.search(r'\.finale[^{}]*\{[^}]*filter', css), 'closing statements appear without blur'
     assert 'photo-grade' not in css and 'mix-blend-mode' not in css and 'backdrop-filter' not in css, 'no full-size filters, blend modes or backdrop blur'
     assert 'optimizeLegibility' not in css, 'text-rendering stays at the browser default'
-    assert '.mm.is-idle' in css and '.is-idle, .is-idle *' not in css, 'only the butterfly rests off screen, not whole sections'
-    assert "$$('.mm')" in home and "$$('main > section').forEach(section => rest" not in home
+    assert '.mm' not in css and "$$('.mm')" not in home and 'is-idle' not in home, 'the butterfly and its resting logic are gone'
+    assert "$$('main > section').forEach(section => rest" not in home
     assert 'window.__ready = true' in home and 'window.__ready' in home.split('<style>')[0], 'safety net: the page shows itself even if its script fails'
     assert 'scrollMax' in home, 'the progress fallback measures the page on resize, not on every scroll'
     assert 'data-fallback' not in home, 'no place borrows the photograph of another place'
@@ -368,6 +385,108 @@ def build_fixture(builder, mutate, posts):
     return temporary, work
 
 
+def sample_sections(builder):
+    """A fixed page for the checks: they never depend on what the owner has typed into the real content/sections.json."""
+    def text(body, heading='', look='plain', note=''):
+        return {'type': 'text', 'heading': heading, 'body': body, 'note': note, 'look': look}
+
+    def photos(s1, s2='', place='inline', caption='', alt=''):
+        return {'type': 'photos', 's1': s1, 's2': s2, 's3': '', 'place': place, 'caption': caption, 'alt': alt}
+    themes = builder.default_block('themes')
+    themes.update({'title': 'Sample themes', 't1': 'Theme one', 'd1': 'Detail one', 'finalTitle': 'Sample closing', 'finalText': 'Closing text.'})
+    return {'sections': [
+        {'id': 'intro', 'type': 'text', 'title': 'Sample intro', 'layout': 'rail-right', 'blocks': [
+            text('First paragraph.'), {'type': 'quote', 'text': 'A short quote.', 'size': 'auto'},
+            {'type': 'aside', 'text': 'Set\naside', 'look': 'panel', 'photo': '2'}]},
+        {'id': 'sessions', 'type': 'text', 'title': 'Sample sessions', 'layout': 'rail-left', 'blocks': [
+            photos('3', place='side', alt='Side photo'), text('Lead text.', look='lead'), text('Body text.', 'Sub heading'),
+            text('Panel body.', 'Panel heading', 'panel', 'Small note'), themes]},
+        {'id': 'change', 'type': 'text', 'title': 'Sample change', 'layout': 'rail-left', 'blocks': [
+            {'type': 'aside', 'text': 'Hand\nwritten', 'look': 'hand', 'photo': ''}, text('Scene text.', 'Scene heading')]},
+        {'id': 'about', 'type': 'text', 'title': 'Sample story', 'layout': 'centered', 'blocks': [
+            text('Story lead.', look='lead'), text('Part one A.\n\nPart one B.', look='dropcap'),
+            {'type': 'quote', 'text': 'A long highlighted phrase that is clearly longer than seventy characters, so it is set smaller.', 'size': 'auto'},
+            photos('4', '5', caption='From the FIFA archive', alt='Archive photographs'), text('Part two.'), photos('6', '7', alt='Recent photographs'),
+            text('Closing line.', look='hand')]},
+        {'id': 'contact', 'type': 'contact'}, {'id': 'qa', 'type': 'qa'}]}
+
+
+def section_html(home, sid):
+    return re.search(r'<section class="band[^"]*" id="' + sid + r'".*?</section>', home, re.S).group(0)
+
+
+def check_sections(builder):
+    """Sections and blocks: order and numbers, the story layout, side columns, photos on the live site, reordering and defensive loading."""
+    def with_sections(data, **site_extra):
+        def mutate(work, site):
+            site.update(site_extra)
+            (work / 'content/sections.json').write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
+        return mutate
+
+    # preview: every numbered photo place is drawn, the story has its two photo pairs
+    temporary, work = build_fixture(builder, with_sections(sample_sections(builder), portrait='media/test-cover.webp', quote_photo='', eyes_photo='', story_photo_1='', story_photo_2='', story_photo_3='', story_photo_4='', publish_ready=False), posts=False)
+    with temporary:
+        home = (work / '_site/index.html').read_text(encoding='utf-8')
+        ids = re.findall(r'<section class="band[^"]*" id="(\w+)"', home)
+        assert ids == ['hero', 'intro', 'sessions', 'change', 'about', 'contact', 'qa'], ids
+        assert re.findall(r'data-sec="(\d+)"', home) == ['1', '2', '3', '4', '5', '6'], 'sections are numbered in page order'
+        for index, tone in enumerate(('sand', 'teal', 'dune', 'deep', 'sand', 'teal'), 0):
+            assert re.search(r'<section class="band band-' + tone + r'[^"]*" id="\w+"[^>]*data-sec="' + str(index + 1) + '"', home), f'section {index + 1} should be {tone}'
+        assert sorted({int(n) for n in re.findall(r'data-slot="(\d+)"', home)}) == list(range(1, 8)), 'before launch every numbered place is drawn'
+        about = section_html(home, 'about')
+        assert re.findall(r'<(?:div|blockquote) class="b (b-[a-z]+)', about) == ['b-lead', 'b-text', 'b-quote', 'b-photos', 'b-text', 'b-photos', 'b-hand'], 'story: lead, part one, phrase, archive photos, part two, recent photos, closing line'
+        assert about.count('<figure class="photo frame">') == 4 and 'From the FIFA archive' in about and 'class="b-cap"' in about
+        assert 'b-dropcap' in about and about.count('<p>Part one') == 2, 'a text block splits paragraphs at blank lines'
+        assert 'pull pull-long' in about, 'a long phrase is set smaller'
+        assert 'sec-centered' in about and 'sec-grid' not in about and 'data-blk="4.4"' in about, 'blocks carry their number'
+        intro, sessions, change = section_html(home, 'intro'), section_html(home, 'sessions'), section_html(home, 'change')
+        assert 'sec-rail-right' in intro and intro.index('class="blocks"') < intro.index('class="rail"'), 'rail on the right'
+        assert 'sec-rail-left' in sessions and sessions.index('class="rail"') < sessions.index('class="blocks"'), 'rail on the left'
+        assert 'quote-panel' in intro and 'class="photo quote-bg"' in intro and 'b-quote pull"' in intro, 'statement set aside and quote in the text are two different things'
+        assert 'aside-hand' in change and 'finale-hand' in about and home.count('data-write') >= 3
+        assert 'theme-grid' in sessions and sessions.index('class="b b-themes themes"') > sessions.index('class="blocks"'), 'themes take the full width after the columns'
+        assert 'b-panel' in sessions and 'Small note' in sessions and 'b-lead' in sessions
+        assert 'class="mm"' not in home and 'mm1' not in home, 'the butterfly stays removed'
+
+    # live site: empty photo places disappear, a missing side photo leaves one column
+    temporary, work = build_fixture(builder, with_sections(sample_sections(builder), portrait='media/test-cover.webp', story_photo_2='media/test-cover.webp', quote_photo='', eyes_photo='', story_photo_1='', story_photo_3='', story_photo_4='', publish_ready=True), posts=False)
+    with temporary:
+        home = (work / '_site/index.html').read_text(encoding='utf-8')
+        sessions, about = section_html(home, 'sessions'), section_html(home, 'about')
+        assert '<img data-slot="3"' not in home and '<img data-slot="6"' not in home and '<img data-slot="2"' not in home, 'live: places without a photograph are left out'
+        assert 'sec-column' in sessions and 'class="rail"' not in sessions, 'no side photo: one column'
+        assert about.count('class="b b-photos') == 1 and 'b-photos n1' in about and '<img data-slot="5"' in about and '<img data-slot="4"' not in about
+        assert 'class="photo quote-bg"' not in home and 'class="b b-aside quote-panel"' in home, 'the statement stays, only its empty photograph goes'
+        assert home.count('src="media/test-cover.webp"') == 2, 'hero and photo 5 only'
+        assert '<footer class="site-footer after-teal"' in home, 'the footer follows the tone of the last section'
+
+    # reordering, hostile and broken content
+    broken = {'sections': [
+        {'id': 'qa', 'type': 'qa'},
+        {'id': 'about', 'type': 'text', 'title': '</script><b>x</b>', 'layout': 'nonsense', 'blocks': [
+            {'type': 'text', 'heading': '', 'body': 'Fine <i>text</i>', 'note': '', 'look': 'nonsense'}, {'type': 'unknown', 'text': 'skipped'}, 'not a block',
+            {'type': 'photos', 's1': '99', 's2': '', 's3': '', 'place': 'inline', 'caption': '', 'alt': ''}]},
+        {'id': 'contact', 'type': 'contact'},
+        {'id': 'intro', 'type': 'text', 'title': 'Last', 'layout': 'column', 'blocks': []}]}
+    temporary, work = build_fixture(builder, with_sections(broken), posts=False)
+    with temporary:
+        home = (work / '_site/index.html').read_text(encoding='utf-8')
+        assert re.findall(r'<section class="band[^"]*" id="(\w+)"', home) == ['hero', 'qa', 'about', 'contact', 'intro'], 'the page follows the order of the list'
+        for index, tone in enumerate(('sand', 'teal', 'dune', 'deep')):
+            assert f'band-{tone}' in re.findall(r'<section class="band[^"]*" id="\w+"[^>]*data-sec="' + str(index + 1) + '"', home)[0], 'tones follow the position, not the content'
+        assert '<footer class="site-footer after-deep"' in home
+        assert '</script><b>x</b>' not in home and '&lt;/script&gt;' in home and '<i>text</i>' not in home and 'skipped' not in home
+        assert 'sec-column' in section_html(home, 'about'), 'an unknown layout falls back'
+        assert 'data-slot="99"' not in home
+
+    def without_fixed(work, site):
+        (work / 'content/sections.json').write_text(json.dumps({'sections': [{'id': 'intro', 'type': 'text', 'title': 'Only', 'layout': 'column', 'blocks': []}]}), encoding='utf-8')
+    temporary, work = build_fixture(builder, without_fixed, posts=False)
+    with temporary:
+        home = (work / '_site/index.html').read_text(encoding='utf-8')
+        assert re.findall(r'<section class="band[^"]*" id="(\w+)"', home) == ['hero', 'intro', 'contact', 'qa'], 'the form and the questions come back if the list lost them'
+
+
 def main():
     builder = load_builder()
     check_consistency(builder)
@@ -376,12 +495,13 @@ def main():
     check_privacy(ROOT / '_site')
     check_brand_and_dashboard(builder, ROOT / '_site')
     check_fonts(ROOT / '_site')
-    check_about_and_questions(ROOT / '_site')
+    check_questions(ROOT / '_site')
     check_scripts(ROOT / '_site')
     check_photo_numbers(ROOT / '_site')
     check_smooth(ROOT / '_site')
     check_inbox(builder, ROOT / '_site')
     check_page_polish(ROOT / '_site')
+    check_sections(builder)
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
     def full(work, site):
@@ -390,8 +510,8 @@ def main():
                      'story_photo_1': '', 'story_photo_3': '', 'story_photo_4': '', 'form_endpoint': 'https://formspree.io/f/abc123', 'inbox_endpoint': 'https://script.google.com/macros/s/AKfycbTEST_123/exec', 'publish_ready': True})
         data = json.loads((work / 'content/home_en.json').read_text(encoding='utf-8'))
         data['qa']['q3'] = ''
-        data['story']['title'] = '</script><b>x</b>'
         (work / 'content/home_en.json').write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
+        (work / 'content/sections.json').write_text(json.dumps(sample_sections(builder), ensure_ascii=False), encoding='utf-8')
     temporary, work = build_fixture(builder, full, posts=True)
     with temporary:
         home = (work / '_site/index.html').read_text(encoding='utf-8')
@@ -399,19 +519,15 @@ def main():
         privacy = (work / '_site/privacy/index.html').read_text(encoding='utf-8')
         assert 'Test Person' in home and 'hello@example.com' in home and 'Sport Intuitive' in home
         assert 'Disallow: /admin/' in (work / '_site/robots.txt').read_text(encoding='utf-8')
-        assert home.count('src="media/test-cover.webp"') == 3, 'hero, story frame 2 and one note cover: no place borrows another photograph'
-        eyes = re.search(r'<img data-slot="3"[^>]*>', home).group(0)
-        assert 'src=' not in eyes, 'photo 3 stays empty instead of repeating photo 1'
-        assert '<figure class="photo eyes" hidden>' in home and '<figure class="photo plate plate-r" hidden>' in home, 'live site: empty places are hidden with their frames'
-        assert '<figure class="photo hero-photo">' in home and '<figure class="photo plate plate-l">' in home, 'places that have a photograph stay visible'
+        assert home.count('src="media/test-cover.webp"') == 3, 'hero, photo 5 and one note cover: no place borrows another photograph'
+        assert '<figure class="photo hero-photo">' in home and '<img data-slot="5"' in home and '<img data-slot="3"' not in home, 'live site: a place without a photograph is left out'
         assert '"formEndpoint":"https://formspree.io/f/abc123"' in home
         assert '"inboxEndpoint":"https://script.google.com/macros/s/AKfycbTEST_123/exec"' in home and '"preview":false' in home
         assert 'Google Sheets' in privacy and 'formspree.io' in privacy, 'privacy notice names the form service and the spreadsheet'
         assert 'id="notes"' in home and 'CMS_VISIBLE_POSTS = {"en":1}' in home
         assert '<article class="blog-card" data-post-lang="en">' in home
-        assert '<footer class="site-footer after-sand"' in home, 'with notes the footer fades from sand'
+        assert '<footer class="site-footer after-sand"' in home, 'with notes the footer fades from the notes band (sand after a teal section)'
         assert '<details name="qa" data-qa="3" hidden>' in home and '<details name="qa" data-qa="2">' in home
-        assert '</script><b>x</b>' not in home and '\\u003c/script' in home and '&lt;/script&gt;' in home
         assert 'https://demo.github.io/athlete-support/' in home and 'index,follow' in home
         assert 'application/ld+json' in home and 'og:image' in home
         assert 'Testing heading' in article and '<script>alert(1)</script>' not in article
@@ -428,7 +544,9 @@ def main():
 
     # Defensive build: an insecure form endpoint is dropped, nothing is published, no notes appear.
     def careless(work, site):
-        site.update({'form_endpoint': 'http://insecure.example/submit', 'inbox_endpoint': 'https://evil.example/macros/s/x/exec', 'publish_ready': False})
+        site.update({'form_endpoint': 'http://insecure.example/submit', 'inbox_endpoint': 'https://evil.example/macros/s/x/exec', 'publish_ready': False,
+                     'portrait': '', 'quote_photo': '', 'eyes_photo': '', 'story_photo_1': '', 'story_photo_2': '', 'story_photo_3': '', 'story_photo_4': ''})
+        (work / 'content/sections.json').write_text(json.dumps(sample_sections(builder), ensure_ascii=False), encoding='utf-8')
     temporary, work = build_fixture(builder, careless, posts=False)
     with temporary:
         home = (work / '_site/index.html').read_text(encoding='utf-8')
@@ -437,7 +555,7 @@ def main():
         assert '"inboxEndpoint":""' in home and 'evil.example' not in home and 'Google Sheets' not in privacy and '"preview":true' in home
         assert 'id="notes"' not in home and 'noindex,nofollow' in home and '<footer class="site-footer after-teal"' in home
         assert 'through the contact form on this website' in privacy and 'opens your own email program' in privacy
-        assert '<figure class="photo eyes">' in home and ' hidden>' not in re.search(r'<figure class="photo hero-photo"[^>]*>', home).group(0), 'before launch every place stays visible'
+        assert '<img data-slot="3"' in home and ' hidden>' not in re.search(r'<figure class="photo hero-photo"[^>]*>', home).group(0), 'before launch every place stays visible'
         assert 'Disallow: /' in (work / '_site/robots.txt').read_text(encoding='utf-8')
     # Smaller copies of the photographs (needs Pillow, which the workflow installs).
     if importlib.util.find_spec('PIL'):
@@ -445,7 +563,8 @@ def main():
             from PIL import Image
             Image.new('RGB', (2400, 3000), (40, 90, 140)).save(work / 'media/big.jpg', quality=85)
             Image.new('RGB', (500, 600), (90, 40, 140)).save(work / 'media/small.jpg', quality=85)
-            site.update({'portrait': 'media/big.jpg', 'story_photo_1': 'media/small.jpg', 'publish_ready': False})
+            site.update({'portrait': 'media/big.jpg', 'story_photo_1': 'media/small.jpg', 'quote_photo': '', 'eyes_photo': '', 'story_photo_2': '', 'story_photo_3': '', 'story_photo_4': '', 'publish_ready': False})
+            (work / 'content/sections.json').write_text(json.dumps(sample_sections(builder), ensure_ascii=False), encoding='utf-8')
         temporary, work = build_fixture(builder, photographed, posts=False)
         with temporary:
             home = (work / '_site/index.html').read_text(encoding='utf-8')
@@ -454,8 +573,8 @@ def main():
             for width in (640, 1080, 1600):
                 assert (work / f'_site/media/opt/media-big-jpg-{width}.webp').stat().st_size > 0
             assert (work / '_site/media/big.jpg').exists(), 'the original stays'
-            assert 'media-small' not in home and 'src="media/small.jpg"' in home, 'a small photograph needs no copies'
-    print('OK: smooth scrolling rules, own photo for every number, smaller photo copies, plain dashboard, English-only copy and CMS in sync, warm sand bands and transitions, self-hosted fonts, one Q&A block, photo-left hero, soft floating buttons, numbered photo places, requests inbox, highlighted phrases, closing statements, preface, privacy notice, photos, form, notes, safety and publish mode')
+            assert 'media-small' not in home and 'src="media/small.jpg"' in home, 'a small photograph needs no copies (photo 4 sits in the story)'
+    print('OK: sections and blocks (order, numbers, tones, story layout, side column, live photo places, broken content), smooth scrolling rules, own photo for every number, smaller photo copies, plain dashboard, English-only copy and CMS in sync, warm sand bands and transitions, self-hosted fonts, one Q&A block, photo-left hero, soft floating buttons, numbered photo places, requests inbox, privacy notice, photos, form, notes, safety and publish mode')
 
 
 if __name__ == '__main__':
