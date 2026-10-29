@@ -4,13 +4,13 @@
   "role_en": "Athlete support consultant",
   "publish_ready": false,
   "form_endpoint": "",
-  "quote_photo": "",
+  "quote_photo": "media/photo-2-20261029-092851.webp",
   "privacy_address": "",
   "inbox_endpoint": "",
   "portrait": "media/photo-1.jpg",
-  "eyes_photo": "",
-  "story_photo_1": "",
-  "story_photo_2": "",
-  "story_photo_3": "",
-  "story_photo_4": ""
+  "eyes_photo": "media/photo-3-20261029-092919.webp",
+  "story_photo_1": "media/photo-4-20261029-092935.webp",
+  "story_photo_2": "media/photo-5-20261029-093004.webp",
+  "story_photo_3": "media/photo-6-20261029-093023.webp",
+  "story_photo_4": "media/photo-7-20261029-093038.webp"
 }
