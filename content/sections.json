@@ -198,15 +198,6 @@
           "type": "quote",
           "text": "If you are walking this path and don’t have that support, you can reach out.",
           "size": "auto"
-        },
-        {
-          "type": "photos",
-          "s1": "7",
-          "s2": "2",
-          "s3": "",
-          "place": "inline",
-          "caption": "",
-          "alt": ""
         }
       ]
     },
@@ -231,23 +222,24 @@
           "look": "dropcap"
         },
         {
-          "type": "quote",
-          "text": "Over time, I began to envision a space where athletes could find support beyond their sporting achievements.",
-          "size": "auto"
-        },
-        {
           "type": "photos",
           "s1": "4",
           "s2": "5",
           "s3": "",
           "place": "inline",
           "caption": "From the FIFA archive",
-          "alt": "Photographs from the FIFA archive"
+          "alt": "Photographs from the FIFA archive",
+          "comp": "calm-pair"
+        },
+        {
+          "type": "quote",
+          "text": "Over time, I began to envision a space where athletes could find support beyond their sporting achievements.",
+          "size": "auto"
         },
         {
           "type": "text",
           "heading": "",
-          "body": "A few years ago, my own life took a turn that had been brewing within me for some time. I left a successful career without knowing what would come next. This gave me space to pause and look inward, to reflect on who I really am and what I want. I delved into psychology, body and energy practices, alternative healing approaches, and ancient philosophies. I explored my own perceptions and senses, experimented, and gradually discovered new ways of understanding myself and, most importantly, enjoying my life.\n\nI have always been intuitive, even as a child. Unfortunately, my sensitivity was often dismissed or not taken seriously by my family, so I never learned to trust it. Over the past few years, however, I have managed to find my own voice beneath layers of family conditioning and social expectations. I have learned to trust myself more deeply and rely less on external validation or the need for constant control and security. This journey continues to this day.\n\nToday, through the individual sessions I offer, I am bringing this idea of creating a supportive space for athletes to life.",
+          "body": "A few years ago, my own life took a turn that had been brewing within me for some time. I left a successful career without knowing what would come next. This gave me space to pause and look inward, to reflect on who I really am and what I want. I delved into psychology, body and energy practices, alternative healing approaches, and ancient philosophies. I explored my own perceptions and senses, experimented, and gradually discovered new ways of understanding myself and, most importantly, enjoying my life.\n\nI have always been intuitive, even as a child. Unfortunately, my sensitivity was often dismissed or not taken seriously by my family, so I never learned to trust it. Over the past few years, however, I have managed to find my own voice beneath layers of family conditioning and social expectations. I have learned to trust myself more deeply and rely less on external validation or the need for constant control and security. This journey continues to this day.",
           "note": "",
           "look": "plain"
         },
@@ -258,14 +250,21 @@
           "s3": "",
           "place": "inline",
           "caption": "",
-          "alt": "Recent photographs"
+          "alt": "Recent photographs",
+          "comp": "lead-small"
         },
         {
           "type": "text",
           "heading": "",
-          "body": "Guiding others in their search for self-trust, fulfilment, and happiness has become a meaningful part of my own journey, too.",
+          "body": "Today, through the individual sessions I offer, I am bringing this idea of creating a supportive space for athletes to life.",
           "note": "",
-          "look": "hand"
+          "look": "plain"
+        },
+        {
+          "type": "aside",
+          "text": "Guiding others in their search for self-trust, fulfilment, and happiness has become a meaningful part of my own journey, too.",
+          "look": "closing",
+          "photo": ""
         }
       ]
     },

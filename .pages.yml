@@ -220,9 +220,9 @@ content:
           - value: text
             label: Текст
           - value: quote
-            label: Цитата в тексте
+            label: Цитата
           - value: aside
-            label: Фраза сбоку
+            label: Фраза
           - value: photos
             label: Фото
           - value: themes
@@ -237,10 +237,14 @@ content:
         label: Мелкая приписка под текстом (необязательно)
         type: text
       - name: look
-        label: Оформление
+        label: Оформление (у Фразы quiet — тихая, hand — рукописью, panel — на плашке)
         type: select
         options:
           values:
+          - value: quiet
+            label: Фраза · тихая
+          - value: closing
+            label: Фраза · заключительная
           - value: plain
             label: Обычный текст (с подзаголовком выглядит как раздел, без него как абзац)
           - value: lead
@@ -268,81 +272,17 @@ content:
           - value: small
             label: Помельче
       - name: photo
-        label: Фото за фразой (необязательно)
-        type: select
-        options:
-          values:
-          - value: ''
-            label: — нет —
-          - value: '2'
-            label: Фото 2
-          - value: '3'
-            label: Фото 3
-          - value: '4'
-            label: Фото 4
-          - value: '5'
-            label: Фото 5
-          - value: '6'
-            label: Фото 6
-          - value: '7'
-            label: Фото 7
+        label: Фото за фразой (необязательно) (номер 2–7 или файл media/…; удобнее выбирать в панели)
+        type: string
       - name: s1
-        label: Первое фото
-        type: select
-        options:
-          values:
-          - value: ''
-            label: — нет —
-          - value: '2'
-            label: Фото 2
-          - value: '3'
-            label: Фото 3
-          - value: '4'
-            label: Фото 4
-          - value: '5'
-            label: Фото 5
-          - value: '6'
-            label: Фото 6
-          - value: '7'
-            label: Фото 7
+        label: Первое фото (номер 2–7 или файл media/…; удобнее выбирать в панели)
+        type: string
       - name: s2
-        label: Второе фото (необязательно)
-        type: select
-        options:
-          values:
-          - value: ''
-            label: — нет —
-          - value: '2'
-            label: Фото 2
-          - value: '3'
-            label: Фото 3
-          - value: '4'
-            label: Фото 4
-          - value: '5'
-            label: Фото 5
-          - value: '6'
-            label: Фото 6
-          - value: '7'
-            label: Фото 7
+        label: Второе фото (необязательно) (номер 2–7 или файл media/…; удобнее выбирать в панели)
+        type: string
       - name: s3
-        label: Третье фото (необязательно)
-        type: select
-        options:
-          values:
-          - value: ''
-            label: — нет —
-          - value: '2'
-            label: Фото 2
-          - value: '3'
-            label: Фото 3
-          - value: '4'
-            label: Фото 4
-          - value: '5'
-            label: Фото 5
-          - value: '6'
-            label: Фото 6
-          - value: '7'
-            label: Фото 7
+        label: Третье фото (необязательно) (номер 2–7 или файл media/…; удобнее выбирать в панели)
+        type: string
       - name: place
         label: Где показать
         type: select
@@ -357,6 +297,41 @@ content:
         type: string
       - name: alt
         label: Описание фото для скринридеров (необязательно)
+        type: string
+      - name: comp
+        label: Композиция фото
+        type: select
+        options:
+          values:
+          - value: auto
+            label: Как раньше, ряд из 1–3 фото
+          - value: single
+            label: Одно фото
+          - value: wide
+            label: Одно широкое фото
+          - value: calm-pair
+            label: Спокойная пара, большое и малое
+          - value: lead-small
+            label: Крупное и малое, асимметрия
+          - value: trio
+            label: Три фото, крупное и два малых
+      - name: zoom
+        label: Открывать фото крупнее по нажатию
+        type: select
+        options:
+          values:
+          - value: ''
+            label: Нет
+          - value: yes
+            label: Да
+      - name: f1
+        label: Кадрирование 1 (x,y,масштаб; задаётся в панели)
+        type: string
+      - name: f2
+        label: Кадрирование 2 (x,y,масштаб; задаётся в панели)
+        type: string
+      - name: f3
+        label: Кадрирование 3 (x,y,масштаб; задаётся в панели)
         type: string
       - name: title
         label: Заголовок

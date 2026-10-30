@@ -78,6 +78,37 @@ PHOTO_SLOTS = (
 PHOTO_FIELDS = tuple(slot['field'] for slot in PHOTO_SLOTS)
 SLOT_FIELD = {str(slot['num']): slot['field'] for slot in PHOTO_SLOTS}
 PLACE_SLOTS = tuple(str(n) for n in range(2, 8))   # photos 2..7 can be put into blocks; photo 1 is the first screen
+COMPS = (('auto', 'Как раньше: ряд из 1–3 фото'), ('single', 'Одно фото'), ('wide', 'Одно широкое фото'),
+         ('calm-pair', 'Спокойная пара: большое фото и малое, много воздуха'), ('lead-small', 'Крупное фото и малое рядом (асимметрия)'),
+         ('trio', 'Три фото: крупное и два малых'))
+# Frame shape of every photograph of a composition: (desktop ratio, phone ratio, name). The dashboard draws its crop frames from the same table.
+FRAMES = {
+    'auto': (('4/5', '4/5', 'Фото 1'), ('4/5', '4/5', 'Фото 2'), ('4/5', '4/5', 'Фото 3')),
+    'single': (('4/5', '4/5', 'Одно фото'),),
+    'wide': (('16/9', '4/3', 'Широкий кадр'),),
+    'calm-pair': (('3/2', '4/3', 'Большой кадр'), ('4/5', '4/5', 'Малый кадр')),
+    'lead-small': (('4/5', '4/5', 'Крупный кадр'), ('1/1', '1/1', 'Малый кадр')),
+    'trio': (('4/5', '4/5', 'Крупный кадр'), ('1/1', '1/1', 'Малый кадр сверху'), ('4/5', '4/5', 'Малый кадр снизу')),
+}
+ZOOM_OPTIONS = (('', 'Нет'), ('yes', 'Да, открывать крупнее по нажатию'))
+CROP_RE = re.compile(r'^(\d{1,3}(?:\.\d{1,2})?),(\d{1,3}(?:\.\d{1,2})?),(\d(?:\.\d{1,2})?)$')
+
+
+def photo_ref_ok(value):
+    try:
+        return bool(photo_path(value))
+    except ValueError:
+        return False
+
+
+def clean_crop(value):
+    """'x,y,zoom' (position in percent, zoom 1 to 3) or '' when the value is not usable."""
+    m = CROP_RE.fullmatch(str(value or '').strip())
+    if not m:
+        return ''
+    x, y, z = (float(g) for g in m.groups())
+    return f'{x:g},{y:g},{z:g}' if x <= 100 and y <= 100 and 1 <= z <= 3 else ''
+
 SRCSET_WIDTHS = (640, 1080, 1600)   # smaller copies (WebP) for phones and small windows; the original is always the largest choice
 # Only the first-screen photograph is a fixed place in the template. An empty one is hidden together with its frame on the live site.
 HIDE_WHEN_EMPTY = ('portrait',)
@@ -367,7 +398,7 @@ TEXT_LOOKS = (
     ('finale', 'Итоговая фраза по центру'),
     ('hand', 'Рукописная строка по центру'),
 )
-ASIDE_LOOKS = (('panel', 'Тёмная плашка (можно с фото за текстом)'), ('hand', 'Рукописная фраза без плашки'))
+ASIDE_LOOKS = (('quiet', 'Тихая: обычным шрифтом, без рамки'), ('closing', 'Заключительная: узкая колонка, много воздуха (для конца страницы)'), ('hand', 'Рукописью (Caveat), без плашки'), ('panel', 'На тёмной плашке (можно с фото за текстом)'))
 QUOTE_SIZES = (('auto', 'Автоматически (длинные фразы мельче)'), ('large', 'Крупно'), ('small', 'Помельче'))
 PHOTO_PLACES = (('inline', 'В тексте'), ('side', 'Сбоку, в боковой колонке'))
 THEME_COUNT = 6
@@ -390,29 +421,34 @@ BLOCK_TYPES = {
         ],
     },
     'quote': {
-        'label': 'Цитата в тексте', 'add': 'Цитата',
-        'hint': 'Выделенная фраза внутри текста: курсив и цветная линия слева.',
+        'label': 'Цитата', 'add': 'Цитата',
+        'hint': 'Выделенная мысль внутри текста: крупнее, цветом, без курсива и без линии. Для отдельного высказывания лучше блок «Фраза».',
         'fields': [
             {'name': 'text', 'label': 'Цитата', 'type': 'text'},
             {'name': 'size', 'label': 'Размер', 'type': 'select', 'options': _opts(QUOTE_SIZES), 'default': 'auto'},
         ],
     },
     'aside': {
-        'label': 'Фраза сбоку', 'add': 'Фраза сбоку',
-        'hint': 'Рукописная фраза, вынесенная в сторону, как фото. В разделе с боковой колонкой стоит сбоку, в остальных прямо в тексте. Перенос строки здесь это перенос строки во фразе.',
+        'label': 'Фраза', 'add': 'Фраза',
+        'hint': 'Отдельное высказывание. «Тихая» по умолчанию, рукописью (Caveat) только когда это уместно. В разделе с боковой колонкой стоит сбоку, в остальных прямо в тексте. Перенос строки здесь это перенос строки во фразе.',
         'fields': [
             {'name': 'text', 'label': 'Фраза', 'type': 'text'},
-            {'name': 'look', 'label': 'Оформление', 'type': 'select', 'options': _opts(ASIDE_LOOKS), 'default': 'panel'},
-            {'name': 'photo', 'label': 'Фото за фразой (необязательно)', 'type': 'slot', 'options': SLOT_OPTIONS, 'default': '', 'showIf': {'look': ['panel']}},
+            {'name': 'look', 'label': 'Вид фразы', 'type': 'select', 'options': _opts(ASIDE_LOOKS), 'default': 'quiet'},
+            {'name': 'photo', 'label': 'Фото за фразой (необязательно)', 'type': 'photo', 'default': '', 'showIf': {'look': ['panel']}},
         ],
     },
     'photos': {
         'label': 'Фото', 'add': 'Фото',
-        'hint': 'Выберите, какие из пронумерованных фото показать (сами фото загружаются на вкладке «Фотографии»). Два фото встают рядом.',
+        'hint': 'Выберите фото из библиотеки (вкладка «Фотографии») или загрузите новое прямо здесь. Композиция задаёт форму кадров, «Кадрировать» двигает фото внутри кадра, оригинал не меняется.',
         'fields': [
-            {'name': 's1', 'label': 'Первое фото', 'type': 'slot', 'options': SLOT_OPTIONS, 'default': ''},
-            {'name': 's2', 'label': 'Второе фото (необязательно)', 'type': 'slot', 'options': SLOT_OPTIONS, 'default': ''},
-            {'name': 's3', 'label': 'Третье фото (необязательно)', 'type': 'slot', 'options': SLOT_OPTIONS, 'default': ''},
+            {'name': 'comp', 'label': 'Композиция', 'type': 'select', 'options': _opts(COMPS), 'default': 'auto'},
+            {'name': 's1', 'label': 'Первое фото', 'type': 'photo', 'default': ''},
+            {'name': 's2', 'label': 'Второе фото (необязательно)', 'type': 'photo', 'default': ''},
+            {'name': 's3', 'label': 'Третье фото (необязательно)', 'type': 'photo', 'default': ''},
+            {'name': 'f1', 'label': 'Кадрирование 1', 'type': 'crop', 'default': ''},
+            {'name': 'f2', 'label': 'Кадрирование 2', 'type': 'crop', 'default': ''},
+            {'name': 'f3', 'label': 'Кадрирование 3', 'type': 'crop', 'default': ''},
+            {'name': 'zoom', 'label': 'Открывать фото крупнее по нажатию', 'type': 'select', 'options': _opts(ZOOM_OPTIONS), 'default': ''},
             {'name': 'place', 'label': 'Где показать', 'type': 'select', 'options': _opts(PHOTO_PLACES), 'default': 'inline'},
             {'name': 'caption', 'label': 'Подпись под фото (необязательно)', 'type': 'string'},
             {'name': 'alt', 'label': 'Описание фото для скринридеров (необязательно)', 'type': 'string'},
@@ -440,7 +476,6 @@ THEME_GLYPHS = (
     '<path d="M3 23h26M9 23a7 7 0 0 1 14 0M16 8v4M7.5 12l2.5 2.5M24.5 12L22 14.5"/>',
 )
 COMPASS_GLYPH = '<svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12"/><path d="M16 8l3.2 8L16 24l-3.2-8z"/></svg>'
-STROKE_SVG = '<svg class="quote-stroke" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M2 11 C40 2 72 17 112 9 S190 3 232 10 S282 15 298 7"/></svg>'
 PHOTO_PLACEHOLDER = '<div class="ph" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="22" cy="26" r="6"/><path d="m9 47 14-13 9 7 11-13 13 16"/></svg><span data-i18n="photoSoon"></span></div>'
 SECTION_DEFAULT_LAYOUT = 'column'
 
@@ -467,6 +502,13 @@ def clean_block(raw, where):
     for field in BLOCK_TYPES[kind]['fields']:
         value = raw.get(field['name'], field.get('default', ''))
         value = '' if value is None else str(value)
+        if field['type'] == 'photo':
+            value = value.strip()
+            if value and value not in PLACE_SLOTS and not photo_ref_ok(value):
+                _warn(f'{where}: "{value}" is not a photograph of the site; it is left out')
+                value = ''
+        elif field['type'] == 'crop':
+            value = clean_crop(value)
         if field['type'] in ('select', 'slot') and value not in [o[0] for o in field['options']]:
             if value:
                 _warn(f'{where}: "{value}" is not a valid {field["name"]}; the default is used')
@@ -545,21 +587,37 @@ class PageContext:
     def __init__(self, site, ready):
         self.site, self.ready, self.cache = site, ready, {}
 
-    def photo(self, num, alt, sizes, frame_class='', bg=False):
-        """The frame of numbered photo `num`. An empty place is drawn with a number before launch and left out on the live site."""
-        path = photo_path(self.site.get(SLOT_FIELD[num]))
-        if not path and self.ready:
+    def resolve(self, ref):
+        """A photograph is a numbered place ("2" to "7") or a file of the library ("media/...").  Returns (path, place number)."""
+        ref = str(ref or '').strip()
+        if ref in SLOT_FIELD:
+            return photo_path(self.site.get(SLOT_FIELD[ref])), ref
+        path = photo_path(ref) if photo_ref_ok(ref) else ''
+        if path and not (OUT / path).is_file():
+            _warn(f'photograph {path} is not in the media folder; it is left out')
+            return '', ''
+        return path, ''
+
+    def photo(self, ref, alt, sizes, frame_class='', bg=False, crop='', ratio=None):
+        """The frame of one photograph. An empty numbered place is drawn with its number before launch and left out on the live site."""
+        path, num = self.resolve(ref)
+        if not path and (self.ready or not num):
             return ''
-        attributes = f'data-slot="{num}"'
+        attributes = f'data-slot="{num}"' if num else ''
         if path:
             attributes += f' src="{esc(path)}"'
             if path not in self.cache:
                 self.cache[path] = make_variants(OUT, path)
             if self.cache[path]:
                 attributes += ' srcset="' + ', '.join(f'{esc(name)} {size}w' for name, size in self.cache[path]) + f'" sizes="{esc(sizes)}"'
+            crop = clean_crop(crop)
+            if crop:
+                x, y, z = crop.split(',')
+                attributes += f' style="object-position:{x}% {y}%' + (f';transform:scale({z});transform-origin:{x}% {y}%' if float(z) != 1 else '') + '"'
         if bg:
             return f'<figure class="photo quote-bg" aria-hidden="true"><img {attributes} alt="" loading="lazy" decoding="async"></figure>'
-        return (f'<figure class="photo {frame_class}"><img {attributes} alt="{esc(alt)}" loading="lazy" decoding="async">'
+        shape = f' style="--ar:{esc(ratio[0])};--ar-m:{esc(ratio[1])}"' if ratio else ''
+        return (f'<figure class="photo {frame_class}"{shape}><img {attributes} alt="{esc(alt)}" loading="lazy" decoding="async">'
                 f'{PHOTO_PLACEHOLDER}</figure>')
 
 
@@ -577,33 +635,41 @@ def render_block(block, label, ctx, in_rail):
         if look == 'panel':
             return f'<div class="b b-panel" {number} data-fade>{heading}{para_html(block["body"])}{note}</div>'
         if look == 'finale':
-            return (f'<div class="b b-finale finale" {number} data-finale><span class="finale-line" aria-hidden="true"></span>{COMPASS_GLYPH}'
+            return (f'<div class="b b-finale finale" {number}><span class="finale-line" aria-hidden="true"></span>{COMPASS_GLYPH}'
                     f'{heading}{para_html(block["body"])}</div>')
         if look == 'hand':
-            return (f'<div class="b b-hand finale finale-hand" {number} data-finale><span class="finale-line" aria-hidden="true"></span>'
-                    f'<p class="finale-note" data-write>{esc(block["body"].strip())}</p>{STROKE_SVG}</div>')
+            return (f'<div class="b b-hand finale finale-hand" {number}><span class="finale-line" aria-hidden="true"></span>'
+                    f'<p class="finale-note">{esc(block["body"].strip())}</p></div>')
         classes = 'b b-text' + (' has-h' if heading else '') + (' b-dropcap' if look == 'dropcap' else '')
         return f'<div class="{classes}" {number} data-fade>{heading}{para_html(block["body"])}{note}</div>'
     if kind == 'quote':
         text = block['text'].strip()
         small = block['size'] == 'small' or (block['size'] == 'auto' and len(text) > 70)
-        return f'<blockquote class="b b-quote pull{" pull-long" if small else ""}" {number} data-fade>{esc(text)}</blockquote>'
+        return f'<blockquote class="b b-quote pull{" pull-long" if small else ""}" {number}>{esc(text)}</blockquote>'
     if kind == 'aside':
         text = block['text'].strip()
+        if block['look'] == 'closing':
+            return f'<div class="b b-aside aside-closing" {number}><p class="statement">{esc(text)}</p></div>'
+        if block['look'] == 'quiet':
+            return f'<div class="b b-aside aside-quiet" {number}><p class="statement">{esc(text)}</p></div>'
         if block['look'] == 'hand':
-            return f'<div class="b b-aside aside-hand" {number}><blockquote class="quote-text" data-write>{esc(text)}</blockquote>{STROKE_SVG}</div>'
+            return f'<div class="b b-aside aside-hand" {number}><blockquote class="quote-text">{esc(text)}</blockquote></div>'
         figure = ctx.photo(block['photo'], '', '(max-width:900px) 100vw, 600px', bg=True) if block['photo'] else ''
-        return f'<div class="b b-aside quote-panel" {number}>{figure}<blockquote class="quote-text" data-write>{esc(text)}</blockquote>{STROKE_SVG}</div>'
+        return f'<div class="b b-aside quote-panel" {number}>{figure}<blockquote class="quote-text">{esc(text)}</blockquote></div>'
     if kind == 'photos':
-        slots = [block[k] for k in ('s1', 's2', 's3') if block[k]]
-        count = len(slots)
+        comp = block['comp'] if block['comp'] in FRAMES else 'auto'
+        refs = [(block[f's{n}'], block[f'f{n}'], n - 1) for n in (1, 2, 3) if block[f's{n}']]
+        if comp != 'auto':
+            refs = [r for r in refs if r[2] < len(FRAMES[comp])]
+        count = len(refs)
         sizes = ('(max-width:900px) 100vw, 45vw' if in_rail else '(max-width:700px) 90vw, 420px') if count == 1 else '(max-width:700px) 45vw, 480px'
         alt = block['alt'].strip() or block['caption'].strip()
-        figures = [f for f in (ctx.photo(n, alt, sizes, 'frame') for n in slots) if f]
+        figures = [f for f in (ctx.photo(ref, alt, sizes, 'frame', crop=crop, ratio=FRAMES[comp][index] if comp != 'auto' else None) for ref, crop, index in refs) if f]
         if not figures:
             return ''
         caption = f'<p class="b-cap">{esc(block["caption"].strip())}</p>' if block['caption'].strip() else ''
-        return f'<div class="b b-photos n{len(figures)}{" b-side" if in_rail else ""}" {number} data-fade>{"".join(figures)}{caption}</div>'
+        extra = (f' data-comp="{comp}"' if comp != 'auto' else '') + (' data-lightbox' if block['zoom'] == 'yes' else '')
+        return f'<div class="b b-photos n{len(figures)}{" b-side" if in_rail else ""}" {number}{extra} data-fade>{"".join(figures)}{caption}</div>'
     if kind == 'themes':
         items = ''
         for n in range(1, THEME_COUNT + 1):
@@ -616,7 +682,7 @@ def render_block(block, label, ctx, in_rail):
         grid = f'<ul class="theme-grid">{items}</ul>' if items else ''
         final = ''
         if block['finalTitle'].strip() or block['finalText'].strip():
-            final = ('<div class="finale" data-finale><span class="finale-line" aria-hidden="true"></span>' + COMPASS_GLYPH
+            final = ('<div class="finale"><span class="finale-line" aria-hidden="true"></span>' + COMPASS_GLYPH
                      + (f'<h3>{esc(block["finalTitle"].strip())}</h3>' if block['finalTitle'].strip() else '')
                      + (f'<p>{esc(block["finalText"].strip())}</p>' if block['finalText'].strip() else '') + '</div>')
         return f'<div class="b b-themes themes" {number}>{head}{intro}{grid}{final}</div>'
@@ -673,6 +739,12 @@ def render_text_section(section, number, tone, ctx):
             f'<div class="container">{head}{"".join(segments)}</div></section>')
 
 
+def section_has_content(section):
+    """A text section with no title and nothing to show is not drawn (a new section the owner has not filled in yet)."""
+    return bool(section['title'].strip()) or any(block_has_content(b) for b in section['blocks'] if b)
+
+
+
 def take_section(template, sid):
     """Cut a fixed section (contact, qa) out of the template; it is put back at its place in the page order."""
     pattern = re.compile(r'[ \t]*<section class="band band-(?:sand|teal|dune|deep)[^"]*" id="' + sid + r'"[^>]*>.*?</section>[ \t]*\n?', re.S)
@@ -691,7 +763,8 @@ def place_sections(template, sections, ctx):
     for index, section in enumerate(sections):
         tone, number = TONE_CYCLE[index % len(TONE_CYCLE)], index + 1
         if section['type'] == 'text':
-            parts.append(render_text_section(section, number, tone, ctx))
+            if section_has_content(section):
+                parts.append(render_text_section(section, number, tone, ctx))
         else:
             html_part = fixed[section['type']]
             html_part = re.sub(r'band-(?:sand|teal|dune|deep)', f'band-{tone}', html_part, count=1)
@@ -951,6 +1024,8 @@ def page_schema():
         'layouts': _opts(LAYOUTS),
         'sectionLabels': {'contact': 'Контакты и форма', 'qa': 'Вопросы и ответы (Q&A) и карточка «вводная беседа бесплатно»'},
         'slots': list(PLACE_SLOTS),
+        'comps': _opts(COMPS),
+        'frames': {name: [list(f) for f in frames] for name, frames in FRAMES.items()},
     }
 
 

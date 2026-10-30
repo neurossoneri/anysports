@@ -6,3 +6,6 @@ __pycache__/
 .venv/
 repomix-output.xml
 .backup-*/
+.backup-text-structure/
+.backup-photo-tools/
+.backup-about-story/

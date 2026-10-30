@@ -127,6 +127,40 @@ button.mini{min-width:36px;padding:5px 9px}
 .bhead .bname{font-weight:650}
 .bhead .bprev{flex:1;min-width:100px;color:var(--muted);font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .addrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 0}
+.gap{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0}
+.gap>.btn{opacity:.78}.gap>.btn:hover,.gap>.btn:focus-visible{opacity:1}
+.gapmenu{display:inline-flex;flex-wrap:wrap;gap:6px}
+.grip{border:0;background:none;cursor:grab;color:var(--muted);font-size:1.1rem;line-height:1;padding:4px 6px;border-radius:6px}
+.grip:hover{background:var(--soft)}
+.dragging{opacity:.45}
+.drop-before{box-shadow:0 -3px 0 var(--blue)}
+.drop-after{box-shadow:0 3px 0 var(--blue)}
+.strip{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 14px}
+.strip .chipbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:.84rem;font-weight:600;color:var(--ink)}
+.strip .chipbtn:hover{background:var(--soft)}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(20,38,58,.55);display:grid;place-items:center;padding:16px}
+.mbox{background:#fff;border-radius:12px;max-width:760px;width:100%;max-height:calc(100vh - 32px);overflow:auto;padding:16px 18px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.mhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.mhead h2{margin:0;font-size:1.1rem}
+.lrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:12px}
+.pitem{border:2px solid var(--line);border-radius:10px;background:#fff;padding:0;cursor:pointer;overflow:hidden;text-align:left}
+.pitem.on{border-color:var(--blue)}.pitem img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover}
+.pitem span{display:block;padding:4px 8px;font-size:.74rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ptiles{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+.ptile{width:170px}.plabel{font-size:.82rem;font-weight:600;margin-bottom:6px}
+.pframe{width:100%;background:var(--soft);border-radius:8px;overflow:hidden;display:grid;place-items:center;color:var(--muted);font-size:.8rem;position:relative}
+.pframe img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.ptile .acts{justify-content:flex-start;margin-top:8px}
+.cframe{position:relative;margin:12px auto;overflow:hidden;border-radius:8px;background:var(--soft);cursor:grab;touch-action:none}
+.cframe.grab{cursor:grabbing}
+.cframe img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%;user-select:none;pointer-events:none}
+.crow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:10px 0}
+.crow input[type=range]{flex:1;min-width:140px;max-width:300px}
+.lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:14px}
+.ltile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:8px;align-content:start}
+.lthumb{aspect-ratio:4/5;background:var(--soft);border-radius:6px;overflow:hidden}.lthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.lmeta{display:grid;gap:3px;font-size:.82rem;color:var(--muted);word-break:break-all}.lmeta b{color:var(--ink);font-size:.86rem}.lmeta .use{color:var(--green)}
+.libdrop{outline:3px dashed var(--blue);outline-offset:4px}
 .fld select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
 .fld input[type=search]{width:100%}
 
@@ -186,6 +220,7 @@ const S = { schema: null, token: '', repo: '', branch: 'main', site: {}, home: {
             pending: {}, tab: 'photos', lang: 'en', filter: '', run: null, busy: '', notice: null, dirty: 0,
             open: new Set(), req: { items: null, loaded: false, loading: false, error: '', code: '', keyProblem: '', filter: 'new', q: '' } };
 const clone = o => JSON.parse(JSON.stringify(o));
+S.lib = { items: null, loading: false, error: '' }; S.deleted = new Set();
 const enc = p => p.split('/').map(encodeURIComponent).join('/');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const getv = (obj, group, name) => ((obj && obj[group] && obj[group][name]) || '');
@@ -242,7 +277,8 @@ function changes() {
   }
   for (const f of S.schema.contacts) if (contactChanged(f.name)) out.contacts.push(f.name);
   for (const p of S.schema.photos) if (photoChanged(p.field)) out.photos.push(p.num);
-  out.total = out.textCount + out.pageCount + out.contacts.length + out.photos.length + (out.ready ? 1 : 0);
+  out.library = pendingKept().filter(([, p]) => p.lib && !p.saved).length + S.deleted.size;
+  out.total = out.textCount + out.pageCount + out.contacts.length + out.photos.length + out.library + (out.ready ? 1 : 0);
   return out;
 }
 
@@ -279,8 +315,7 @@ function photoPath(num, ext, when) {
   return `media/photo-${num}-${d.getFullYear()}${two(d.getMonth() + 1)}${two(d.getDate())}-${two(d.getHours())}${two(d.getMinutes())}${two(d.getSeconds())}.${ext}`;
 }
 function usedPending() {
-  const live = new Set(photoFields().map(f => S.site[f]).filter(Boolean));
-  return Object.entries(S.pending).filter(([path, p]) => live.has(path) && !p.saved).map(([path, p]) => ({ path, blob: p.blob }));
+  return pendingKept().filter(([, p]) => !p.saved).map(([path, p]) => ({ path, blob: p.blob }));
 }
 async function toBase64(blob) {
   if (typeof FileReader === 'undefined') return Buffer.from(await blob.arrayBuffer()).toString('base64');
@@ -296,6 +331,7 @@ function commitMessage(c) {
   if (c.textCount) parts.push('тексты (' + Object.keys(c.text).map(l => l.toUpperCase()).join(', ') + ')');
   if (c.pageCount) parts.push('разделы и блоки страницы');
   if (c.photos.length) parts.push('фото ' + c.photos.join(', '));
+  if (c.library) parts.push('библиотека фото');
   if (c.contacts.length) parts.push('контакты и имя');
   if (c.ready) parts.push(S.site.publish_ready ? 'индексация включена' : 'индексация выключена');
   return 'Панель управления: ' + parts.join('; ');
@@ -310,8 +346,8 @@ async function commitChanges(step) {
   add('content/site.json', S.site, S.orig.site);
   S.schema.langs.forEach(l => add(`content/home_${l}.json`, S.home[l], S.orig.home[l]));
   add('content/sections.json', S.page, S.orig.page);
-  if (!files.length) return null;
-  const photos = usedPending();
+  const photos = usedPending(), removals = [...S.deleted];
+  if (!files.length && !photos.length && !removals.length) return null;
   step('check');
   for (const f of files) {
     if (await readFile(f.path) !== S.raw[f.path]) { const e = ghError(409, 'conflict'); e.conflict = true; throw e; }
@@ -328,12 +364,15 @@ async function commitChanges(step) {
   const parent = await gh(`/repos/${S.repo}/git/commits/${head}`);
   const tree = await gh(`/repos/${S.repo}/git/trees`, { method: 'POST', body: { base_tree: parent.tree.sha, tree: [
     ...files.map(f => ({ path: f.path, mode: '100644', type: 'blob', content: f.text })),
-    ...blobs.map(b => ({ path: b.path, mode: '100644', type: 'blob', sha: b.sha })) ] } });
+    ...blobs.map(b => ({ path: b.path, mode: '100644', type: 'blob', sha: b.sha })),
+    ...removals.map(path => ({ path, mode: '100644', type: 'blob', sha: null })) ] } });
   const commit = await gh(`/repos/${S.repo}/git/commits`, { method: 'POST', body: { message: commitMessage(c), tree: tree.sha, parents: [head] } });
   await gh(`/repos/${S.repo}/git/refs/heads/${enc(S.branch)}`, { method: 'PATCH', body: { sha: commit.sha } });
   S.orig = { site: clone(S.site), home: clone(S.home), page: clone(S.page) };
   files.forEach(f => { S.raw[f.path] = f.text; });
   blobs.forEach(b => { if (S.pending[b.path]) S.pending[b.path].saved = true; });
+  if (S.lib.items) S.lib.items = S.lib.items.filter(i => !removals.includes(i.path));
+  S.deleted.clear();
   return { sha: commit.sha, files: files.map(f => f.path), photos: blobs.length };
 }
 
@@ -461,13 +500,53 @@ function moveItem(list, from, to) {
   if (from === to || from < 0 || to < 0 || from >= list.length || to >= list.length) return false;
   const [item] = list.splice(from, 1); list.splice(to, 0, item); return true;
 }
+function newSectionId() { const used = new Set(S.page.sections.map(s => s.id)); let n = 1; while (used.has('section-' + n)) n++; return 'section-' + n; }
+function newSection() { return { id: newSectionId(), type: 'text', title: '', layout: 'column', blocks: [newBlock('text')] }; }
+function insertAt(list, index, item) { list.splice(Math.max(0, Math.min(index, list.length)), 0, item); }
+const SLOT_NUM = /^\d+$/;
+const slotField = num => { const s = S.schema.photos.find(p => String(p.num) === String(num)); return s ? s.field : ''; };
+const slotPath = num => S.site[slotField(num)] || '';
+/** The file a photograph reference points to: a numbered place ("4") or a file of the library ("media/..."). */
+const refPath = ref => { ref = String(ref || ''); return SLOT_NUM.test(ref) ? slotPath(ref) : ref; };
+const clampPct = v => Math.max(0, Math.min(100, v));
+function parseCrop(v) { const m = String(v || '').split(',').map(Number); return m.length === 3 && m.every(Number.isFinite) ? { x: m[0], y: m[1], z: m[2] } : { x: 50, y: 30, z: 1 }; }
+const fmtCrop = c => `${+(+c.x).toFixed(1)},${+(+c.y).toFixed(1)},${+(+c.z).toFixed(2)}`;
+/** The same rule the site uses: the picture moves inside its frame and can be enlarged around that point. */
+function cropStyle(v) {
+  if (!v) return '';
+  const c = parseCrop(v);
+  return `object-position:${c.x}% ${c.y}%` + (c.z !== 1 ? `;transform:scale(${c.z});transform-origin:${c.x}% ${c.y}%` : '');
+}
+/** Pending files that will be saved: library uploads, and anything a place or a block points to. */
+function pendingKept() {
+  const live = new Set(photoFields().map(f => S.site[f]).filter(Boolean));
+  const used = new Set();
+  S.page.sections.forEach(s => (s.blocks || []).forEach(b => ['s1', 's2', 's3', 'photo'].forEach(k => { if (b[k]) used.add(b[k]); })));
+  return Object.entries(S.pending).filter(([path, p]) => p.lib || live.has(path) || used.has(path));
+}
+function libraryList() {
+  const known = new Map((S.lib.items || []).map(i => [i.path, { path: i.path, kb: Math.round(i.size / 1024) }]));
+  for (const [path, p] of pendingKept()) known.set(path, { path, kb: p.kb });
+  S.deleted.forEach(path => known.delete(path));
+  return [...known.values()].sort((a, b) => b.path.localeCompare(a.path));
+}
+function pathUses(path) {
+  const uses = [];
+  S.schema.photos.forEach(s => { if (S.site[s.field] === path) uses.push(s.num === 1 ? 'первый экран' : `место ${s.num}`); });
+  S.page.sections.forEach((sec, i) => (sec.blocks || []).forEach((b, j) => {
+    const where = `блок ${i + 1}.${j + 1}`;
+    if (b.type === 'photos' && [b.s1, b.s2, b.s3].some(r => r && refPath(r) === path)) uses.push(where);
+    if (b.type === 'aside' && b.photo && refPath(b.photo) === path) uses.push(where + ' (фон фразы)');
+  }));
+  return uses;
+}
 const secOrig = id => ((S.orig.page && S.orig.page.sections) || []).find(s => s.id === id);
 const secChanged = sec => { const o = secOrig(sec.id); return !o || JSON.stringify(o) !== JSON.stringify(sec); };
 const orderChanged = () => S.page.sections.map(s => s.id).join('|') !== ((S.orig.page && S.orig.page.sections) || []).map(s => s.id).join('|');
 const pageChangeCount = () => S.page.sections.filter(secChanged).length + (orderChanged() ? 1 : 0);
 const blockName = b => (blockSpec(b.type) ? blockSpec(b.type).label : String(b.type));
 function blockPreview(b) {
-  const photos = [b.s1, b.s2, b.s3].filter(Boolean).map(n => 'Фото ' + n).join(', ');
+  const photos = [b.s1, b.s2, b.s3].filter(Boolean).map(n => (/^\d+$/.test(n) ? 'Фото ' + n : String(n).replace(/^media\//, '').slice(0, 22))).join(', ');
   const s = String(b.heading || b.body || b.text || b.title || photos || '').replace(/\s+/g, ' ').trim();
   return s.length > 70 ? s.slice(0, 70) + '…' : s;
 }
@@ -476,13 +555,13 @@ function slotUsage(num) {
   const n = String(num), uses = [];
   S.page.sections.forEach((sec, i) => (sec.blocks || []).forEach((b, j) => {
     const where = `раздел ${i + 1} «${sec.title || sec.id}», блок ${i + 1}.${j + 1}`;
-    if (b.type === 'photos' && [b.s1, b.s2, b.s3].includes(n)) uses.push({ text: where + (b.place === 'side' ? ' (сбоку)' : ' (в тексте)'), shape: 'вертикаль 4:5 (по краям кадр обрежется)' });
-    if (b.type === 'aside' && b.look === 'panel' && b.photo === n) uses.push({ text: where + ' (фон за фразой)', shape: 'горизонталь, пейзаж' });
+    if (b.type === 'photos' && [b.s1, b.s2, b.s3].some(r => r === n || (slotPath(n) && r === slotPath(n)))) uses.push({ text: where + (b.place === 'side' ? ' (сбоку)' : ' (в тексте)'), shape: 'вертикаль 4:5 (по краям кадр обрежется)' });
+    if (b.type === 'aside' && b.look === 'panel' && (b.photo === n || (slotPath(n) && b.photo === slotPath(n)))) uses.push({ text: where + ' (фон за фразой)', shape: 'горизонталь, пейзаж' });
   }));
   return uses;
 }
 
-root.__dash = { S, newBlock, moveItem, pageChangeCount, secChanged, slotUsage, blockPreview, gh, loadAll, changes, validate, commitChanges, photoPath, usedPending, watchDeploy, latestRun, setv, getv, explain, commitMessage,
+root.__dash = { S, newBlock, newSection, newSectionId, insertAt, moveItem, pageChangeCount, secChanged, slotUsage, blockPreview, gh, loadAll, changes, validate, commitChanges, photoPath, usedPending, watchDeploy, latestRun, setv, getv, explain, commitMessage,
                 inboxCall, requestCounts, contactAction, timeAgo, csvOf, INBOX_URL_RE };
 if (typeof document === 'undefined') { if (typeof module !== 'undefined') module.exports = root.__dash; return; }
 
@@ -562,7 +641,7 @@ function paintTabs(known) {
   if (!tabsBar) return;
   const c = known || changes();
   const fresh = S.req.loaded ? requestCounts(S.req.items).new : 0;
-  const badge = { photos: [c.photos.length, ''], texts: [c.textCount + c.pageCount, ''], settings: [c.contacts.length + (c.ready ? 1 : 0), ''], requests: [fresh, ' green'] };
+  const badge = { photos: [c.photos.length + c.library, ''], texts: [c.textCount + c.pageCount, ''], settings: [c.contacts.length + (c.ready ? 1 : 0), ''], requests: [fresh, ' green'] };
   tabsBar.querySelectorAll('button').forEach(b => {
     b.setAttribute('aria-selected', String(b.dataset.tab === S.tab));
     const old = b.querySelector('.n'); if (old) old.remove();
@@ -573,6 +652,7 @@ function paintTabs(known) {
 function discard() {
   if (!confirm('Отменить все несохранённые правки? Новые фото тоже не будут добавлены.')) return;
   S.site = clone(S.orig.site); S.home = clone(S.orig.home); S.page = clone(S.orig.page);
+  S.deleted.clear();
   for (const p of Object.values(S.pending)) if (!p.saved) URL.revokeObjectURL(p.url);
   S.pending = Object.fromEntries(Object.entries(S.pending).filter(([, p]) => p.saved));
   setNotice('ok', null); renderPanel(); paintBar();
@@ -609,6 +689,17 @@ function photoSrc(field) {
   if (!path) return '';
   return S.pending[path] ? S.pending[path].url : '../' + path;
 }
+async function loadLibrary() {
+  S.lib.loading = true;
+  try {
+    const list = await gh(`/repos/${S.repo}/contents/media?ref=${encodeURIComponent(S.branch)}`);
+    S.lib.items = (Array.isArray(list) ? list : []).filter(f => f.type === 'file' && /\.(jpe?g|png|webp|gif|avif)$/i.test(f.name)).map(f => ({ path: f.path, size: f.size }));
+    S.lib.error = '';
+  } catch (e) { S.lib.items = e.status === 404 ? [] : null; S.lib.error = e.status === 404 ? '' : 'Не удалось загрузить список фото. Обновите страницу.'; }
+  S.lib.loading = false;
+  if (S.tab === 'photos' && typeof panel !== 'undefined' && panel) renderPanel();
+}
+
 async function takeFile(slot, file) {
   if (!file) return;
   if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|gif|avif|heic)$/i.test(file.name)) { setNotice('warn', 'Это не похоже на картинку. Подойдут JPG, PNG или WebP.'); return; }
@@ -672,10 +763,164 @@ function panelPhotos() {
       const slot = row && S.schema.photos.find(s => String(s.num) === row.dataset.num);
       if (files.length === 1 && slot) takeFile(slot, files[0]); else if (files.length) takeMany(files);
     } }, rows);
-  return el('div', {}, el('h1', {}, 'Фотографии'),
-    el('p', { class: 'lead' }, 'Семь мест, у каждого свой номер: тот же жёлтый номер виден на сайте по ссылке с «?photos». Где показывать фото, выбирается блоком «Фото» в разделе (вкладка «Тексты»): так фото можно ставить в любое место страницы. Нажмите «Заменить» или перетащите файл на строку, большие файлы сожмутся сами. Файлы с номером в названии (1.jpg, фото-3.png) можно перетащить на список сразу несколько.'),
-    el('p', { class: 'muted' }, el('a', { href: '../?photos', target: '_blank', rel: 'noopener' }, 'Открыть сайт с номерами фото ↗')),
-    list);
+  const old = el('details', { class: 'more' }, el('summary', {}, 'Первый экран и прежние номерные места (1–7)'),
+    el('div', { class: 'inner' },
+      el('p', { class: 'lead' }, 'Здесь меняется главное фото первого экрана (номер 1). Остальные номера работают как раньше: блок «Фото» может ссылаться и на номер, и на файл из библиотеки. Несколько файлов с номером в названии (3.jpg) можно перетащить на этот список сразу.'),
+      el('p', { class: 'muted' }, el('a', { href: '../?photos', target: '_blank', rel: 'noopener' }, 'Открыть сайт с номерами фото ↗')),
+      list));
+  return el('div', {}, el('h1', {}, 'Фотографии'), libraryPanel(), el('div', { style: 'height:18px' }), old);
+}
+
+/* ---------- photo library, picker, crop ---------- */
+const thumbSrc = path => (S.pending[path] ? S.pending[path].url : '../' + path);
+let libSeq = 0;
+function libPath(ext) { const d = new Date(); return `media/photo-${d.getFullYear()}${two(d.getMonth() + 1)}${two(d.getDate())}-${two(d.getHours())}${two(d.getMinutes())}${two(d.getSeconds())}-${++libSeq}.${ext}`; }
+/** Compresses the chosen files and adds them to the library. Nothing is saved until "Сохранить и опубликовать". Returns the new paths. */
+async function addToLibrary(files) {
+  const added = [];
+  for (const file of Array.from(files || [])) {
+    if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|gif|avif|heic)$/i.test(file.name)) { setNotice('warn', `Файл «${file.name}» не похож на картинку. Подойдут JPG, PNG или WebP.`); continue; }
+    S.busy = 'Готовлю фото…'; paintBar();
+    try {
+      const { blob, ext, source } = await prepareImage(file);
+      const path = libPath(ext);
+      S.pending[path] = { blob, url: URL.createObjectURL(blob), kb: Math.round(blob.size / 1024), w: source.width, h: source.height, lib: true };
+      added.push(path);
+      if (Math.max(source.width, source.height) < 1100) setNotice('warn', `Фото «${file.name}» небольшое (${source.width}×${source.height}). На большом экране оно может выглядеть мягким. По возможности загрузите оригинал.`);
+    } catch (e) { setNotice('bad', e.message); }
+  }
+  S.busy = ''; paintBar();
+  return added;
+}
+function removeFromLibrary(path) {
+  const p = S.pending[path];
+  if (p && !p.saved) { URL.revokeObjectURL(p.url); delete S.pending[path]; }
+  else {
+    if (!confirm('Удалить файл из библиотеки?\n\nОн исчезнет из репозитория после «Сохранить и опубликовать». Если это фото вставлено в статью («Заметки»), оно там пропадёт.')) return;
+    S.deleted.add(path); delete S.pending[path];
+  }
+  renderPanel(); paintBar();
+}
+function libraryPanel() {
+  const input = el('input', { type: 'file', accept: 'image/*', multiple: true, id: 'lib-file', onchange: async e => { const files = Array.from(e.target.files); e.target.value = ''; if ((await addToLibrary(files)).length) renderPanel(); } });
+  const tiles = libraryList().map(item => {
+    const uses = pathUses(item.path), pend = S.pending[item.path];
+    return el('div', { class: 'ltile' },
+      el('div', { class: 'lthumb' }, el('img', { src: thumbSrc(item.path), alt: '', loading: 'lazy', decoding: 'async' })),
+      el('div', { class: 'lmeta' }, el('b', {}, item.path.replace(/^media\//, '')), item.kb ? el('span', {}, item.kb + ' КБ') : null,
+        pend && !pend.saved ? el('span', { class: 'tag new' }, 'не сохранено') : null,
+        el('span', { class: uses.length ? 'use' : '' }, uses.length ? 'Используется: ' + uses.join('; ') : 'нигде не используется')),
+      el('button', { class: 'btn ghost small', type: 'button', disabled: uses.length > 0, title: uses.length ? 'Фото используется: сначала уберите его из блоков' : 'Удалить из библиотеки', onclick: () => removeFromLibrary(item.path) }, 'Удалить'));
+  });
+  const wrap = el('div', {
+    ondragover: e => { e.preventDefault(); wrap.classList.add('libdrop'); },
+    ondragleave: e => { if (!wrap.contains(e.relatedTarget)) wrap.classList.remove('libdrop'); },
+    ondrop: async e => { e.preventDefault(); wrap.classList.remove('libdrop'); if ((await addToLibrary(e.dataTransfer.files)).length) renderPanel(); } },
+    el('p', { class: 'lead' }, 'Все фото сайта. Загрузите новые (можно перетащить файлы сюда), посмотрите, что где используется, и выбирайте их в блоках «Фото» на вкладке «Тексты». Загрузить фото можно и прямо из окна выбора в блоке. Сжатие в браузере автоматическое.'),
+    el('div', { class: 'lrow' }, input, el('label', { class: 'btn', for: 'lib-file', tabindex: 0, onkeydown: keyClick('lib-file') }, 'Загрузить фото'),
+      S.lib.loading ? el('span', { class: 'muted' }, 'Загружаю список…') : null),
+    S.lib.error ? el('div', { class: 'note bad' }, S.lib.error) : null,
+    el('div', { class: 'lib' }, tiles.length ? tiles : el('p', { class: 'muted' }, S.lib.loading ? 'Загружаю…' : 'Пока нет ни одного фото.')));
+  return wrap;
+}
+
+/** A simple dialog over the page: Esc, the Close button or a click outside close it, and focus goes back to where it was. */
+function openModal(title, build) {
+  const prev = document.activeElement;
+  const overlay = el('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': title });
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  function close() { document.removeEventListener('keydown', onKey); overlay.remove(); if (prev && prev.isConnected) prev.focus(); }
+  document.addEventListener('keydown', onKey);
+  overlay.addEventListener('mousedown', e => { if (e.target === overlay) close(); });
+  overlay.append(el('div', { class: 'mbox' }, el('div', { class: 'mhead' }, el('h2', {}, title), el('button', { class: 'btn ghost small', type: 'button', onclick: close }, 'Закрыть')), build(close)));
+  document.body.append(overlay);
+  const first = overlay.querySelector('.mbox .pitem, .mbox label.btn, .mbox button.btn:not(.ghost)'); if (first) first.focus();
+  return close;
+}
+function openPicker(current, onPick) {
+  openModal('Выберите фото', close => {
+    const input = el('input', { type: 'file', accept: 'image/*', id: 'pick-file', onchange: async e => { const files = Array.from(e.target.files); e.target.value = ''; const added = await addToLibrary(files); if (added.length) { close(); onPick(added[0]); } } });
+    const items = libraryList(), now = refPath(current);
+    return el('div', {},
+      el('div', { class: 'lrow' }, input, el('label', { class: 'btn', for: 'pick-file', tabindex: 0, onkeydown: keyClick('pick-file') }, '+ Загрузить новое фото'), el('span', { class: 'muted' }, 'Новое фото сразу встанет на место.')),
+      items.length ? el('div', { class: 'pgrid' }, items.map(item => el('button', { class: 'pitem' + (item.path === now ? ' on' : ''), type: 'button', title: item.path, onclick: () => { close(); onPick(item.path); } },
+        el('img', { src: thumbSrc(item.path), alt: '' }), el('span', {}, item.path.replace(/^media\//, ''))))) : el('p', { class: 'muted' }, 'В библиотеке пока пусто. Загрузите первое фото.'));
+  });
+}
+/** Direct manipulation: drag the photograph inside its frame, set the zoom, switch between the computer and phone shape of the frame. */
+function openCrop(b, i, frame, path, done) {
+  const state = parseCrop(b['f' + i]);
+  let phone = false, drag = null;
+  openModal('Кадрирование: ' + frame[2], close => {
+    const img = el('img', { src: thumbSrc(path), alt: '', draggable: false });
+    const box = el('div', { class: 'cframe', tabindex: '0', role: 'img', 'aria-label': 'Кадр. Тяните мышью или стрелками на клавиатуре.' }, img);
+    const zoom = el('input', { type: 'range', min: '1', max: '3', step: '0.02', value: String(state.z), 'aria-label': 'Масштаб' });
+    const label = el('span', { class: 'muted' }, '');
+    const seg = [['Компьютер', false], ['Телефон', true]].map(([text, isPhone]) => el('button', { type: 'button', 'aria-pressed': String(isPhone === phone), onclick: () => { phone = isPhone; apply(); } }, text));
+    function apply() {
+      box.style.aspectRatio = phone ? frame[1] : frame[0];
+      box.style.width = phone ? '220px' : 'min(100%, 460px)';
+      img.style.cssText = cropStyle(fmtCrop(state)) || 'object-position:50% 30%';
+      zoom.value = String(state.z); label.textContent = 'Масштаб ×' + (+state.z).toFixed(2);
+      seg.forEach((button, k) => button.setAttribute('aria-pressed', String((k === 1) === phone)));
+    }
+    const overflow = () => { const r = box.getBoundingClientRect(), iw = img.naturalWidth || 1, ih = img.naturalHeight || 1, k = Math.max(r.width / iw, r.height / ih) * state.z; return [iw * k - r.width, ih * k - r.height]; };
+    box.addEventListener('pointerdown', e => { box.setPointerCapture(e.pointerId); drag = { x: e.clientX, y: e.clientY, s: { ...state } }; box.classList.add('grab'); });
+    box.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const [ox, oy] = overflow();
+      if (ox > 0.5) state.x = clampPct(drag.s.x - (e.clientX - drag.x) / ox * 100);
+      if (oy > 0.5) state.y = clampPct(drag.s.y - (e.clientY - drag.y) / oy * 100);
+      apply();
+    });
+    const stop = () => { drag = null; box.classList.remove('grab'); };
+    box.addEventListener('pointerup', stop); box.addEventListener('pointercancel', stop);
+    box.addEventListener('keydown', e => {
+      const step = e.shiftKey ? 8 : 2, d = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] }[e.key];
+      if (!d) return; e.preventDefault(); state.x = clampPct(state.x + d[0]); state.y = clampPct(state.y + d[1]); apply();
+    });
+    zoom.addEventListener('input', () => { state.z = Number(zoom.value); apply(); });
+    img.addEventListener('load', apply);
+    apply();
+    return el('div', {},
+      el('p', { class: 'muted' }, 'Потяните фото внутри рамки, чтобы важное осталось в кадре. Переключатель показывает форму кадра на компьютере и на телефоне. Оригинальный файл не меняется.'),
+      el('div', { class: 'crow' }, el('div', { class: 'seg', role: 'group', 'aria-label': 'Форма кадра' }, seg)),
+      box,
+      el('div', { class: 'crow' }, el('button', { class: 'btn ghost small mini', type: 'button', 'aria-label': 'Уменьшить', onclick: () => { state.z = Math.max(1, state.z - 0.1); apply(); } }, '−'), zoom,
+        el('button', { class: 'btn ghost small mini', type: 'button', 'aria-label': 'Увеличить', onclick: () => { state.z = Math.min(3, state.z + 0.1); apply(); } }, '+'), label),
+      el('div', { class: 'crow' },
+        el('button', { class: 'btn ghost small', type: 'button', onclick: () => { state.x = 50; state.y = 30; state.z = 1; apply(); } }, 'Сбросить'),
+        el('button', { class: 'btn ghost small', type: 'button', onclick: close }, 'Отмена'),
+        el('button', { class: 'btn small', type: 'button', onclick: () => {
+          const same = state.x === 50 && state.y === 30 && state.z === 1;
+          b['f' + i] = same ? '' : fmtCrop(state); close(); done();
+        } }, 'Готово')));
+  });
+}
+function photoSlots(sec, si, b, bi) {
+  const comp = b.comp || 'auto', frames = S.schema.page.frames[comp] || S.schema.page.frames.auto;
+  const count = comp === 'auto' ? 3 : frames.length, done = () => afterStructure({ sid: sec.id, block: bi });
+  const tiles = [];
+  for (let i = 1; i <= count; i++) {
+    const ref = b['s' + i], path = refPath(ref), frame = frames[i - 1] || frames[0];
+    tiles.push(el('div', { class: 'ptile' }, el('div', { class: 'plabel' }, `${i}. ${frame[2]}`),
+      el('div', { class: 'pframe', style: `aspect-ratio:${frame[0]}` }, path ? el('img', { src: thumbSrc(path), alt: '', style: cropStyle(b['f' + i]) }) : el('span', {}, 'пусто')),
+      el('div', { class: 'acts' },
+        el('button', { class: 'btn small', type: 'button', onclick: () => openPicker(ref, p => { b['s' + i] = p; b['f' + i] = ''; done(); }) }, path ? 'Заменить' : 'Выбрать'),
+        path ? el('button', { class: 'btn ghost small', type: 'button', onclick: () => openCrop(b, i, frame, path, done) }, 'Кадрировать') : null,
+        path ? el('button', { class: 'btn ghost small', type: 'button', onclick: () => { b['s' + i] = ''; b['f' + i] = ''; done(); } }, 'Убрать') : null)));
+  }
+  return el('div', { class: 'fld', 'data-find': 'фото в блоке композиция' }, el('label', {}, 'Фото в блоке'), el('div', { class: 'ptiles' }, tiles),
+    el('p', { class: 'hint' }, 'Рамки показаны в форме, в которой фото будут на сайте. Замена и «Убрать» не трогают файл в библиотеке.'));
+}
+/** One photograph field: the "photos" block draws all its photographs together (from its first field); any other block draws one tile. */
+function photoWidget(sec, si, b, bi, f) {
+  if (b.type === 'photos') return f.name === 's1' ? photoSlots(sec, si, b, bi) : null;
+  const path = refPath(b[f.name]), done = () => afterStructure({ sid: sec.id, block: bi });
+  return el('div', { class: 'fld', 'data-find': (f.label + ' фото').toLowerCase() }, el('label', {}, f.label),
+    el('div', { class: 'ptile' }, el('div', { class: 'pframe', style: 'aspect-ratio:16/10' }, path ? el('img', { src: thumbSrc(path), alt: '' }) : el('span', {}, 'пусто')),
+      el('div', { class: 'acts' }, el('button', { class: 'btn small', type: 'button', onclick: () => openPicker(b[f.name], p => { b[f.name] = p; done(); }) }, path ? 'Заменить' : 'Выбрать'),
+        path ? el('button', { class: 'btn ghost small', type: 'button', onclick: () => { b[f.name] = ''; done(); } }, 'Убрать') : null)));
 }
 
 /* ---------- texts: the page by sections and blocks, then the remaining texts ---------- */
@@ -748,6 +993,73 @@ function afterStructure(focus) { focusAfter = focus || null; renderPanel(); pain
 function moveSection(from, to) { const id = S.page.sections[from].id; if (moveItem(S.page.sections, from, to)) afterStructure({ sid: id }); }
 function moveBlock(sec, from, to) { if (moveItem(sec.blocks, from, to)) afterStructure({ sid: sec.id, block: to }); }
 function addBlock(sec, type) { sec.blocks.push(newBlock(type)); S.open.add(sec.id); afterStructure({ sid: sec.id, block: sec.blocks.length - 1, fresh: true }); }
+/* ----- adding at a chosen place, deleting, dragging ----- */
+function addSectionAt(at) { const sec = newSection(); insertAt(S.page.sections, at, sec); S.open.add(sec.id); afterStructure({ sid: sec.id, fresh: true }); }
+function addBlockAt(sec, at, type) { insertAt(sec.blocks, at, newBlock(type)); S.open.add(sec.id); afterStructure({ sid: sec.id, block: at, fresh: true }); }
+function deleteSection(si) {
+  const sec = S.page.sections[si], name = sec.title || sec.id;
+  if (!confirm(`Удалить раздел ${si + 1} «${name}» вместе со всеми его блоками (${sec.blocks.length})?\n\nСразу после удаления появится кнопка «Вернуть раздел». Файлы фотографий не удаляются.`)) return;
+  S.page.sections.splice(si, 1);
+  (S.removed = S.removed || []).push({ sec, at: si });
+  afterStructure(null);
+  setNotice('warn', [`Раздел «${name}» удалён. `, el('button', { class: 'btn small', type: 'button', onclick: undoDeleteSection }, 'Вернуть раздел')]);
+}
+function undoDeleteSection() {
+  const last = (S.removed || []).pop(); if (!last) return;
+  insertAt(S.page.sections, last.at, last.sec); S.open.add(last.sec.id);
+  setNotice('ok', null); afterStructure({ sid: last.sec.id });
+}
+/** A thin row between two cards: says where the new thing will appear. */
+function sectionGap(at) {
+  const total = S.page.sections.length;
+  const where = at === 0 ? 'в начало (сразу после первого экрана)' : at >= total ? 'в самый конец' : `между разделами ${at} и ${at + 1}`;
+  return el('div', { class: 'gap' }, el('button', { class: 'btn ghost small', type: 'button', onclick: () => addSectionAt(at) }, '+ Новый раздел ' + where));
+}
+function blockGap(sec, si, at) {
+  const menu = el('span', { class: 'gapmenu', hidden: true }, S.schema.page.blockTypes.map(spec => el('button', { class: 'btn small', type: 'button', onclick: () => addBlockAt(sec, at, spec.type) }, spec.add)));
+  const open = el('button', { class: 'btn ghost small', type: 'button', 'aria-expanded': 'false', onclick: () => { menu.hidden = !menu.hidden; open.setAttribute('aria-expanded', String(!menu.hidden)); } },
+    at === 0 ? '+ Вставить в начало раздела' : `+ Вставить сюда (будет блок ${si + 1}.${at + 1})`);
+  return el('div', { class: 'gap' }, open, menu);
+}
+function pageStrip() {
+  const short = s => { const t = s.type === 'text' ? (s.title || '(без заголовка)') : ({ contact: 'Контакты', qa: 'Q&A' })[s.type]; return t.length > 26 ? t.slice(0, 26) + '…' : t; };
+  return el('div', { class: 'strip', role: 'group', 'aria-label': 'Порядок разделов на странице' }, el('span', { class: 'muted' }, 'Страница сверху вниз: первый экран →'),
+    ...S.page.sections.map((sec, i) => el('button', { class: 'chipbtn', type: 'button', onclick: () => jumpToSection(sec.id) }, `${i + 1} · ${short(sec)}`)));
+}
+function jumpToSection(id) {
+  const node = document.querySelector(`.pcard[data-key="${id}"]`); if (!node) return;
+  S.open.add(id); setCardOpen(node, true); node.scrollIntoView({ block: 'start', behavior: 'smooth' });
+}
+let dragFrom = null;
+const gripButton = label => el('button', { class: 'grip', type: 'button', 'aria-label': label + '. Или выберите номер в списке рядом.', title: 'Потяните, чтобы переставить' }, '⠿');
+/** Dragging starts only from the handle, so text selection inside the card keeps working. Touch screens use the position list. */
+function makeDraggable(node, grip, { group, index, onMove }) {
+  const off = () => { node.draggable = false; };
+  const clear = () => document.querySelectorAll('.dragging, .drop-before, .drop-after').forEach(n => n.classList.remove('dragging', 'drop-before', 'drop-after'));
+  grip.addEventListener('mousedown', () => { node.draggable = true; });
+  grip.addEventListener('mouseup', off);
+  node.addEventListener('dragstart', e => {
+    if (!node.draggable) return;
+    e.stopPropagation(); dragFrom = { group, index };
+    try { e.dataTransfer.setData('text/plain', group + ':' + index); e.dataTransfer.effectAllowed = 'move'; } catch (err) {}
+    node.classList.add('dragging');
+  });
+  node.addEventListener('dragend', () => { dragFrom = null; off(); clear(); });
+  node.addEventListener('dragover', e => {
+    if (!dragFrom || dragFrom.group !== group || dragFrom.index === index) return;
+    e.preventDefault(); e.stopPropagation();
+    const r = node.getBoundingClientRect(), after = e.clientY > r.top + r.height / 2;
+    node.classList.toggle('drop-after', after); node.classList.toggle('drop-before', !after);
+  });
+  node.addEventListener('dragleave', e => { if (!node.contains(e.relatedTarget)) node.classList.remove('drop-before', 'drop-after'); });
+  node.addEventListener('drop', e => {
+    if (!dragFrom || dragFrom.group !== group) return;
+    e.preventDefault(); e.stopPropagation();
+    const r = node.getBoundingClientRect(), after = e.clientY > r.top + r.height / 2, from = dragFrom.index;
+    let to = after ? index + 1 : index; if (from < to) to -= 1;
+    dragFrom = null; clear(); onMove(from, to);
+  });
+}
 function deleteBlock(sec, si, bi) {
   const b = sec.blocks[bi];
   if (!confirm(`Удалить блок ${si + 1}.${bi + 1} («${blockName(b)}»${blockPreview(b) ? ': ' + blockPreview(b) : ''})?\n\nПока вы не нажали «Сохранить и опубликовать», его можно вернуть кнопкой «Вернуть раздел как было».`)) return;
@@ -756,31 +1068,41 @@ function deleteBlock(sec, si, bi) {
 
 function blockCard(sec, si, b, bi) {
   const spec = blockSpec(b.type), last = sec.blocks.length - 1, label = `${si + 1}.${bi + 1}`;
-  const fields = spec.fields.filter(f => !f.showIf || Object.entries(f.showIf).every(([k, vals]) => vals.includes(b[k]))).map(f => makeField({
-    label: f.label, value: b[f.name], type: f.type, options: f.options, redraw: f.name === 'look' && !!spec.fields.some(x => x.showIf),
+  const fields = spec.fields.filter(f => !f.showIf || Object.entries(f.showIf).every(([k, vals]) => vals.includes(b[k]))).map(f => f.type === 'crop' ? null : f.type === 'photo' ? photoWidget(sec, si, b, bi, f) : makeField({
+    label: f.label, value: b[f.name], type: f.type, options: f.options, redraw: (f.name === 'look' && !!spec.fields.some(x => x.showIf)) || f.name === 'comp',
     hint: f.name === 'text' && b.type === 'aside' ? 'Перенос строки здесь это перенос строки во фразе.' : '', onSet: val => { b[f.name] = val; } }));
-  return el('div', { class: 'blk', 'data-bi': String(bi) },
-    el('div', { class: 'bhead' }, el('span', { class: 'num' }, label), el('span', { class: 'bname' }, blockName(b)), el('span', { class: 'bprev' }, blockPreview(b)),
+  const grip = gripButton(`Перетащить блок ${label}`);
+  const pos = el('select', { class: 'pos', 'aria-label': `Положение блока ${label} в разделе`, onchange: e => moveBlock(sec, bi, Number(e.target.value)) },
+    sec.blocks.map((_, k) => el('option', { value: String(k) }, '№ ' + (k + 1))));
+  pos.value = String(bi);
+  const node = el('div', { class: 'blk', 'data-bi': String(bi) },
+    el('div', { class: 'bhead' }, grip, el('span', { class: 'num' }, label), el('span', { class: 'bname' }, blockName(b)), el('span', { class: 'bprev' }, blockPreview(b)), pos,
       miniBtn('▲', `Поднять блок ${label} выше`, () => moveBlock(sec, bi, bi - 1), bi === 0),
       miniBtn('▼', `Опустить блок ${label} ниже`, () => moveBlock(sec, bi, bi + 1), bi === last),
       el('button', { class: 'btn danger small', type: 'button', 'aria-label': `Удалить блок ${label}`, onclick: () => deleteBlock(sec, si, bi) }, 'Удалить')),
     spec.hint ? el('p', { class: 'hint', style: 'margin:0 0 10px' }, spec.hint) : null,
     el('div', { class: 'flds' }, fields));
+  makeDraggable(node, grip, { group: 'blk:' + sec.id, index: bi, onMove: (from, to) => moveBlock(sec, from, to) });
+  return node;
 }
 
 function textSectionBody(sec, si) {
   const layoutField = makeField({ label: 'Расположение раздела', value: sec.layout, type: 'select', options: S.schema.page.layouts,
-    hint: 'Боковая колонка нужна блокам «Фраза сбоку» и фото с пометкой «сбоку»; если таких блоков нет, раздел идёт одной колонкой.', onSet: val => { sec.layout = val; } });
+    hint: 'Боковая колонка нужна блокам «Фраза» (если она не тихая) и фото с пометкой «сбоку»; если таких блоков нет, раздел идёт одной колонкой.', onSet: val => { sec.layout = val; } });
   const titleField = makeField({ label: 'Заголовок раздела', value: sec.title, type: 'string', onSet: val => { sec.title = val; } });
   const adds = S.schema.page.blockTypes.map(spec => el('button', { class: 'btn small', type: 'button', onclick: () => addBlock(sec, spec.type) }, '+ ' + spec.add));
   const original = secOrig(sec.id);
+  const items = [];
+  sec.blocks.forEach((b, bi) => { items.push(blockGap(sec, si, bi), blockCard(sec, si, b, bi)); });
   return el('div', {},
     el('div', { class: 'flds' }, titleField, layoutField),
     el('h3', { class: 'subh' }, sec.blocks.length ? 'Блоки раздела (идут сверху вниз)' : 'В разделе пока нет блоков'),
-    ...sec.blocks.map((b, bi) => blockCard(sec, si, b, bi)),
+    ...items,
     el('div', { class: 'addrow' }, el('span', { class: 'muted' }, 'Добавить в конец раздела:'), ...adds),
-    original && secChanged(sec) ? el('div', { class: 'row' }, el('button', { class: 'btn ghost small', type: 'button',
-      onclick: () => { S.page.sections[si] = clone(original); afterStructure({ sid: sec.id }); } }, '↩ Вернуть раздел как было')) : null);
+    el('div', { class: 'row' },
+      original && secChanged(sec) ? el('button', { class: 'btn ghost small', type: 'button',
+        onclick: () => { S.page.sections[si] = clone(original); afterStructure({ sid: sec.id }); } }, '↩ Вернуть раздел как было') : null,
+      el('button', { class: 'btn danger small', type: 'button', onclick: () => deleteSection(si) }, 'Удалить раздел')));
 }
 
 function sectionCard(sec, si) {
@@ -788,15 +1110,18 @@ function sectionCard(sec, si) {
   const pos = el('select', { class: 'pos', 'aria-label': `Положение раздела «${isText ? sec.title : sec.type}» в списке`, onchange: e => moveSection(si, Number(e.target.value)) },
     S.page.sections.map((_, k) => el('option', { value: String(k) }, '№ ' + (k + 1))));
   pos.value = String(si);
-  const controls = el('span', { class: 'ctl' }, pos, miniBtn('▲', `Поднять раздел ${si + 1} выше`, () => moveSection(si, si - 1), si === 0),
+  const grip = gripButton(`Перетащить раздел ${si + 1}`);
+  const controls = el('span', { class: 'ctl' }, grip, pos, miniBtn('▲', `Поднять раздел ${si + 1} выше`, () => moveSection(si, si - 1), si === 0),
     miniBtn('▼', `Опустить раздел ${si + 1} ниже`, () => moveSection(si, si + 1), si === total - 1));
   let body;
   if (isText) body = textSectionBody(sec, si);
   else if (sec.type === 'contact') body = el('div', { class: 'flds' }, groupByName('contact').fields.map(f => groupField(groupByName('contact'), f)));
   else body = el('div', {}, el('div', { class: 'flds' }, groupByName('qa').fields.map(f => groupField(groupByName('qa'), f))),
     el('h3', { class: 'subh' }, groupByName('free').label), el('div', { class: 'flds' }, groupByName('free').fields.map(f => groupField(groupByName('free'), f))));
-  return card({ key: sec.id, num: si + 1, title: isText ? (sec.title || '(без заголовка)') : S.schema.page.sectionLabels[sec.type],
+  const node = card({ key: sec.id, num: si + 1, title: isText ? (sec.title || '(без заголовка)') : S.schema.page.sectionLabels[sec.type],
     sub: isText ? sec.blocks.length + ' бл.' : 'форма', sid: sec.id, link: sec.id, controls, body, open: S.open.has(sec.id) });
+  makeDraggable(node, grip, { group: 'sec', index: si, onMove: (from, to) => moveSection(from, to) });
+  return node;
 }
 function groupCard(name, num) {
   const g = groupByName(name); if (!g) return null;
@@ -808,15 +1133,15 @@ function panelTexts() {
   const search = el('input', { type: 'search', placeholder: 'Найти поле или слово…', value: S.filter, 'aria-label': 'Поиск по текстам',
     oninput: e => { S.filter = e.target.value; applyFilter(); } });
   const hero = groupCard('hero');
-  const sections = S.page.sections.map(sectionCard);
+  const sections = []; S.page.sections.forEach((sec, i) => { sections.push(sectionGap(i), sectionCard(sec, i)); }); sections.push(sectionGap(S.page.sections.length));
   const rest = ['meta', 'notes', 'footer'].map(n => groupCard(n)).filter(Boolean);
   setTimeout(() => { applyFilter(); paintDots(); runFocus(); }, 0);
   return el('div', {}, el('h1', {}, 'Тексты'),
-    el('p', { class: 'lead' }, 'Страница состоит из разделов, а раздел из блоков (текст, цитата, фраза сбоку, фото). Всё пронумеровано: раздел 3, его блок 3.2. Номер можно выбрать в списке или двигать стрелками ▲▼, блоки добавляются и удаляются внутри раздела. Затем нажмите «Сохранить и опубликовать» внизу.'),
+    el('p', { class: 'lead' }, 'Страница состоит из разделов, а раздел из блоков (текст, цитата, фраза, фото). Всё пронумеровано: раздел 3, его блок 3.2. Перетаскивайте за ручку ⠿ или выберите номер в списке; кнопки «+» между карточками добавляют раздел или блок ровно туда. Затем нажмите «Сохранить и опубликовать» внизу.'),
     el('p', { class: 'muted' }, el('a', { href: '../?blocks', target: '_blank', rel: 'noopener' }, 'Открыть сайт с теми же номерами разделов и блоков ↗')),
     el('div', { class: 'bar2' }, search), el('p', { class: 'lead', id: 'nofind', hidden: true }, 'Ничего не найдено. Попробуйте другое слово.'),
     el('h2', { class: 'subh' }, 'Первый экран'), ...[hero],
-    el('h2', { class: 'subh' }, 'Разделы страницы (сверху вниз)'), ...sections,
+    el('h2', { class: 'subh' }, 'Разделы страницы (сверху вниз)'), pageStrip(), ...sections,
     el('h2', { class: 'subh' }, 'Остальные тексты'), ...rest);
 }
 function runFocus() {
@@ -832,6 +1157,7 @@ function runFocus() {
 }
 function applyFilter() {
   const q = S.filter.trim().toLowerCase();
+  document.querySelectorAll('.gap').forEach(g => { g.hidden = !!q; });
   let any = false;
   document.querySelectorAll('.pcard').forEach(c => {
     let shown = 0;
@@ -1079,6 +1405,7 @@ async function enter() {
     const repo = await gh('/repos/' + S.repo);
     if (repo.permissions && !repo.permissions.push) throw ghError(403, '');
     await loadAll();
+        loadLibrary();
   } catch (e) {
     if (e.status === 401 || e.status === 403 || e.status === 404) return logout(explain(e));
     app.replaceChildren(el('main', {}, el('div', { class: 'note bad' }, explain(e)), el('button', { class: 'btn', onclick: enter }, 'Повторить')));
