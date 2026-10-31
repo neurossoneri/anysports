@@ -9,14 +9,7 @@
         {
           "type": "text",
           "heading": "",
-          "body": "Because I believe that intuition is essential in sport.",
-          "note": "",
-          "look": "plain"
-        },
-        {
-          "type": "text",
-          "heading": "",
-          "body": "Throughout their careers, athletes often experience a powerful connection to their intuition. At least once, every competitive athlete has experienced moments when they instinctively know something that goes beyond the logical next step, their coach’s instructions or an agreed strategy.",
+          "body": "Because I believe that intuition is essential in sport.\n\nThroughout their careers, athletes often experience a powerful connection to their intuition. At least once, every competitive athlete has experienced moments when they instinctively know something that goes beyond the logical next step, their coach’s instructions or an agreed strategy.",
           "note": "",
           "look": "plain"
         },
@@ -28,22 +21,23 @@
         {
           "type": "text",
           "heading": "",
-          "body": "They bring an immediate sense of flow and clarity — an inner shift that changes the outer reality.",
+          "body": "They bring an immediate sense of flow and clarity — an inner shift that changes the outer reality. \n\nHow long and deep this connection goes often determines an athlete’s ability to turn a difficult situation in their favour, stay present and creative, and enjoy their performance.",
           "note": "",
           "look": "plain"
         },
         {
-          "type": "text",
-          "heading": "",
-          "body": "How long and deep this connection goes often determines an athlete’s ability to turn a difficult situation in their favour, stay present and creative, and enjoy their performance.",
-          "note": "",
-          "look": "plain"
-        },
-        {
-          "type": "aside",
-          "text": "You can only control yourself.\nThe rest is out of your control.",
-          "look": "panel",
-          "photo": ""
+          "type": "photos",
+          "comp": "auto",
+          "s1": "media/photo-7-20261029-093038.webp",
+          "s2": "",
+          "s3": "",
+          "f1": "50,85.2,1",
+          "f2": "",
+          "f3": "",
+          "zoom": "",
+          "place": "side",
+          "caption": "",
+          "alt": ""
         }
       ]
     },
