@@ -64,7 +64,8 @@
           "f2": "50,100,1",
           "f3": "",
           "zoom": "yes",
-          "comp": "lead-small"
+          "comp": "calm-pair",
+          "f1": "50,78.4,1"
         },
         {
           "type": "text",
