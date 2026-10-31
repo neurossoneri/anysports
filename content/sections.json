@@ -50,23 +50,29 @@
         {
           "type": "photos",
           "s1": "3",
-          "s2": "media/photo-7-20261029-093038.webp",
+          "s2": "",
           "s3": "media/photo-2-20261029-092851.webp",
           "place": "side",
           "caption": "",
           "alt": "Close-up portrait: part of a woman’s face, looking at the camera",
-          "f2": "50,100,1",
+          "f2": "",
           "f3": "",
           "zoom": "yes",
-          "comp": "calm-pair",
-          "f1": "50,78.4,1"
+          "comp": "single",
+          "f1": "50,48.8,1"
+        },
+        {
+          "type": "aside",
+          "text": "\"Faith is rewarded, perhaps, even more than talent or ability. ... We are required to believe in something that doesn't exist in order to allow it to come into being\" Rick Rubin, The Creative Act: A Way of Being.",
+          "look": "panel",
+          "photo": ""
         },
         {
           "type": "text",
           "heading": "",
           "body": "A space to develop the ability to connect with yourself, listen to your inner voice and recognise what it is saying.",
           "note": "",
-          "look": "dropcap"
+          "look": "plain"
         },
         {
           "type": "text",
@@ -74,11 +80,6 @@
           "body": "For some, intuition comes as a gut feeling or a sensation in the heart; for others, as a voice, an image, a sudden flash of insight, or even something that appears in a dream. Sometimes it arrives instantly and clearly; at other times it is subtle and needs silence, patience and attention to notice.",
           "note": "",
           "look": "plain"
-        },
-        {
-          "type": "quote",
-          "text": "Not everything in life can be understood through logic, nor does everything need to be.",
-          "size": "large"
         },
         {
           "type": "text",
@@ -98,6 +99,11 @@
           "body": "Intuition can reconnect us with our inner truth: our values, what makes us happy, what we want from life and how we wish to move through it. Yet this journey is not only about understanding and answers. It is also about learning to accept the unknown, the unpredictable and the uncontrollable. Letting go of the boundaries that stand in the way of your inner alignment and contentment is one of the few skills we practise.",
           "note": "",
           "look": "plain"
+        },
+        {
+          "type": "quote",
+          "text": "Not everything in life can be understood through logic, nor does everything need to be.",
+          "size": "auto"
         },
         {
           "type": "text",
