@@ -51,7 +51,7 @@
       "id": "sessions",
       "type": "text",
       "title": "Intuition sessions",
-      "layout": "centered",
+      "layout": "rail-left",
       "blocks": [
         {
           "type": "photos",
