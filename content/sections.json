@@ -56,11 +56,13 @@
         {
           "type": "photos",
           "s1": "3",
-          "s2": "",
-          "s3": "",
+          "s2": "media/photo-7-20261029-093038.webp",
+          "s3": "media/photo-2-20261029-092851.webp",
           "place": "side",
           "caption": "",
-          "alt": "Close-up portrait: part of a woman’s face, looking at the camera"
+          "alt": "Close-up portrait: part of a woman’s face, looking at the camera",
+          "f2": "",
+          "f3": ""
         },
         {
           "type": "text",
