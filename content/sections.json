@@ -210,24 +210,21 @@
         {
           "type": "text",
           "heading": "",
-          "body": "From joining grassroots sports clubs as a child to becoming a passionate sports fan and eventually working as a Competition Manager at one of the world’s largest sports organisations, my journey has taken me through many different sides of sport.\n\nDuring my ten years at FIFA, I contributed to the organisation of football World Cups, as well as numerous related events. Along the way, I met athletes at different stages of their careers, each with their own backgrounds, experiences, ambitions, and challenges. Through these encounters, I gradually developed a deeper interest in the person behind the athlete — their individual journey, their inner world, and the challenges that may remain unseen from the outside.",
+          "body": "From joining grassroots sports clubs as a child to becoming a passionate sports fan and eventually working as a Competition Manager at one of the world’s largest sports organisations, my journey has taken me through many different sides of sport.\n\nDuring my ten years at FIFA, I contributed to the organisation of football World Cups, as well as numerous related events. Along the way, I met athletes at different stages of their careers, each with their own backgrounds, experiences, ambitions, and challenges. Through these encounters, I gradually developed a deeper interest in the person behind the athlete — their individual journey, their inner world, and the challenges that may remain unseen from the outside. Over time, I began to envision a space where athletes could find support beyond their sporting achievements.",
           "note": "",
           "look": "dropcap"
         },
         {
           "type": "photos",
           "s1": "4",
-          "s2": "5",
-          "s3": "",
+          "s2": "media/photo-20261102-150255-3.webp",
+          "s3": "media/photo-20261102-150442-6.webp",
           "place": "inline",
           "caption": "From the FIFA archive",
           "alt": "Photographs from the FIFA archive",
-          "comp": "calm-pair"
-        },
-        {
-          "type": "quote",
-          "text": "Over time, I began to envision a space where athletes could find support beyond their sporting achievements.",
-          "size": "auto"
+          "comp": "trio",
+          "f2": "50,46.1,1",
+          "f3": "50,99.6,1"
         },
         {
           "type": "text",
