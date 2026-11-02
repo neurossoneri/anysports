@@ -63,7 +63,7 @@
         },
         {
           "type": "aside",
-          "text": "\"Faith is rewarded, perhaps, even more than talent or ability. ... We are required to believe in something that doesn't exist in order to allow it to come into being\" Rick Rubin, The Creative Act: A Way of Being.",
+          "text": "\"Faith is rewarded, perhaps, even more than talent or ability. ... We are required to believe in something that doesn't exist in order to allow it to come into being\" \n— Rick Rubin, The Creative Act: A Way of Being",
           "look": "panel",
           "photo": ""
         },
@@ -141,54 +141,47 @@
       "blocks": [
         {
           "type": "aside",
-          "text": "Transformation isn’t a call to change your outer circumstances. Its an inner journey towards wholeness.",
-          "look": "hand",
+          "text": "\"Failure is the information you need to get where you’re going.\"\n— Rick Rubin, The Creative Act: A Way of Being",
+          "look": "panel",
           "photo": ""
         },
         {
-          "type": "text",
-          "heading": "Transformation is not an easy period but it has a rewarding results",
-          "body": "It often begins independently of our readiness or desire. At a certain point in life, we feel that something is changing — first inside us.\n\nInitially, we dismiss these shifts, calling them moods or temporary phases, thinking that once something external changes, we’ll return to normal.",
-          "note": "",
-          "look": "plain"
+          "type": "photos",
+          "comp": "single",
+          "s1": "media/photo-20261102-135729-2.webp",
+          "s2": "",
+          "s3": "",
+          "f1": "",
+          "f2": "",
+          "f3": "",
+          "zoom": "",
+          "place": "inline",
+          "caption": "",
+          "alt": ""
         },
         {
           "type": "text",
-          "heading": "",
-          "body": "But at some point, we realise this is not something that will simply pass. We can’t run from it or keep denying it.",
+          "heading": "Transformation isn’t a call to change your outer circumstances. Its an inner journey towards wholeness.",
+          "body": "Transformation is not an easy period but it has a rewarding results. It often begins independently of our readiness or desire. At a certain point in life, we feel that something is changing — first inside us.\n\nInitially, we dismiss these shifts, calling them moods or temporary phases, thinking that once something external changes, we’ll return to normal.\n\nBut at some point, we realise this is not something that will simply pass. We can’t run from it or keep denying it.",
           "note": "",
           "look": "plain"
         },
         {
           "type": "quote",
-          "text": "The first step is to acknowledge the truth: we are changing.",
+          "text": "The first step is to acknowledge the truth: we are changing. And we should let it happen.",
           "size": "auto"
         },
         {
           "type": "text",
           "heading": "",
-          "body": "You recognise this stage when things that once mattered lose their power — what used to bring you joy, purpose and satisfaction no longer does. There is a sense of inner confusion, a void where nothing feels alive or purposeful.",
-          "note": "",
-          "look": "plain"
-        },
-        {
-          "type": "text",
-          "heading": "",
-          "body": "We reach for what is familiar: it feels safe, even when it no longer fits. Resisting change is natural — we do not know what lies on the other side.\n\nThis discomfort is hard to endure for long. Some manage, but often the easiest path is to face it — to welcome what is emerging, to embrace the transformation.",
+          "body": "You recognise this stage when things that once mattered lose their power — what used to bring you joy, purpose and satisfaction no longer does. There is a sense of inner confusion, a void where nothing feels alive or purposeful.\n\nWe reach for what is familiar: it feels safe, even when it no longer fits. Resisting change is natural — we do not know what lies on the other side.\n\nThis discomfort is hard to endure for long. Some manage, but often the easiest path is to face it — to welcome what is emerging, to embrace the transformation.",
           "note": "",
           "look": "plain"
         },
         {
           "type": "text",
           "heading": "Rediscovering what feels like you",
-          "body": "After years of parental advice, education and social conditioning, we often drift far from who we truly are. Transformation pushes us to step back and rediscover what truly feels like us.\n",
-          "note": "",
-          "look": "plain"
-        },
-        {
-          "type": "text",
-          "heading": "",
-          "body": "In this stage there is a lot of social pressure. People offer well-meaning advice — just keep trying, see a therapist, change jobs, find a new relationship. These shifts might distract you, but ultimately you might confront the same inner truths again.\n\nThis can lead to social alienation and feeling of loosing touch with your life.",
+          "body": "After years of parental advice, education and social conditioning, we often drift far from who we truly are. Transformation pushes us to step back and rediscover what truly feels like us.\n\nIn this stage there is a lot of social pressure. People offer well-meaning advice — just keep trying, see a therapist, change jobs, find a new relationship. These shifts might distract you, but ultimately you might confront the same inner truths again.\n\nThis can lead to social alienation and feeling of loosing touch with your life.\n",
           "note": "",
           "look": "plain"
         },
