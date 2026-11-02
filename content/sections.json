@@ -201,11 +201,9 @@
       "layout": "centered",
       "blocks": [
         {
-          "type": "text",
-          "heading": "",
-          "body": "Although I am not an athlete myself, sport has always been part of my life.",
-          "note": "",
-          "look": "lead"
+          "type": "quote",
+          "text": "Although I am not an athlete myself, sport has always been part of my life.",
+          "size": "auto"
         },
         {
           "type": "text",

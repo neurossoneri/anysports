@@ -10,13 +10,13 @@
   },
   "contact": {
     "title": "Write to me",
-    "lead": "A few words about you are enough. The details can wait for our conversation.",
+    "lead": "A few words about you and what your looking for are enough. The details can wait for our conversation.",
     "formName": "Your name",
-    "formReach": "How to reach you (email, Telegram or WhatsApp)",
+    "formReach": "Best way to reach you back (email, phone number @ WhatsApp / Telegram)",
     "formMessage": "Leave your message",
     "formSend": "Send",
     "formSent": "Thank you. Your message has been sent.",
-    "formNote": "By sending this form you agree that I may use your name, contact details and message to reply to you, as described in the"
+    "formNote": "Your information will be used solely to respond to your enquiry. For details on how your personal data is handled, please see our [Privacy Policy]."
   },
   "free": {
     "title": "An introductory conversation costs you nothing",
