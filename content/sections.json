@@ -155,7 +155,7 @@
           "f2": "",
           "f3": "",
           "zoom": "",
-          "place": "inline",
+          "place": "side",
           "caption": "",
           "alt": ""
         },
@@ -188,14 +188,9 @@
         {
           "type": "text",
           "heading": "How I can support here",
-          "body": "What I offer is simply to be a witness — a steady presence as you navigate these shifts, to normalise and name what you’re feeling. Let yourself relax in unknown and uncomfortable. \nThis is deep and individual work, but everyone sometimes needs a hand to hold in these moments. Of course, it’s not a hand you rely on forever. Much of the journey you walk alone, but a witness — someone who can name your experience as valid and normal — can make the difference.\n\nI speak from my own journey, and what I offer is to be that hand, that witness, perhaps even that guide, whenever you need it.",
+          "body": "What I offer is simply to be a witness — a steady presence as you navigate these shifts, to normalise and name what you’re feeling. Let yourself relax in unknown and uncomfortable. \nThis is deep and individual work, but everyone sometimes needs a hand to hold in these moments. Of course, it’s not a hand you rely on forever. Much of the journey you walk alone, but a witness — someone who can name your experience as valid and normal — can make the difference.\n\nI speak from my own journey, and what I offer is to be that hand, that witness, perhaps even that guide, whenever you need it.\n\nIf you are walking this path and don’t have that support, you can reach out.",
           "note": "",
-          "look": "plain"
-        },
-        {
-          "type": "quote",
-          "text": "If you are walking this path and don’t have that support, you can reach out.",
-          "size": "auto"
+          "look": "panel"
         }
       ]
     },
