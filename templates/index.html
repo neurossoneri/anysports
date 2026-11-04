@@ -43,6 +43,7 @@
       --type-quote-long:400 clamp(1.2rem,1.9vw,1.55rem)/1.5 var(--serif);
       --type-statement:500 clamp(1.75rem,3.2vw,2.8rem)/1.26 var(--serif);
       --type-hand:500 clamp(2rem,3.6vw,3.2rem)/1.2 var(--hand);
+      --type-panel:500 clamp(1.45rem,2.4vw,2rem)/1.4 var(--serif);
     }
     :root[data-theme="dark"] {
       color-scheme:dark;
@@ -141,7 +142,7 @@
     .hero { padding:0; }
     .hero-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); min-height:min(100svh,900px); }
     .hero-photo { min-height:100%; animation:heroIn 1.8s var(--ease) both; -webkit-mask-image:linear-gradient(180deg,#000 78%,transparent); mask-image:linear-gradient(180deg,#000 78%,transparent); }   /* the lower edge dissolves into the page */
-    .hero-photo > img { object-position:88% 42%; }   /* the face sits at the right edge of the picture: keep it in view on narrow screens */
+    .hero-photo > img { object-position:var(--hx,88%) var(--hy,42%); transform:scale(var(--hz,1)); transform-origin:var(--hx,88%) var(--hy,42%); }   /* 88% 42%: прежнее положение, если кадрирование не задано */
     .hero-quote { align-self:center; padding:clamp(40px,6vw,96px) max(24px,calc((100vw - 1200px) / 2)) clamp(40px,6vw,96px) clamp(24px,4vw,72px); }
     .hero-quote::before { content:""; display:block; width:64px; height:3px; margin-bottom:clamp(24px,3vw,40px); background:linear-gradient(90deg,var(--blue-hi),var(--green-hi)); }
     .hero-q1 { font:500 clamp(2.2rem,4vw,4rem)/1.08 var(--serif); letter-spacing:-.03em; animation:riseIn 1.6s var(--ease) .5s both; }
@@ -184,10 +185,10 @@
     .b p.b-note, .b-lead p.b-note { margin-top:1em; font:400 .92rem/1.7 var(--sans); color:var(--c-muted); }
     .b-panel p.b-note { margin:0; color:var(--c-text); }
     /* Quotation: upright serif, accent colour, larger and set in by space. No italics, no rule. */
-    .pull { margin:clamp(40px,6vw,76px) 0; padding-left:clamp(0px,3vw,36px); font:var(--type-quote); letter-spacing:-.012em; color:var(--c-a); max-width:20em; white-space:pre-line; text-wrap:balance; }
-    .pull-long { font:var(--type-quote-long); max-width:26em; }
+    .pull { margin:clamp(18px,2.4vw,30px) 0; padding:0; font:var(--type-quote); letter-spacing:-.012em; color:var(--c-a); max-width:none; white-space:pre-line; text-wrap:pretty; }
+    .pull-long { font:var(--type-quote-long); max-width:none; }
     .pull:empty { display:none; }
-    .blocks > .pull { margin-top:clamp(40px,6vw,76px); margin-bottom:clamp(40px,6vw,76px); }
+    .blocks > .pull { margin-top:clamp(18px,2.4vw,30px); margin-bottom:clamp(18px,2.4vw,30px); }
     .sec-centered .pull { margin-inline:auto; }
 
     /* Statements set aside, like a photo: handwritten, on a cold panel or on the page itself */
@@ -410,6 +411,74 @@
     /* Closing statement: a narrow, quiet column with a lot of air. Ordinary type, no line, no ornament, no background. */
     .aside-closing { margin:clamp(72px,12vw,168px) auto clamp(24px,5vw,72px); padding:0; text-align:center; }
     .aside-closing .statement { max-width:16em; margin-inline:auto; font:400 clamp(1.45rem,2.6vw,2.2rem)/1.42 var(--serif); letter-spacing:-.01em; color:var(--c-text); }
+    /* owner-feedback-v2. Обратная связь владелицы (ноябрь 2026). Блок стоит в конце таблицы: он дополняет правила выше. */
+    /* Обычный текст без подзаголовка выглядит так же, как обычный текст с подзаголовком в том же разделе. В разделах без подзаголовков ничего не меняется. */
+    .sec:has(.b-text.has-h) .b-text:not(.has-h):not(.b-dropcap) p { font:400 clamp(1.02rem,1.3vw,1.12rem)/1.85 var(--sans); color:var(--c-muted); max-width:62ch; }
+    /* Подпись под цитатой или фразой: строка, начатая с тире. Мельче и с новой строки. */
+    .q-by { display:block; margin-top:.9em; font:500 .86rem/1.5 var(--sans); letter-spacing:.03em; text-transform:none; text-shadow:none; white-space:pre-line; opacity:.85; }
+    /* Плашка: прямой книжный шрифт; цвет подкладки выбирается в панели. «Авто»: на тёмном и бирюзовом фоне плашка светлее фона, на светлом тёмная. */
+    .quote-panel .quote-text { font:var(--type-panel); letter-spacing:-.005em; }
+    .quote-panel:not(:has(.quote-bg)) { min-height:0; align-content:center; }
+    .quote-panel:not(:has(.quote-bg))::before { content:none; }
+    .band-deep .quote-panel, .band-teal .quote-panel { background:linear-gradient(150deg,#1d527a,#216f8a 58%,#268c85); box-shadow:inset 0 0 0 1px rgba(141,189,240,.3),0 28px 50px -32px rgba(0,0,0,.75); }
+    .quote-panel[data-tint="night"] { background:linear-gradient(150deg,#0b2c44,#0f4a5b 60%,#14604f); box-shadow:none; }
+    .quote-panel[data-tint="sea"] { background:linear-gradient(150deg,#1d527a,#216f8a 58%,#268c85); box-shadow:inset 0 0 0 1px rgba(141,189,240,.3),0 28px 50px -32px rgba(0,0,0,.75); }
+    .quote-panel[data-tint="sand"] { background:linear-gradient(150deg,#f2e9d6,#e6d9bd); box-shadow:inset 0 0 0 1px rgba(16,36,58,.14); }
+    .quote-panel[data-tint="mist"] { background:linear-gradient(150deg,#e4eef8,#cfe0f1); box-shadow:inset 0 0 0 1px rgba(16,36,58,.14); }
+    .quote-panel[data-tint="sand"] .quote-text, .quote-panel[data-tint="mist"] .quote-text { color:#10243a; text-shadow:none; }
+    /* Начертание фразы (панель, тихая, заключительная) */
+    [data-face="bold"] .statement, [data-face="bold"] .quote-text { font-weight:700; }
+    [data-face="caps"] .statement { font-size:clamp(1.2rem,2.2vw,1.9rem); text-transform:uppercase; letter-spacing:.05em; font-weight:600; line-height:1.45; }
+    [data-face="caps"] .quote-text { font-size:clamp(1.05rem,1.8vw,1.5rem); text-transform:uppercase; letter-spacing:.05em; font-weight:600; line-height:1.5; }
+    [data-face="sans"] .statement, [data-face="sans"] .quote-text { font-family:var(--sans); font-weight:500; letter-spacing:-.005em; }
+    /* Седьмая тема списка («Trusting yourself first»): того же размера, что остальные, по центру, вплотную к списку */
+    .theme-final { max-width:none; text-align:center; padding-left:0!important; padding-right:0!important; }
+    .theme-final .glyph { margin-inline:auto; }
+    .theme-final span { margin-inline:auto; }
+    .theme-final + .theme-grid { margin-top:0; }
+    /* Широкое фото во всю ширину экрана: передышка между частями раздела, края растворяются в фоне */
+    .b-band { width:100vw; margin:clamp(40px,6vw,88px) 0 clamp(40px,6vw,88px) calc(50% - 50vw); }
+    .b-band .photo { height:clamp(240px,38vw,560px); background:none; -webkit-mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent); mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent); }
+    .b-band.band-h-low .photo { height:clamp(170px,26vw,380px); }
+    .b-band.band-h-tall .photo { height:clamp(320px,54vw,780px); }
+    .b-band .photo > img { object-position:50% 30%; }
+    .b-band.band-blur-soft .photo > img { filter:blur(3px); scale:1.05; }
+    .b-band.band-blur-medium .photo > img { filter:blur(9px); scale:1.08; }
+    /* Главный экран: вид цитаты и (по желанию) фото сверху на телефоне */
+    .hero { --hs:1; }
+    .hero[data-size="small"] { --hs:.82; }
+    .hero[data-size="large"] { --hs:1.2; }
+    .hero-q1 { font-size:calc(clamp(2.2rem,4vw,4rem) * var(--hs)); }
+    .hero-q2 { font-size:calc(clamp(1.05rem,1.5vw,1.3rem) * var(--hs)); }
+    .hero[data-font="sans"] .hero-q1, .hero[data-font="sans"] .hero-q2 { font-family:var(--sans); }
+    .hero[data-font="sans"] .hero-q1 { font-weight:600; }
+    .hero[data-font="bold"] .hero-q1 { font-weight:700; }
+    .hero[data-font="bold"] .hero-q2 { font-weight:600; }
+    .hero[data-font="caps"] .hero-q1 { text-transform:uppercase; letter-spacing:.02em; line-height:1.2; font-size:calc(clamp(1.7rem,3vw,3rem) * var(--hs)); }
+    @media (max-width:900px) {
+      .hero-photo > img { object-position:var(--mx,var(--hx,88%)) var(--my,var(--hy,42%)); transform:scale(var(--mz,var(--hz,1))); transform-origin:var(--mx,var(--hx,88%)) var(--my,var(--hy,42%)); }
+      .hero-q1 { font-size:calc(clamp(1.45rem,5.6vw,2.7rem) * var(--hs)); }
+      .hero-q2 { font-size:calc(clamp(.9rem,2.5vw,1.15rem) * var(--hs)); }
+      .hero[data-font="caps"] .hero-q1 { font-size:calc(clamp(1.15rem,4.4vw,2.1rem) * var(--hs)); }
+      .hero[data-phone="top"] .hero-grid { grid-template-columns:minmax(0,1fr); min-height:0; }
+      .hero[data-phone="top"] .hero-photo { min-height:0; width:100%; aspect-ratio:4/5; max-height:78svh; }
+      .hero[data-phone="top"] .hero-quote { padding:clamp(24px,6vw,40px) clamp(18px,5vw,32px) clamp(40px,8vw,64px); }
+    }
+    /* Политика конфиденциальности во всплывающем окне (без JavaScript ссылка открывает обычную страницу) */
+    html:has(dialog[open]) { overflow:hidden; }
+    .pp-dialog { width:min(780px,calc(100vw - 24px)); max-width:none; max-height:min(90vh,940px); padding:0; border:0; background:var(--paper); color:var(--text); box-shadow:0 40px 90px -30px rgba(0,0,0,.7); }
+    .pp-dialog::backdrop { background:rgba(6,18,30,.82); }
+    .pp-box { max-height:min(90vh,940px); overflow:auto; overscroll-behavior:contain; padding:clamp(28px,5vw,56px) clamp(20px,5vw,56px) clamp(32px,5vw,56px); }
+    .pp-close { position:sticky; top:0; float:right; z-index:2; width:44px; height:44px; margin:-8px -8px 0 12px; border:1px solid var(--border); background:var(--paper); color:var(--text); font:400 1.6rem/1 var(--sans); cursor:pointer; }
+    .pp-title { margin:0 0 18px; font:500 clamp(1.8rem,3.4vw,2.6rem)/1.15 var(--serif); letter-spacing:-.02em; }
+    .pp-body { font:400 1.02rem/1.75 var(--sans); }
+    .pp-body h2 { margin:30px 0 8px; font:500 1.3rem/1.3 var(--serif); }
+    .pp-body p { margin:0 0 .9em; }
+    .pp-body ul { margin:0 0 .9em; padding-left:1.2em; }
+    .pp-body li { margin-bottom:6px; }
+    .pp-body a { color:var(--blue-deep); text-decoration:underline; text-underline-offset:3px; }
+    .pp-more { margin-top:28px; font-size:.88rem; }
+    .pp-more a { color:var(--blue-deep); text-decoration:underline; text-underline-offset:3px; }
     /* An optional larger view: a quiet dark overlay, closed by a tap, Esc or the button. */
     .zoom-btn { position:absolute; inset:0; z-index:3; padding:0; border:0; background:transparent; cursor:zoom-in; }
     .zoom-btn:focus-visible { outline:2px solid var(--blue-hi); outline-offset:-5px; }
@@ -465,7 +534,7 @@
             <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
             <button class="button button-primary" type="submit" id="form-send" data-i18n="contact.formSend"></button>
             <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
-            <p class="form-note"><span data-i18n="contact.formNote"></span> <a href="privacy/" data-i18n="privacyLink"></a>.</p>
+            <p class="form-note" data-i18n-link="contact.formNote"><!--@@FORMNOTE@@--></p>
           </form>
           <p class="form-sent" id="form-sent" role="status" tabindex="-1" hidden data-i18n="contact.formSent"></p>
         </div>
@@ -481,23 +550,7 @@
             <a class="qa-ask" href="#contact" data-i18n="qa.ask"></a>
           </div>
           <div class="qa-body">
-          <div class="qa-group">
-            <h3 class="qa-group-title" data-i18n="qa.g1"></h3>
-            <details name="qa" data-qa="1"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q1"></span></summary><div class="qa-a"><p data-i18n="qa.a1"></p></div></details>
-            <details name="qa" data-qa="2"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q2"></span></summary><div class="qa-a"><p data-i18n="qa.a2"></p></div></details>
-            <details name="qa" data-qa="3"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q3"></span></summary><div class="qa-a"><p data-i18n="qa.a3"></p></div></details>
-            <details name="qa" data-qa="4"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q4"></span></summary><div class="qa-a"><p data-i18n="qa.a4"></p></div></details>
-          </div>
-          <div class="qa-group">
-            <h3 class="qa-group-title" data-i18n="qa.g2"></h3>
-            <details name="qa" data-qa="5"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q5"></span></summary><div class="qa-a"><p data-i18n="qa.a5"></p></div></details>
-            <details name="qa" data-qa="6"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q6"></span></summary><div class="qa-a"><p data-i18n="qa.a6"></p></div></details>
-          </div>
-          <div class="qa-group">
-            <h3 class="qa-group-title" data-i18n="qa.g3"></h3>
-            <details name="qa" data-qa="7"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q7"></span></summary><div class="qa-a"><p data-i18n="qa.a7"></p></div></details>
-            <details name="qa" data-qa="8"><summary><span class="qa-n" aria-hidden="true"></span><span class="qa-q" data-i18n="qa.q8"></span></summary><div class="qa-a"><p data-i18n="qa.a8"></p></div></details>
-          </div>
+<!--@@QA@@-->
           </div>
         </div>
         <div class="free" id="free">
@@ -513,8 +566,10 @@
     <!--@@NOTES@@-->
   </main>
 
-  <footer class="site-footer after-teal"><div class="container footer-inner"><p>© <span id="year">2026</span> <span data-i18n="footerName"></span> · <span data-i18n="footer.line"></span></p><div class="footer-links"><a href="privacy/" data-i18n="privacyFooter"></a><a href="#top" data-i18n="backToTop"></a></div></div><div class="container"><p class="footer-privacy" data-i18n="footer.privacy"></p></div></footer>
+  <footer class="site-footer after-teal"><div class="container footer-inner"><p>© <span id="year">2026</span> <span data-i18n="footerName"></span> · <span data-i18n="footer.line"></span></p><div class="footer-links"><a href="privacy/" data-privacy data-i18n="privacyFooter"></a><a href="#top" data-i18n="backToTop"></a></div></div><div class="container"><p class="footer-privacy" data-i18n="footer.privacy"></p></div></footer>
 
+
+  <!--@@PRIVACY@@-->
 
   <script>
     'use strict';
@@ -557,7 +612,6 @@
       $$('[data-i18n]').forEach(node => { const text = t(node.dataset.i18n); if (node.textContent !== text) node.textContent = text; });   // the build already wrote this text: touch only what differs
       $$('[data-i18n-aria]').forEach(node => node.setAttribute('aria-label', t(node.dataset.i18nAria)));
       $$('[data-i18n-alt]').forEach(node => { const text = t(node.dataset.i18nAlt); if (node.alt !== text) node.alt = text; });
-      $$('[data-qa]').forEach(node => { node.hidden = !t('qa.q' + node.dataset.qa).trim(); });
       $$('[data-post-lang]').forEach(node => { node.hidden = node.dataset.postLang !== lang; });
       const notes = $('#notes');
       if (notes) notes.hidden = !(CMS_VISIBLE_POSTS[lang] > 0);
@@ -570,6 +624,19 @@
 
     watch('[data-fade]', 'in', { threshold: .15, rootMargin: '0px 0px -6% 0px' });
     window.__ready = true;                                                              // the page script is running: the safety net in <head> stands down
+
+    /* ---------- Privacy notice in a dialog (without JavaScript the same link opens the page privacy/) ---------- */
+    const privacyBox = $('#privacy-dialog');
+    if (privacyBox && typeof privacyBox.showModal === 'function') {
+      document.addEventListener('click', event => {
+        const link = event.target.closest('a[data-privacy]');
+        if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        privacyBox.showModal();
+        $('.pp-box', privacyBox).scrollTop = 0;
+      });
+      privacyBox.addEventListener('click', event => { if (event.target === privacyBox || event.target.closest('.pp-close')) privacyBox.close(); });
+    }
 
     /* ---------- Photographs: an optional larger view (a setting of the photo block) ---------- */
     $$('.b-photos[data-lightbox] .photo').forEach(frame => {

@@ -116,6 +116,45 @@ content:
   - name: portrait
     label: Фото 1 · Главное фото (первый экран, левая половина; вертикальный кадр, например половина лица)
     type: image
+  - name: portrait_crop
+    label: Кадрирование главного фото на компьютере (x,y,масштаб; задаётся в панели, вкладка «Фотографии»)
+    type: string
+  - name: portrait_crop_m
+    label: Кадрирование главного фото на телефоне (x,y,масштаб; задаётся в панели, вкладка «Фотографии»)
+    type: string
+  - name: hero_phone
+    label: 'Главное фото на телефоне (задаётся в панели)'
+    type: select
+    options:
+      values:
+      - value: side
+        label: 'Рядом с текстом'
+      - value: top
+        label: 'Сверху на всю ширину'
+  - name: hero_font
+    label: 'Главный экран: шрифт цитаты'
+    type: select
+    options:
+      values:
+      - value: serif
+        label: 'Книжный'
+      - value: sans
+        label: 'Без засечек'
+      - value: bold
+        label: 'Жирный'
+      - value: caps
+        label: 'Заглавными'
+  - name: hero_size
+    label: 'Главный экран: размер цитаты'
+    type: select
+    options:
+      values:
+      - value: small
+        label: 'Помельче'
+      - value: normal
+        label: 'Как сейчас'
+      - value: large
+        label: 'Крупнее'
   - name: quote_photo
     label: Фото 2 · место выбирается в блоке «Фото» раздела страницы (лучше править в /admin/)
     type: image
@@ -227,6 +266,8 @@ content:
             label: Фото
           - value: themes
             label: Список тем со значками
+          - value: band
+            label: Широкое фото во всю ширину
       - name: heading
         label: Подзаголовок (необязательно)
         type: string
@@ -381,6 +422,95 @@ content:
       - name: finalText
         label: Итоговая фраза · текст (по центру)
         type: text
+      - name: tint
+        label: 'Цвет плашки фразы'
+        type: select
+        options:
+          values:
+          - value: auto
+            label: 'Автоматически'
+          - value: sea
+            label: 'Морская'
+          - value: night
+            label: 'Тёмная'
+          - value: sand
+            label: 'Светлая, песочная'
+          - value: mist
+            label: 'Светлая, голубая'
+      - name: face
+        label: 'Шрифт фразы'
+        type: select
+        options:
+          values:
+          - value: book
+            label: 'Книжный'
+          - value: bold
+            label: 'Жирный'
+          - value: caps
+            label: 'Заглавными'
+          - value: sans
+            label: 'Без засечек'
+      - name: crop
+        label: Кадрирование широкого фото (x,y,масштаб; задаётся в панели)
+        type: string
+      - name: height
+        label: 'Высота широкого фото'
+        type: select
+        options:
+          values:
+          - value: low
+            label: 'Невысокая'
+          - value: medium
+            label: 'Средняя'
+          - value: tall
+            label: 'Высокая'
+      - name: blur
+        label: 'Размытие широкого фото'
+        type: select
+        options:
+          values:
+          - value: none
+            label: 'Без размытия'
+          - value: soft
+            label: 'Лёгкое'
+          - value: medium
+            label: 'Сильнее'
+      - name: finalPos
+        label: 'Седьмая тема: где стоит'
+        type: select
+        options:
+          values:
+          - value: after
+            label: 'После шести тем'
+          - value: before
+            label: 'Перед шестью темами'
+- name: qa
+  label: 'Вопросы и ответы: категории и вопросы (удобнее в /admin/)'
+  type: file
+  path: content/qa.json
+  format: json
+  operations:
+    delete: false
+  fields:
+  - name: groups
+    label: Категории (порядок = порядок на сайте)
+    type: object
+    list: true
+    fields:
+    - name: title
+      label: Подпись категории (можно оставить пустой)
+      type: string
+    - name: items
+      label: Вопросы
+      type: object
+      list: true
+      fields:
+      - name: q
+        label: Вопрос
+        type: string
+      - name: a
+        label: Ответ
+        type: text
 - name: home_en
   label: Тексты сайта (English)
   type: file
@@ -438,7 +568,7 @@ content:
       label: Сообщение после успешной отправки
       type: text
     - name: formNote
-      label: Согласие под формой (после текста сама добавляется ссылка «privacy notice»)
+      label: 'Согласие под формой (слово в [квадратных скобках] становится ссылкой на политику конфиденциальности; без скобок ссылка добавится в конце)'
       type: text
   - name: qa
     label: Q&A (раздел страницы; пустой вопрос скрывает слот)
@@ -453,74 +583,6 @@ content:
     - name: ask
       label: Ссылка под текстом (ведёт к форме контактов)
       type: string
-    - name: g1
-      label: Подпись группы 1 (над вопросами 1–4)
-      type: string
-      description: Оставьте пустым, чтобы убрать подпись.
-    - name: q1
-      label: Вопрос 1
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a1
-      label: Ответ 1
-      type: text
-    - name: q2
-      label: Вопрос 2
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a2
-      label: Ответ 2
-      type: text
-    - name: q3
-      label: Вопрос 3
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a3
-      label: Ответ 3
-      type: text
-    - name: q4
-      label: Вопрос 4
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a4
-      label: Ответ 4
-      type: text
-    - name: g2
-      label: Подпись группы 2 (над вопросами 5–6)
-      type: string
-      description: Оставьте пустым, чтобы убрать подпись.
-    - name: q5
-      label: Вопрос 5
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a5
-      label: Ответ 5
-      type: text
-    - name: q6
-      label: Вопрос 6
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a6
-      label: Ответ 6
-      type: text
-    - name: g3
-      label: Подпись группы 3 (над вопросами 7–8)
-      type: string
-      description: Оставьте пустым, чтобы убрать подпись.
-    - name: q7
-      label: Вопрос 7
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a7
-      label: Ответ 7
-      type: text
-    - name: q8
-      label: Вопрос 8
-      type: string
-      description: Оставьте пустым, чтобы скрыть этот вопрос.
-    - name: a8
-      label: Ответ 8
-      type: text
   - name: free
     label: 'Q&A: блок «вводная беседа бесплатно» (под вопросами)'
     type: object

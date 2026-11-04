@@ -113,14 +113,14 @@ SRCSET_WIDTHS = (640, 1080, 1600)   # smaller copies (WebP) for phones and small
 # Only the first-screen photograph is a fixed place in the template. An empty one is hidden together with its frame on the live site.
 HIDE_WHEN_EMPTY = ('portrait',)
 
-QA_SLOTS = 8
+QA_FILE = 'content/qa.json'   # questions and answers: categories with their questions (edited in the dashboard)
 BRAND_DEFAULT = 'Sport Intuitive'
 # The logo (also the favicon design) for article pages. The home page has no top bar any more.
 BRAND_MARK_SVG = '''<svg viewBox="0 0 48 48" width="35" height="35" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><rect width="48" height="14" fill="#cfe0f5"/><rect y="14" width="48" height="10" fill="#dce8f8"/><rect y="24" width="48" height="8" fill="#e8ecf9"/><circle cx="37" cy="11" r="4.6" fill="#fff" opacity=".85"/><path d="M-2 31 13 12l8 9 8-12 21 22z" fill="#aab9e4"/><path d="M9.7 16 13 12l3.6 4-1.8-1.1-1.6 1.7-1.6-1.7zM25.9 13.6 29 9l4.6 4.6-2.3-1.2-2.1 2-1.6-1.9z" fill="#fff" opacity=".93"/><path d="M-2 31v-4l8-5 9 9zM19 31l11-9 10 6 10-4v7z" fill="#7f9fd3"/><rect y="31" width="48" height="17" fill="#86c4bc"/><rect y="31" width="48" height="6" fill="#c3e2e0" opacity=".55"/><path d="M12 34.5h9M27 37.5h11M8 40h7" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".6"/><path d="M-2 48v-8c8-4 15-1 22 3 8 4 18 3 30-2v7z" fill="#8ec99b"/><path d="M14 48c10-3 22-2 36-7v7z" fill="#64aa8b"/><path d="M36 46.5l-.6-4.2M39 46.5l.3-5M42 46.5l1.3-4" stroke="#4f9a7a" stroke-width="1" stroke-linecap="round" fill="none"/></svg>'''
 # Dashboard: which page section a group of copy lives in (for the "show on the site" link).
 SECTION_ANCHORS = {'hero': 'hero', 'contact': 'contact', 'qa': 'qa', 'free': 'free', 'notes': 'notes'}
 # Copy that must never be blank (tests check it; the dashboard enforces it before saving).
-REQUIRED_COPY = ('qa.q1',)
+REQUIRED_COPY = ()
 # Promise-like wording the site must never carry (checked by the tests and, before saving, by the dashboard).
 BANNED_PHRASES = {
     'en': [r'risk of (?:physical )?injur', r'\bprevent', r'burn-?out', r'guarantee', r'\bcures?\b', r'\btreat(?:s|ment)?\b'],
@@ -398,9 +398,18 @@ TEXT_LOOKS = (
     ('finale', 'Итоговая фраза по центру'),
     ('hand', 'Рукописная строка по центру'),
 )
-ASIDE_LOOKS = (('quiet', 'Тихая: обычным шрифтом, без рамки'), ('closing', 'Заключительная: узкая колонка, много воздуха (для конца страницы)'), ('hand', 'Рукописью (Caveat), без плашки'), ('panel', 'На тёмной плашке (можно с фото за текстом)'))
+ASIDE_LOOKS = (('quiet', 'Тихая: обычным шрифтом, без рамки'), ('closing', 'Заключительная: узкая колонка, много воздуха (для конца страницы)'), ('hand', 'Рукописью (Caveat), без плашки'), ('panel', 'На плашке (цвет и шрифт выбираются; можно с фото за текстом)'))
 QUOTE_SIZES = (('auto', 'Автоматически (длинные фразы мельче)'), ('large', 'Крупно'), ('small', 'Помельче'))
 PHOTO_PLACES = (('inline', 'В тексте'), ('side', 'Сбоку, в боковой колонке'))
+ASIDE_TINTS = (('auto', 'Автоматически (на тёмном фоне светлее фона, на светлом тёмная)'), ('sea', 'Морская, светлее тёмного фона'), ('night', 'Тёмная'),
+               ('sand', 'Светлая, песочная'), ('mist', 'Светлая, голубая'))
+ASIDE_FACES = (('book', 'Книжный: прямой шрифт с засечками'), ('bold', 'Жирный'), ('caps', 'Заглавными'), ('sans', 'Прямой, без засечек'))
+BAND_BLURS = (('none', 'Без размытия'), ('soft', 'Лёгкое'), ('medium', 'Сильнее'))
+BAND_HEIGHTS = (('low', 'Невысокая полоса'), ('medium', 'Средняя'), ('tall', 'Высокая'))
+FINAL_POSITIONS = (('after', 'После шести тем'), ('before', 'Перед шестью темами'))
+HERO_FONTS = (('serif', 'Книжный (как сейчас)'), ('sans', 'Без засечек'), ('bold', 'Жирный'), ('caps', 'Заглавными'))
+HERO_SIZES = (('small', 'Помельче'), ('normal', 'Как сейчас'), ('large', 'Крупнее'))
+PHONE_HEROES = (('side', 'Рядом с текстом, узкая полоса (как сейчас)'), ('top', 'Сверху на всю ширину, текст под фото'))
 THEME_COUNT = 6
 
 
@@ -422,7 +431,7 @@ BLOCK_TYPES = {
     },
     'quote': {
         'label': 'Цитата', 'add': 'Цитата',
-        'hint': 'Выделенная мысль внутри текста: крупнее, цветом, без курсива и без линии. Для отдельного высказывания лучше блок «Фраза».',
+        'hint': 'Выделенная мысль внутри текста: крупнее, цветом, без курсива и без линии, без отступа слева. Подпись: начните новую строку с тире. Для отдельного высказывания лучше блок «Фраза».',
         'fields': [
             {'name': 'text', 'label': 'Цитата', 'type': 'text'},
             {'name': 'size', 'label': 'Размер', 'type': 'select', 'options': _opts(QUOTE_SIZES), 'default': 'auto'},
@@ -430,11 +439,13 @@ BLOCK_TYPES = {
     },
     'aside': {
         'label': 'Фраза', 'add': 'Фраза',
-        'hint': 'Отдельное высказывание. «Тихая» по умолчанию, рукописью (Caveat) только когда это уместно. В разделе с боковой колонкой стоит сбоку, в остальных прямо в тексте. Перенос строки здесь это перенос строки во фразе.',
+        'hint': 'Отдельное высказывание. «Тихая» по умолчанию, рукописью (Caveat) только когда это уместно. В разделе с боковой колонкой стоит сбоку, в остальных прямо в тексте. Перенос строки здесь это перенос строки во фразе. Подпись: начните новую строку с тире («— Рик Рубин, The Creative Act»), и она встанет мельче и отдельной строкой.',
         'fields': [
             {'name': 'text', 'label': 'Фраза', 'type': 'text'},
             {'name': 'look', 'label': 'Вид фразы', 'type': 'select', 'options': _opts(ASIDE_LOOKS), 'default': 'quiet'},
             {'name': 'photo', 'label': 'Фото за фразой (необязательно)', 'type': 'photo', 'default': '', 'showIf': {'look': ['panel']}},
+            {'name': 'tint', 'label': 'Цвет плашки (когда за фразой нет фото)', 'type': 'select', 'options': _opts(ASIDE_TINTS), 'default': 'auto', 'showIf': {'look': ['panel']}},
+            {'name': 'face', 'label': 'Шрифт фразы', 'type': 'select', 'options': _opts(ASIDE_FACES), 'default': 'book', 'showIf': {'look': ['panel', 'quiet', 'closing']}},
         ],
     },
     'photos': {
@@ -454,19 +465,31 @@ BLOCK_TYPES = {
             {'name': 'alt', 'label': 'Описание фото для скринридеров (необязательно)', 'type': 'string'},
         ],
     },
+    'band': {
+        'label': 'Широкое фото', 'add': 'Широкое фото',
+        'hint': 'Фото во всю ширину экрана, как передышка или переход между частями раздела. Верх и низ мягко растворяются в фоне. Подойдёт горизонтальный кадр. «Кадрировать» двигает фото внутри полосы. Пока фото не выбрано, блок на сайте не виден.',
+        'fields': [
+            {'name': 'photo', 'label': 'Фото', 'type': 'photo', 'default': ''},
+            {'name': 'crop', 'label': 'Кадрирование', 'type': 'crop', 'default': ''},
+            {'name': 'height', 'label': 'Высота полосы', 'type': 'select', 'options': _opts(BAND_HEIGHTS), 'default': 'medium'},
+            {'name': 'blur', 'label': 'Размытие', 'type': 'select', 'options': _opts(BAND_BLURS), 'default': 'none'},
+            {'name': 'alt', 'label': 'Описание фото для скринридеров (необязательно)', 'type': 'string'},
+        ],
+    },
     'themes': {
         'label': 'Список тем со значками', 'add': 'Список тем',
-        'hint': 'Шесть тем со значками и итоговая фраза. Тему с пустым названием и пояснением сайт не показывает.',
+        'hint': 'Шесть тем со значками и седьмая тема по центру (её можно поставить перед шестью или после). Тему с пустым названием и пояснением сайт не показывает.',
         'fields': ([{'name': 'title', 'label': 'Заголовок', 'type': 'string'},
                     {'name': 'intro', 'label': 'Вступление', 'type': 'text'}]
                    + [f for n in range(1, THEME_COUNT + 1) for f in (
                        {'name': f't{n}', 'label': f'Тема {n} · фраза', 'type': 'string'},
                        {'name': f'd{n}', 'label': f'Тема {n} · пояснение', 'type': 'text'})]
-                   + [{'name': 'finalTitle', 'label': 'Итоговая фраза · заголовок (по центру, крупно)', 'type': 'string'},
-                      {'name': 'finalText', 'label': 'Итоговая фраза · текст (по центру)', 'type': 'text'}]),
+                   + [{'name': 'finalTitle', 'label': 'Седьмая тема · фраза (по центру, как у остальных тем)', 'type': 'string'},
+                      {'name': 'finalText', 'label': 'Седьмая тема · пояснение (по центру)', 'type': 'text'},
+                      {'name': 'finalPos', 'label': 'Седьмая тема · где стоит', 'type': 'select', 'options': _opts(FINAL_POSITIONS), 'default': 'after'}]),
     },
 }
-WIDE_BLOCKS = ('themes',)   # these take the full width of the page and close the two-column part of a section
+WIDE_BLOCKS = ('themes', 'band')   # these take the full width of the page and close the two-column part of a section
 THEME_GLYPHS = (
     '<path d="M4 9h24M8 16h16M12 23h8"/>',
     '<circle cx="16" cy="16" r="2.6"/><path d="M10.5 10.5a7.8 7.8 0 0 0 0 11M21.5 10.5a7.8 7.8 0 0 1 0 11M6 6a14 14 0 0 0 0 20M26 6a14 14 0 0 1 0 20"/>',
@@ -573,8 +596,10 @@ def block_has_content(block):
         return bool(block['text'].strip())
     if kind == 'photos':
         return any(block[k] for k in ('s1', 's2', 's3'))
+    if kind == 'band':
+        return bool(block['photo'])
     if kind == 'themes':
-        return any(v.strip() for k, v in block.items() if k != 'type')
+        return any(v.strip() for k, v in block.items() if k not in ('type', 'finalPos'))
     return False
 
 
@@ -621,6 +646,27 @@ class PageContext:
                 f'{PHOTO_PLACEHOLDER}</figure>')
 
 
+SIGNATURE_LINE = re.compile(r'^\s*(?:[—–―]|--)\s*(?=\S)')
+
+
+def split_signature(text):
+    """A quotation and its signature. Lines that start with a dash after at least one line of text ("— Rick Rubin, The Creative Act") are the signature."""
+    main, by = [], []
+    for line in str(text or '').strip().split('\n'):
+        if by or (main and SIGNATURE_LINE.match(line)):
+            if line.strip():
+                by.append(line.strip())
+        else:
+            main.append(line)
+    return '\n'.join(main).strip(), by
+
+
+def quote_inner(text):
+    """Escaped text of a quotation; the signature, if there is one, is a smaller line of its own."""
+    main, by = split_signature(text)
+    return esc(main) + (f'<span class="q-by">{esc(chr(10).join(by))}</span>' if by else '')
+
+
 def render_block(block, label, ctx, in_rail):
     """HTML of one block, or '' when it is empty or has nothing to show. `label` is its number, like 4.2 (the same as in the dashboard)."""
     if not block or not block_has_content(block):
@@ -644,18 +690,20 @@ def render_block(block, label, ctx, in_rail):
         return f'<div class="{classes}" {number} data-fade>{heading}{para_html(block["body"])}{note}</div>'
     if kind == 'quote':
         text = block['text'].strip()
-        small = block['size'] == 'small' or (block['size'] == 'auto' and len(text) > 70)
-        return f'<blockquote class="b b-quote pull{" pull-long" if small else ""}" {number}>{esc(text)}</blockquote>'
+        small = block['size'] == 'small' or (block['size'] == 'auto' and len(split_signature(text)[0]) > 70)
+        return f'<blockquote class="b b-quote pull{" pull-long" if small else ""}" {number}>{quote_inner(text)}</blockquote>'
     if kind == 'aside':
         text = block['text'].strip()
+        face = f' data-face="{block["face"]}"' if block['face'] not in ('', 'book') else ''
         if block['look'] == 'closing':
-            return f'<div class="b b-aside aside-closing" {number}><p class="statement">{esc(text)}</p></div>'
+            return f'<div class="b b-aside aside-closing" {number}{face}><p class="statement">{quote_inner(text)}</p></div>'
         if block['look'] == 'quiet':
-            return f'<div class="b b-aside aside-quiet" {number}><p class="statement">{esc(text)}</p></div>'
+            return f'<div class="b b-aside aside-quiet" {number}{face}><p class="statement">{quote_inner(text)}</p></div>'
         if block['look'] == 'hand':
-            return f'<div class="b b-aside aside-hand" {number}><blockquote class="quote-text">{esc(text)}</blockquote></div>'
+            return f'<div class="b b-aside aside-hand" {number}><blockquote class="quote-text">{quote_inner(text)}</blockquote></div>'
         figure = ctx.photo(block['photo'], '', '(max-width:900px) 100vw, 600px', bg=True) if block['photo'] else ''
-        return f'<div class="b b-aside quote-panel" {number}>{figure}<blockquote class="quote-text">{esc(text)}</blockquote></div>'
+        tint = f' data-tint="{block["tint"]}"' if block['tint'] not in ('', 'auto') and not figure else ''
+        return f'<div class="b b-aside quote-panel" {number}{face}{tint}>{figure}<blockquote class="quote-text">{quote_inner(text)}</blockquote></div>'
     if kind == 'photos':
         comp = block['comp'] if block['comp'] in FRAMES else 'auto'
         refs = [(block[f's{n}'], block[f'f{n}'], n - 1) for n in (1, 2, 3) if block[f's{n}']]
@@ -670,6 +718,11 @@ def render_block(block, label, ctx, in_rail):
         caption = f'<p class="b-cap">{esc(block["caption"].strip())}</p>' if block['caption'].strip() else ''
         extra = (f' data-comp="{comp}"' if comp != 'auto' else '') + (' data-lightbox' if block['zoom'] == 'yes' else '')
         return f'<div class="b b-photos n{len(figures)}{" b-side" if in_rail else ""}" {number}{extra} data-fade>{"".join(figures)}{caption}</div>'
+    if kind == 'band':
+        figure = ctx.photo(block['photo'], block['alt'].strip(), '100vw', 'band-frame', crop=block['crop'])
+        if not figure:
+            return ''
+        return f'<div class="b b-band band-h-{block["height"]} band-blur-{block["blur"]}" {number}>{figure}</div>'
     if kind == 'themes':
         items = ''
         for n in range(1, THEME_COUNT + 1):
@@ -682,10 +735,11 @@ def render_block(block, label, ctx, in_rail):
         grid = f'<ul class="theme-grid">{items}</ul>' if items else ''
         final = ''
         if block['finalTitle'].strip() or block['finalText'].strip():
-            final = ('<div class="finale"><span class="finale-line" aria-hidden="true"></span>' + COMPASS_GLYPH
-                     + (f'<h3>{esc(block["finalTitle"].strip())}</h3>' if block['finalTitle'].strip() else '')
-                     + (f'<p>{esc(block["finalText"].strip())}</p>' if block['finalText'].strip() else '') + '</div>')
-        return f'<div class="b b-themes themes" {number}>{head}{intro}{grid}{final}</div>'
+            final = ('<div class="theme theme-final" data-fade>' + COMPASS_GLYPH
+                     + (f'<strong>{esc(block["finalTitle"].strip())}</strong>' if block['finalTitle'].strip() else '')
+                     + (f'<span>{esc(block["finalText"].strip())}</span>' if block['finalText'].strip() else '') + '</div>')
+        before, after = (final, '') if block['finalPos'] == 'before' else ('', final)
+        return f'<div class="b b-themes themes" {number}>{head}{intro}{before}{grid}{after}</div>'
     return ''
 
 
@@ -773,11 +827,81 @@ def place_sections(template, sections, ctx):
     return replace_required(template, '<!--@@SECTIONS@@-->', '\n\n'.join(parts), 'sections marker'), tone
 
 
+def load_qa():
+    """The questions: [{'title': ..., 'items': [{'q': ..., 'a': ...}]}]. A question without text is not shown; a wrong entry never stops the build."""
+    path = ROOT / QA_FILE
+    if not path.exists():
+        return []
+    try:
+        data = json.loads(path.read_text(encoding='utf-8'))
+    except ValueError:
+        _warn(f'{QA_FILE} is not valid JSON; no questions are shown')
+        return []
+    groups = []
+    for raw in (data.get('groups') if isinstance(data, dict) else None) or []:
+        if not isinstance(raw, dict):
+            continue
+        items = [{'q': str(i.get('q') or '').strip(), 'a': str(i.get('a') or '').strip()}
+                 for i in (raw.get('items') or []) if isinstance(i, dict) and str(i.get('q') or '').strip()]
+        if items:
+            groups.append({'title': str(raw.get('title') or '').strip(), 'items': items})
+    return groups
+
+
+def qa_html(groups):
+    out = ''
+    for group in groups:
+        rows = ''.join('<details name="qa"><summary><span class="qa-n" aria-hidden="true"></span>'
+                       f'<span class="qa-q">{esc(item["q"])}</span></summary><div class="qa-a"><p>{esc(item["a"])}</p></div></details>' for item in group['items'])
+        out += f'<div class="qa-group"><h3 class="qa-group-title">{esc(group["title"])}</h3>{rows}</div>'
+    return out
+
+
+def form_note_html(copy):
+    """The consent line under the form. A word in [square brackets] becomes the link to the privacy notice; without brackets the link is added at the end."""
+    text = copy.get('contact.formNote', '').strip()
+    link = lambda label: f'<a href="privacy/" data-privacy>{esc(label)}</a>'
+    found = list(re.finditer(r'\[([^\[\]]+)\]', text))
+    if not found:
+        return esc(text) + ' ' + link(copy.get('privacyLink', 'privacy notice')) + '.'
+    out, pos = '', 0
+    for m in found:
+        out += esc(text[pos:m.start()]) + link(m.group(1))
+        pos = m.end()
+    return out + esc(text[pos:])
+
+
+def hero_photo_style(site):
+    """CSS variables of the first-screen photograph: position and zoom for computers (--h*) and, when set, for phones (--m*)."""
+    parts = []
+    for prefix, key in (('h', 'portrait_crop'), ('m', 'portrait_crop_m')):
+        crop = clean_crop(site.get(key))
+        if crop:
+            x, y, z = crop.split(',')
+            parts.append(f'--{prefix}x:{x}%;--{prefix}y:{y}%;--{prefix}z:{z}')
+    return ';'.join(parts)
+
+
+def hero_settings(template, site):
+    """Font, size and phone layout of the first screen: written as data attributes, and only when they differ from the default."""
+    attrs = ''
+    for key, choices, default, name in (('hero_font', HERO_FONTS, 'serif', 'font'), ('hero_size', HERO_SIZES, 'normal', 'size'), ('hero_phone', PHONE_HEROES, 'side', 'phone')):
+        value = str(site.get(key) or default)
+        if value not in dict(choices):
+            value = default
+        if value != default:
+            attrs += f' data-{name}="{value}"'
+    if not attrs:
+        return template
+    return replace_required(template, '<section class="band band-deep hero" id="hero">', f'<section class="band band-deep hero" id="hero"{attrs}>', 'hero section')
+
+
 def build_home(site, posts, public_url, ready):
     template = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
     values = collect_values(site)
     copy = values['en']
 
+    template = replace_required(template, '<!--@@QA@@-->', qa_html(load_qa()), 'questions marker')
     sections = load_sections()
     context = PageContext(site, ready)
     template, last_tone = place_sections(template, sections, context)
@@ -798,6 +922,9 @@ def build_home(site, posts, public_url, ready):
             variants = make_variants(OUT, path)
             if variants:
                 attributes += ' srcset="' + ', '.join(f'{esc(name)} {size}w' for name, size in variants) + '" sizes="50vw"'
+            hero_css = hero_photo_style(site)
+            if hero_css:
+                attributes += f' style="{esc(hero_css)}"'
         elif ready and field in HIDE_WHEN_EMPTY:   # live site: an empty place disappears together with its frame
             template, found = re.subn(r'(<figure\b[^>]*)(>\s*<img data-photo="' + field + '")', r'\1 hidden\2', template, count=1)
             if not found:
@@ -828,9 +955,9 @@ def build_home(site, posts, public_url, ready):
         template = text_pat.sub(lambda m, v=value: m.group(1) + esc(v) + m.group(4), template)
         template = template.replace(f'data-i18n-alt="{key}" alt=""', f'data-i18n-alt="{key}" alt="{esc(value)}"')
         template = template.replace(f'data-i18n-aria="{key}"', f'data-i18n-aria="{key}" aria-label="{esc(value)}"')
-    for slot in range(1, QA_SLOTS + 1):
-        if not copy.get(f'qa.q{slot}', '').strip():
-            template = replace_required(template, f'<details name="qa" data-qa="{slot}">', f'<details name="qa" data-qa="{slot}" hidden>', f'qa slot {slot}')
+    template = replace_required(template, '<!--@@FORMNOTE@@-->', form_note_html(copy), 'form note marker')
+    template = replace_required(template, '<!--@@PRIVACY@@-->', privacy_dialog(site), 'privacy marker')
+    template = hero_settings(template, site)
 
     doc_title = copy['meta.fullTitle']
     template = re.sub(r'<title>.*?</title>', lambda m: f'<title>{esc(doc_title)}</title>', template, count=1)
@@ -967,11 +1094,11 @@ def md_plain(value):
     return re.sub(r'([\\`*_{}\[\]<>#|])', r'\\\1', str(value or '').strip())
 
 
-def privacy_page(site, public_url, ready):
-    """privacy/index.html from content/privacy.md: the notice the Swiss FADP (art. 19) asks for, linked from the form and the footer."""
+def privacy_content(site, warn=True):
+    """The privacy notice of content/privacy.md with its placeholders filled in: (meta, markdown), or None when the file is missing."""
     source = ROOT / 'content/privacy.md'
     if not source.exists():
-        return False
+        return None
     data = source.read_text(encoding='utf-8')
     head, separator, body = data[4:].partition('\n---\n') if data.startswith('---\n') else ('', '', data)
     meta = yaml.safe_load(head) or {}
@@ -986,7 +1113,8 @@ def privacy_page(site, public_url, ready):
         lines.append(f'- **Email:** [{email}](mailto:{email})')
     else:
         lines.append('- **Contact:** through the contact form on this website')
-        print('WARNING: no email in content/site.json; the privacy notice names the contact form as the way to reach you.', file=sys.stderr)
+        if warn:
+            print('WARNING: no email in content/site.json; the privacy notice names the contact form as the way to reach you.', file=sys.stderr)
     endpoint = form_endpoint_quiet(site)
     host = urlparse(endpoint).hostname if endpoint else ''
     inbox = inbox_endpoint_quiet(site)
@@ -1002,6 +1130,15 @@ def privacy_page(site, public_url, ready):
     updated = f'{updated.day} {updated:%B %Y}' if isinstance(updated, (dt.date, dt.datetime)) else str(updated or '')
     for marker, value in (('{{controller}}', '\n'.join(lines)), ('{{form_service}}', service), ('{{updated}}', updated)):
         body = body.replace(marker, value)
+    return meta, body
+
+
+def privacy_page(site, public_url, ready):
+    """privacy/index.html from content/privacy.md: the notice the Swiss FADP (art. 19) asks for, linked from the form and the footer (on the home page it opens in a dialog)."""
+    content = privacy_content(site)
+    if not content:
+        return False
+    meta, body = content
     chrome = site_chrome()
     out = OUT / 'privacy/index.html'
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -1009,6 +1146,19 @@ def privacy_page(site, public_url, ready):
                                  lang='en', css_prefix='privacy', body=render_markdown(body), public_url=public_url, ready=ready,
                                  author='', brand=brand_name(site), kind='page'), encoding='utf-8')
     return True
+
+
+def privacy_dialog(site):
+    """The same notice as a dialog on the home page. Without JavaScript the link inside it still opens the page."""
+    content = privacy_content(site, warn=False)
+    if not content:
+        return ''
+    meta, body = content
+    return ('<dialog id="privacy-dialog" class="pp-dialog" aria-labelledby="pp-title"><div class="pp-box">'
+            '<button type="button" class="pp-close" aria-label="Close">&times;</button>'
+            f'<h2 class="pp-title" id="pp-title">{esc(str(meta.get("title") or "Privacy notice"))}</h2>'
+            f'<div class="pp-body">{render_markdown(body)}</div>'
+            '<p class="pp-more"><a href="privacy/">Open this notice as a page</a></p></div></dialog>')
 
 
 def form_endpoint_quiet(site):
@@ -1038,6 +1188,9 @@ def admin_schema(site):
         item = {'name': field['name'], 'label': field.get('label', field['name']), 'type': field.get('type', 'string')}
         if field.get('description'):
             item['description'] = field['description']
+        choices = (field.get('options') or {}).get('values') if isinstance(field.get('options'), dict) else None
+        if choices:
+            item['options'] = [[str(c['value']), str(c['label'])] for c in choices]
         return item
 
     groups = []
@@ -1047,7 +1200,7 @@ def admin_schema(site):
         groups.append({'name': group['name'], 'label': group.get('label', group['name']),
                        'anchor': SECTION_ANCHORS.get(group['name'], ''),
                        'fields': [leaf(f) for f in group['fields']]})
-    skip = set(PHOTO_FIELDS) | {'publish_ready'}
+    skip = set(PHOTO_FIELDS) | {'publish_ready', 'portrait_crop', 'portrait_crop_m', 'hero_phone'}   # the first-screen crop and layout are set with the dashboard's own tool
     contacts = [leaf(f) for f in entries['site']['fields'] if f['name'] not in skip]
     return {
         'repo': os.environ.get('GITHUB_REPOSITORY', ''),
@@ -1058,6 +1211,8 @@ def admin_schema(site):
         'photos': [dict(slot) for slot in PHOTO_SLOTS],
         'banned': BANNED_PHRASES, 'required': list(REQUIRED_COPY),
         'publishReady': bool(site.get('publish_ready')),
+        'hero': {'keys': ['portrait_crop', 'portrait_crop_m', 'hero_phone'], 'default': '88,42,1', 'phoneModes': _opts(PHONE_HEROES),
+                 'frames': {'desktop': '4/5', 'side': '2/7', 'top': '4/5'}},
     }
 
 

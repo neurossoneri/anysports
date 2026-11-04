@@ -216,7 +216,7 @@ const LS = {
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   del(k) { try { localStorage.removeItem(k); } catch (e) {} },
 };
-const S = { schema: null, token: '', repo: '', branch: 'main', site: {}, home: {}, page: { sections: [] }, uid: 0, raw: {}, orig: { site: {}, home: {}, page: { sections: [] } },
+const S = { schema: null, token: '', repo: '', branch: 'main', site: {}, home: {}, page: { sections: [] }, uid: 0, raw: {}, qa: { groups: [] }, orig: { site: {}, home: {}, page: { sections: [] }, qa: { groups: [] } },
             pending: {}, tab: 'photos', lang: 'en', filter: '', run: null, busy: '', notice: null, dirty: 0,
             open: new Set(), req: { items: null, loaded: false, loading: false, error: '', code: '', keyProblem: '', filter: 'new', q: '' } };
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -253,14 +253,15 @@ const readFile = path => gh(`/repos/${S.repo}/contents/${enc(path)}?ref=${encode
 
 async function loadAll() {
   const langs = S.schema.langs;
-  const paths = ['content/site.json', ...langs.map(l => `content/home_${l}.json`), 'content/sections.json'];
-  const texts = await Promise.all(paths.map(readFile));
+  const paths = ['content/site.json', ...langs.map(l => `content/home_${l}.json`), 'content/sections.json', 'content/qa.json'];
+  const texts = await Promise.all(paths.map(p => (p === 'content/qa.json' ? readFile(p).catch(() => '{"groups":[]}') : readFile(p))));
   S.raw = {}; paths.forEach((p, i) => { S.raw[p] = texts[i]; });
   S.site = JSON.parse(texts[0]);
   S.home = {}; langs.forEach((l, i) => { S.home[l] = JSON.parse(texts[i + 1]); });
-  S.page = JSON.parse(texts[texts.length - 1]);
+  S.page = JSON.parse(texts[langs.length + 1]);
+  S.qa = normalizeQa(JSON.parse(texts[langs.length + 2]));
   if (!S.page || !Array.isArray(S.page.sections)) throw new Error('Файл content/sections.json повреждён: нет списка разделов.');
-  S.orig = { site: clone(S.site), home: clone(S.home), page: clone(S.page) };
+  S.orig = { site: clone(S.site), home: clone(S.home), page: clone(S.page), qa: clone(S.qa) };
 }
 
 const photoFields = () => S.schema.photos.map(p => p.field);
@@ -271,14 +272,14 @@ const readyChanged = () => !!S.site.publish_ready !== !!S.orig.site.publish_read
 
 /** Everything that differs from what is saved on GitHub, grouped for the UI and the commit message. */
 function changes() {
-  const out = { text: {}, textCount: 0, pageCount: pageChangeCount(), contacts: [], photos: [], ready: readyChanged() };
+  const out = { text: {}, textCount: 0, pageCount: pageChangeCount(), contacts: [], photos: [], ready: readyChanged(), qa: qaChanged() ? 1 : 0, hero: heroChanged() ? 1 : 0 };
   for (const lang of S.schema.langs) for (const sec of S.schema.groups) for (const f of sec.fields) {
     if (textChanged(lang, sec.name, f.name)) { out.text[lang] = (out.text[lang] || 0) + 1; out.textCount++; }
   }
   for (const f of S.schema.contacts) if (contactChanged(f.name)) out.contacts.push(f.name);
   for (const p of S.schema.photos) if (photoChanged(p.field)) out.photos.push(p.num);
   out.library = pendingKept().filter(([, p]) => p.lib && !p.saved).length + S.deleted.size;
-  out.total = out.textCount + out.pageCount + out.contacts.length + out.photos.length + out.library + (out.ready ? 1 : 0);
+  out.total = out.textCount + out.pageCount + out.contacts.length + out.photos.length + out.library + (out.ready ? 1 : 0) + out.qa + out.hero;
   return out;
 }
 
@@ -296,6 +297,14 @@ function validate() {
     S.page.sections.forEach((sec, si) => {
       promise(`Раздел ${si + 1}, заголовок`, sec.title);
       (sec.blocks || []).forEach((b, bi) => Object.entries(b).forEach(([k, v]) => { if (k !== 'type' && typeof v === 'string') promise(`Блок ${si + 1}.${bi + 1} («${blockName(b)}»)`, v); }));
+    });
+  }
+  {
+    const patterns = (S.schema.banned.en || []).map(p => new RegExp(p, 'i'));
+    const promise = (where, v) => { for (const re of patterns) { const m = String(v || '').match(re); if (m) { out.push(`${where}: слово «${m[0]}» звучит как обещание результата. Такие формулировки на сайте запрещены, перефразируйте.`); return; } } };
+    S.qa.groups.forEach((g, gi) => {
+      promise(`Вопросы, категория ${gi + 1}`, g.title);
+      g.items.forEach((it, ii) => { promise(`Вопрос ${gi + 1}.${ii + 1}`, it.q); promise(`Ответ ${gi + 1}.${ii + 1}`, it.a); });
     });
   }
   const ids = S.page.sections.map(s => s.id);
@@ -330,6 +339,8 @@ function commitMessage(c) {
   const parts = [];
   if (c.textCount) parts.push('тексты (' + Object.keys(c.text).map(l => l.toUpperCase()).join(', ') + ')');
   if (c.pageCount) parts.push('разделы и блоки страницы');
+  if (c.qa) parts.push('вопросы и ответы');
+  if (c.hero) parts.push('кадрирование главного фото');
   if (c.photos.length) parts.push('фото ' + c.photos.join(', '));
   if (c.library) parts.push('библиотека фото');
   if (c.contacts.length) parts.push('контакты и имя');
@@ -346,6 +357,7 @@ async function commitChanges(step) {
   add('content/site.json', S.site, S.orig.site);
   S.schema.langs.forEach(l => add(`content/home_${l}.json`, S.home[l], S.orig.home[l]));
   add('content/sections.json', S.page, S.orig.page);
+  add('content/qa.json', S.qa, S.orig.qa);
   const photos = usedPending(), removals = [...S.deleted];
   if (!files.length && !photos.length && !removals.length) return null;
   step('check');
@@ -368,7 +380,7 @@ async function commitChanges(step) {
     ...removals.map(path => ({ path, mode: '100644', type: 'blob', sha: null })) ] } });
   const commit = await gh(`/repos/${S.repo}/git/commits`, { method: 'POST', body: { message: commitMessage(c), tree: tree.sha, parents: [head] } });
   await gh(`/repos/${S.repo}/git/refs/heads/${enc(S.branch)}`, { method: 'PATCH', body: { sha: commit.sha } });
-  S.orig = { site: clone(S.site), home: clone(S.home), page: clone(S.page) };
+  S.orig = { site: clone(S.site), home: clone(S.home), page: clone(S.page), qa: clone(S.qa) };
   files.forEach(f => { S.raw[f.path] = f.text; });
   blobs.forEach(b => { if (S.pending[b.path]) S.pending[b.path].saved = true; });
   if (S.lib.items) S.lib.items = S.lib.items.filter(i => !removals.includes(i.path));
@@ -537,6 +549,7 @@ function pathUses(path) {
     const where = `блок ${i + 1}.${j + 1}`;
     if (b.type === 'photos' && [b.s1, b.s2, b.s3].some(r => r && refPath(r) === path)) uses.push(where);
     if (b.type === 'aside' && b.photo && refPath(b.photo) === path) uses.push(where + ' (фон фразы)');
+    if (b.type === 'band' && b.photo && refPath(b.photo) === path) uses.push(where + ' (широкое фото)');
   }));
   return uses;
 }
@@ -546,7 +559,7 @@ const orderChanged = () => S.page.sections.map(s => s.id).join('|') !== ((S.orig
 const pageChangeCount = () => S.page.sections.filter(secChanged).length + (orderChanged() ? 1 : 0);
 const blockName = b => (blockSpec(b.type) ? blockSpec(b.type).label : String(b.type));
 function blockPreview(b) {
-  const photos = [b.s1, b.s2, b.s3].filter(Boolean).map(n => (/^\d+$/.test(n) ? 'Фото ' + n : String(n).replace(/^media\//, '').slice(0, 22))).join(', ');
+  const photos = [b.s1, b.s2, b.s3, b.photo].filter(Boolean).map(n => (/^\d+$/.test(n) ? 'Фото ' + n : String(n).replace(/^media\//, '').slice(0, 22))).join(', ');
   const s = String(b.heading || b.body || b.text || b.title || photos || '').replace(/\s+/g, ' ').trim();
   return s.length > 70 ? s.slice(0, 70) + '…' : s;
 }
@@ -561,8 +574,28 @@ function slotUsage(num) {
   return uses;
 }
 
+/* ----- Questions and answers (content/qa.json): categories, each with its questions ----- */
+function normalizeQa(q) {
+  const groups = (q && Array.isArray(q.groups) ? q.groups : []).map(g => ({ title: String((g && g.title) || ''),
+    items: (g && Array.isArray(g.items) ? g.items : []).map(i => ({ q: String((i && i.q) || ''), a: String((i && i.a) || '') })) }));
+  return { groups };
+}
+const qaChanged = () => JSON.stringify(S.qa) !== JSON.stringify(S.orig.qa);
+const HERO_KEYS = ['portrait_crop', 'portrait_crop_m', 'hero_phone'];
+const heroChanged = () => HERO_KEYS.some(k => String(S.site[k] || '') !== String(S.orig.site[k] || ''));
+const qaGroupName = (g, i) => String(g.title || '').trim() || 'Без подписи (' + (i + 1) + ')';
+function qaAddGroup() { S.qa.groups.push({ title: '', items: [{ q: '', a: '' }] }); return S.qa.groups.length - 1; }
+function qaAddItem(gi) { S.qa.groups[gi].items.push({ q: '', a: '' }); return S.qa.groups[gi].items.length - 1; }
+/** Moves a question to another category (at the end of it, or at toIi). */
+function qaMoveItem(gi, ii, toGi, toIi) {
+  const from = S.qa.groups[gi], to = S.qa.groups[toGi];
+  if (!from || !to || !from.items[ii]) return false;
+  const [item] = from.items.splice(ii, 1);
+  insertAt(to.items, toIi === undefined ? to.items.length : toIi, item);
+  return true;
+}
 root.__dash = { S, newBlock, newSection, newSectionId, insertAt, moveItem, pageChangeCount, secChanged, slotUsage, blockPreview, gh, loadAll, changes, validate, commitChanges, photoPath, usedPending, watchDeploy, latestRun, setv, getv, explain, commitMessage,
-                inboxCall, requestCounts, contactAction, timeAgo, csvOf, INBOX_URL_RE };
+                inboxCall, requestCounts, contactAction, timeAgo, csvOf, INBOX_URL_RE, normalizeQa, qaChanged, heroChanged, qaMoveItem, qaAddGroup, qaAddItem };
 if (typeof document === 'undefined') { if (typeof module !== 'undefined') module.exports = root.__dash; return; }
 
 /* ================= interface ================= */
@@ -591,12 +624,15 @@ const FRIENDLY = {
   form_endpoint: ['Адрес формы связи', 'Необязательно. Адрес из сервиса форм (например Formspree): он пересылает сообщения на почту. Если подключены «Заявки», этот адрес не нужен.'],
   inbox_endpoint: ['Адрес приёма заявок', 'Заполняется на вкладке «Заявки» при подключении. Вручную менять не нужно.'],
   public_url: ['Адрес сайта', 'Нужен только если у сайта собственный домен. Начинается с https://'],
+  hero_font: ['Главный экран: шрифт цитаты', 'Как выглядят две цитаты рядом с фото на первом экране.'],
+  hero_size: ['Главный экран: размер цитаты', ''],
   privacy_address: ['Адрес для страницы о конфиденциальности', 'Улица, индекс, город, страна. Можно оставить пустым: тогда покажутся имя и email.'],
 };
 const SETTING_GROUPS = [
   ['Название и имя', ['brand', 'name_en', 'role_en']],
   ['Контакты для посетителей', ['email', 'whatsapp', 'telegram']],
   ['Форма на сайте и заявки', ['form_endpoint', 'inbox_endpoint']],
+  ['Главный экран: вид цитаты', ['hero_font', 'hero_size']],
   ['Адреса', ['public_url', 'privacy_address']],
 ];
 
@@ -641,7 +677,7 @@ function paintTabs(known) {
   if (!tabsBar) return;
   const c = known || changes();
   const fresh = S.req.loaded ? requestCounts(S.req.items).new : 0;
-  const badge = { photos: [c.photos.length + c.library, ''], texts: [c.textCount + c.pageCount, ''], settings: [c.contacts.length + (c.ready ? 1 : 0), ''], requests: [fresh, ' green'] };
+  const badge = { photos: [c.photos.length + c.library + c.hero, ''], texts: [c.textCount + c.pageCount + c.qa, ''], settings: [c.contacts.length + (c.ready ? 1 : 0), ''], requests: [fresh, ' green'] };
   tabsBar.querySelectorAll('button').forEach(b => {
     b.setAttribute('aria-selected', String(b.dataset.tab === S.tab));
     const old = b.querySelector('.n'); if (old) old.remove();
@@ -651,7 +687,7 @@ function paintTabs(known) {
 }
 function discard() {
   if (!confirm('Отменить все несохранённые правки? Новые фото тоже не будут добавлены.')) return;
-  S.site = clone(S.orig.site); S.home = clone(S.orig.home); S.page = clone(S.orig.page);
+  S.site = clone(S.orig.site); S.home = clone(S.orig.home); S.page = clone(S.orig.page); S.qa = clone(S.orig.qa);
   S.deleted.clear();
   for (const p of Object.values(S.pending)) if (!p.saved) URL.revokeObjectURL(p.url);
   S.pending = Object.fromEntries(Object.entries(S.pending).filter(([, p]) => p.saved));
@@ -711,6 +747,7 @@ async function takeFile(slot, file) {
     if (old && S.pending[old] && !S.pending[old].saved) { URL.revokeObjectURL(S.pending[old].url); delete S.pending[old]; }
     S.pending[path] = { blob, url: URL.createObjectURL(blob), kb: Math.round(blob.size / 1024), w: source.width, h: source.height };
     S.site[slot.field] = path;
+    if (slot.num === 1) { S.site.portrait_crop = ''; S.site.portrait_crop_m = ''; }   // a new photograph needs a new crop
     const small = Math.max(source.width, source.height) < 1100;
     setNotice('warn', small ? `Фото ${slot.num} небольшое (${source.width}×${source.height}). На большом экране оно может выглядеть мягким. По возможности загрузите оригинал.` : null);
   } catch (e) { setNotice('bad', e.message); }
@@ -768,7 +805,7 @@ function panelPhotos() {
       el('p', { class: 'lead' }, 'Здесь меняется главное фото первого экрана (номер 1). Остальные номера работают как раньше: блок «Фото» может ссылаться и на номер, и на файл из библиотеки. Несколько файлов с номером в названии (3.jpg) можно перетащить на этот список сразу.'),
       el('p', { class: 'muted' }, el('a', { href: '../?photos', target: '_blank', rel: 'noopener' }, 'Открыть сайт с номерами фото ↗')),
       list));
-  return el('div', {}, el('h1', {}, 'Фотографии'), libraryPanel(), el('div', { style: 'height:18px' }), old);
+  return el('div', {}, el('h1', {}, 'Фотографии'), heroPhotoBox(), libraryPanel(), el('div', { style: 'height:18px' }), old);
 }
 
 /* ---------- photo library, picker, crop ---------- */
@@ -849,7 +886,7 @@ function openPicker(current, onPick) {
 }
 /** Direct manipulation: drag the photograph inside its frame, set the zoom, switch between the computer and phone shape of the frame. */
 function openCrop(b, i, frame, path, done) {
-  const state = parseCrop(b['f' + i]);
+  const key = typeof i === 'string' ? i : 'f' + i, state = parseCrop(b[key]);
   let phone = false, drag = null;
   openModal('Кадрирование: ' + frame[2], close => {
     const img = el('img', { src: thumbSrc(path), alt: '', draggable: false });
@@ -893,7 +930,7 @@ function openCrop(b, i, frame, path, done) {
         el('button', { class: 'btn ghost small', type: 'button', onclick: close }, 'Отмена'),
         el('button', { class: 'btn small', type: 'button', onclick: () => {
           const same = state.x === 50 && state.y === 30 && state.z === 1;
-          b['f' + i] = same ? '' : fmtCrop(state); close(); done();
+          b[key] = same ? '' : fmtCrop(state); close(); done();
         } }, 'Готово')));
   });
 }
@@ -918,9 +955,10 @@ function photoWidget(sec, si, b, bi, f) {
   if (b.type === 'photos') return f.name === 's1' ? photoSlots(sec, si, b, bi) : null;
   const path = refPath(b[f.name]), done = () => afterStructure({ sid: sec.id, block: bi });
   return el('div', { class: 'fld', 'data-find': (f.label + ' фото').toLowerCase() }, el('label', {}, f.label),
-    el('div', { class: 'ptile' }, el('div', { class: 'pframe', style: 'aspect-ratio:16/10' }, path ? el('img', { src: thumbSrc(path), alt: '' }) : el('span', {}, 'пусто')),
+    el('div', { class: 'ptile' }, el('div', { class: 'pframe', style: `aspect-ratio:${b.type === 'band' ? '21/9' : '16/10'}` }, path ? el('img', { src: thumbSrc(path), alt: '', style: b.type === 'band' ? cropStyle(b.crop) : '' }) : el('span', {}, 'пусто')),
       el('div', { class: 'acts' }, el('button', { class: 'btn small', type: 'button', onclick: () => openPicker(b[f.name], p => { b[f.name] = p; done(); }) }, path ? 'Заменить' : 'Выбрать'),
-        path ? el('button', { class: 'btn ghost small', type: 'button', onclick: () => { b[f.name] = ''; done(); } }, 'Убрать') : null)));
+        path && b.type === 'band' ? el('button', { class: 'btn ghost small', type: 'button', onclick: () => openCrop(b, 'crop', ['21/9', '4/3', 'широкая полоса'], path, done) }, 'Кадрировать') : null,
+        path ? el('button', { class: 'btn ghost small', type: 'button', onclick: () => { b[f.name] = ''; b.crop = ''; done(); } }, 'Убрать') : null)));
 }
 
 /* ---------- texts: the page by sections and blocks, then the remaining texts ---------- */
@@ -972,7 +1010,7 @@ function paintDots() {
   document.querySelectorAll('.phead').forEach(head => {
     const dot = head.querySelector('.dot'); if (!dot) return;
     let n = 0;
-    if (head.dataset.sid) { const sec = S.page.sections.find(s => s.id === head.dataset.sid); n = sec && secChanged(sec) ? 1 : 0; }
+    if (head.dataset.sid) { const sec = S.page.sections.find(s => s.id === head.dataset.sid); n = sec && (secChanged(sec) || (sec.type === 'qa' && qaChanged())) ? 1 : 0; }
     else if (head.dataset.gids) n = head.dataset.gids.split(',').reduce((sum, name) => sum + (groupByName(name) ? groupChangedCount(groupByName(name)) : 0), 0);
     dot.hidden = !n; dot.textContent = head.dataset.sid ? 'изменён' : String(n);
   });
@@ -1069,8 +1107,8 @@ function deleteBlock(sec, si, bi) {
 function blockCard(sec, si, b, bi) {
   const spec = blockSpec(b.type), last = sec.blocks.length - 1, label = `${si + 1}.${bi + 1}`;
   const fields = spec.fields.filter(f => !f.showIf || Object.entries(f.showIf).every(([k, vals]) => vals.includes(b[k]))).map(f => f.type === 'crop' ? null : f.type === 'photo' ? photoWidget(sec, si, b, bi, f) : makeField({
-    label: f.label, value: b[f.name], type: f.type, options: f.options, redraw: (f.name === 'look' && !!spec.fields.some(x => x.showIf)) || f.name === 'comp',
-    hint: f.name === 'text' && b.type === 'aside' ? 'Перенос строки здесь это перенос строки во фразе.' : '', onSet: val => { b[f.name] = val; } }));
+    label: f.label, value: b[f.name] ?? f.default, type: f.type, options: f.options, redraw: (f.name === 'look' && !!spec.fields.some(x => x.showIf)) || f.name === 'comp',
+    hint: f.name === 'text' && (b.type === 'aside' || b.type === 'quote') ? 'Подпись: начните новую строку с тире, например «— Рик Рубин, The Creative Act». Она станет мельче и встанет отдельной строкой.' : '', onSet: val => { b[f.name] = val; } }));
   const grip = gripButton(`Перетащить блок ${label}`);
   const pos = el('select', { class: 'pos', 'aria-label': `Положение блока ${label} в разделе`, onchange: e => moveBlock(sec, bi, Number(e.target.value)) },
     sec.blocks.map((_, k) => el('option', { value: String(k) }, '№ ' + (k + 1))));
@@ -1116,13 +1154,135 @@ function sectionCard(sec, si) {
   let body;
   if (isText) body = textSectionBody(sec, si);
   else if (sec.type === 'contact') body = el('div', { class: 'flds' }, groupByName('contact').fields.map(f => groupField(groupByName('contact'), f)));
-  else body = el('div', {}, el('div', { class: 'flds' }, groupByName('qa').fields.map(f => groupField(groupByName('qa'), f))),
+  else body = el('div', {}, el('div', { class: 'flds' }, groupByName('qa').fields.map(f => groupField(groupByName('qa'), f))), qaEditor(),
     el('h3', { class: 'subh' }, groupByName('free').label), el('div', { class: 'flds' }, groupByName('free').fields.map(f => groupField(groupByName('free'), f))));
   const node = card({ key: sec.id, num: si + 1, title: isText ? (sec.title || '(без заголовка)') : S.schema.page.sectionLabels[sec.type],
     sub: isText ? sec.blocks.length + ' бл.' : 'форма', sid: sec.id, link: sec.id, controls, body, open: S.open.has(sec.id) });
   makeDraggable(node, grip, { group: 'sec', index: si, onMove: (from, to) => moveSection(from, to) });
   return node;
 }
+/* ----- Questions and answers: categories and questions can be added, moved, renamed and removed ----- */
+function qaEditor() {
+  const after = () => { S.open.add('qa'); afterStructure({ sid: 'qa' }); };
+  const last = S.qa.groups.length - 1;
+  const groups = S.qa.groups.map((g, gi) => {
+    const items = g.items.map((it, ii) => {
+      const move = el('select', { class: 'pos', 'aria-label': 'Перенести вопрос в другую категорию', onchange: e => { if (qaMoveItem(gi, ii, Number(e.target.value))) after(); } },
+        S.qa.groups.map((x, k) => el('option', { value: String(k) }, 'в: ' + qaGroupName(x, k))));
+      move.value = String(gi);
+      return el('div', { class: 'blk' },
+        el('div', { class: 'bhead' }, el('span', { class: 'num' }, String(ii + 1)), el('span', { class: 'bname' }, 'Вопрос'), el('span', { class: 'bprev' }, it.q.trim().slice(0, 70)), move,
+          miniBtn('▲', 'Поднять вопрос выше', () => { if (moveItem(g.items, ii, ii - 1)) after(); }, ii === 0),
+          miniBtn('▼', 'Опустить вопрос ниже', () => { if (moveItem(g.items, ii, ii + 1)) after(); }, ii === g.items.length - 1),
+          el('button', { class: 'btn danger small', type: 'button', onclick: () => { if (!confirm('Удалить этот вопрос вместе с ответом?')) return; g.items.splice(ii, 1); after(); } }, 'Удалить')),
+        el('div', { class: 'flds' },
+          makeField({ label: 'Вопрос', value: it.q, type: 'string', onSet: v => { it.q = v; } }),
+          makeField({ label: 'Ответ', value: it.a, type: 'text', hint: 'Пустая строка между абзацами разделяет их.', onSet: v => { it.a = v; } })));
+    });
+    return el('div', { class: 'blk' },
+      el('div', { class: 'bhead' }, el('span', { class: 'bname' }, 'Категория ' + (gi + 1)), el('span', { class: 'bprev' }, g.items.length + ' вопр.'),
+        miniBtn('▲', 'Поднять категорию выше', () => { if (moveItem(S.qa.groups, gi, gi - 1)) after(); }, gi === 0),
+        miniBtn('▼', 'Опустить категорию ниже', () => { if (moveItem(S.qa.groups, gi, gi + 1)) after(); }, gi === last),
+        el('button', { class: 'btn danger small', type: 'button', onclick: () => {
+          if (!confirm(`Удалить категорию «${qaGroupName(g, gi)}» вместе с её вопросами (${g.items.length})?\n\nЧтобы убрать только подпись, очистите поле «Подпись категории». Пока вы не сохранили, всё можно вернуть кнопкой «Вернуть вопросы как было».`)) return;
+          S.qa.groups.splice(gi, 1); after(); } }, 'Удалить категорию')),
+      el('div', { class: 'flds' }, makeField({ label: 'Подпись категории (оставьте пустой, чтобы убрать подпись)', value: g.title, type: 'string', onSet: v => { g.title = v; } })),
+      ...items,
+      el('div', { class: 'addrow' }, el('button', { class: 'btn small', type: 'button', onclick: () => { qaAddItem(gi); after(); } }, '+ Вопрос в эту категорию')));
+  });
+  return el('div', {},
+    el('h3', { class: 'subh' }, 'Вопросы и категории'),
+    el('p', { class: 'hint', style: 'margin:0 0 10px' }, 'Категория это подпись над группой вопросов. Вопрос можно перенести в другую категорию списком «в: …». Вопрос без текста сайт не показывает; категорию без вопросов тоже.'),
+    ...groups,
+    el('div', { class: 'row' },
+      el('button', { class: 'btn small', type: 'button', onclick: () => { qaAddGroup(); after(); } }, '+ Добавить категорию'),
+      qaChanged() ? el('button', { class: 'btn ghost small', type: 'button', onclick: () => { S.qa = clone(S.orig.qa); after(); } }, '↩ Вернуть вопросы как было') : null));
+}
+
+/* ----- The first-screen photograph: crop for computers and for phones ----- */
+function openHeroCrop(path) {
+  const DEF = { x: 88, y: 42, z: 1 }, hero = S.schema.hero;
+  const desktop = S.site.portrait_crop ? parseCrop(S.site.portrait_crop) : { ...DEF };
+  const phone = S.site.portrait_crop_m ? parseCrop(S.site.portrait_crop_m) : { ...desktop };
+  let mode = 'desktop', phoneOwn = !!S.site.portrait_crop_m, drag = null;
+  openModal('Кадрирование главного фото', close => {
+    const img = el('img', { src: thumbSrc(path), alt: '', draggable: false });
+    const box = el('div', { class: 'cframe', tabindex: '0', role: 'img', 'aria-label': 'Кадр. Тяните мышью или стрелками на клавиатуре.' }, img);
+    const zoom = el('input', { type: 'range', min: '1', max: '3', step: '0.02', value: '1', 'aria-label': 'Масштаб' });
+    const label = el('span', { class: 'muted' }, '');
+    const cur = () => (mode === 'desktop' ? desktop : phone);
+    const frameKey = () => (mode === 'desktop' ? 'desktop' : (S.site.hero_phone === 'top' ? 'top' : 'side'));
+    const touch = () => { if (mode === 'phone') phoneOwn = true; };
+    const seg = [['Компьютер', 'desktop'], ['Телефон', 'phone']].map(([text, m]) => el('button', { type: 'button', 'aria-pressed': String(m === mode), onclick: () => { mode = m; apply(); } }, text));
+    const layout = el('select', { id: 'hero-layout', 'aria-label': 'Фото на телефоне', onchange: e => { S.site.hero_phone = e.target.value === 'top' ? 'top' : ''; apply(); } },
+      hero.phoneModes.map(([v, t]) => el('option', { value: v }, t)));
+    layout.value = S.site.hero_phone === 'top' ? 'top' : 'side';
+    const layoutRow = el('div', { class: 'crow' }, el('label', { for: 'hero-layout' }, 'Фото на телефоне:'), layout);
+    function apply() {
+      if (mode === 'phone' && !phoneOwn) Object.assign(phone, desktop);
+      const st = cur(), k = frameKey();
+      box.style.aspectRatio = hero.frames[k];
+      box.style.width = k === 'side' ? '120px' : k === 'top' ? '240px' : 'min(100%, 400px)';
+      img.style.cssText = cropStyle(fmtCrop(st));
+      zoom.value = String(st.z); label.textContent = 'Масштаб ×' + (+st.z).toFixed(2);
+      seg.forEach((button, n) => button.setAttribute('aria-pressed', String((n === 1) === (mode === 'phone'))));
+      layoutRow.style.display = mode === 'desktop' ? 'none' : '';
+    }
+    const overflow = () => { const st = cur(), r = box.getBoundingClientRect(), iw = img.naturalWidth || 1, ih = img.naturalHeight || 1, k = Math.max(r.width / iw, r.height / ih) * st.z; return [iw * k - r.width, ih * k - r.height]; };
+    box.addEventListener('pointerdown', e => { box.setPointerCapture(e.pointerId); drag = { x: e.clientX, y: e.clientY, s: { ...cur() } }; box.classList.add('grab'); });
+    box.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const st = cur(), [ox, oy] = overflow(); touch();
+      if (ox > 0.5) st.x = clampPct(drag.s.x - (e.clientX - drag.x) / ox * 100);
+      if (oy > 0.5) st.y = clampPct(drag.s.y - (e.clientY - drag.y) / oy * 100);
+      apply();
+    });
+    const stop = () => { drag = null; box.classList.remove('grab'); };
+    box.addEventListener('pointerup', stop); box.addEventListener('pointercancel', stop);
+    box.addEventListener('keydown', e => {
+      const step = e.shiftKey ? 8 : 2, d = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] }[e.key];
+      if (!d) return; e.preventDefault(); const st = cur(); touch(); st.x = clampPct(st.x + d[0]); st.y = clampPct(st.y + d[1]); apply();
+    });
+    zoom.addEventListener('input', () => { touch(); cur().z = Number(zoom.value); apply(); });
+    img.addEventListener('load', apply);
+    apply();
+    const same = (a, b) => +a.x === +b.x && +a.y === +b.y && +a.z === +b.z;
+    return el('div', {},
+      el('p', { class: 'muted' }, 'Потяните фото внутри рамки, чтобы лицо осталось в кадре. Отдельно настройте компьютер и телефон. Если на телефоне лицо всё равно не помещается в узкую полосу, выберите «Сверху на всю ширину». Оригинал не меняется.'),
+      el('div', { class: 'crow' }, el('div', { class: 'seg', role: 'group', 'aria-label': 'Форма кадра' }, seg)),
+      layoutRow, box,
+      el('div', { class: 'crow' }, el('button', { class: 'btn ghost small mini', type: 'button', 'aria-label': 'Уменьшить', onclick: () => { touch(); const st = cur(); st.z = Math.max(1, st.z - 0.1); apply(); } }, '−'), zoom,
+        el('button', { class: 'btn ghost small mini', type: 'button', 'aria-label': 'Увеличить', onclick: () => { touch(); const st = cur(); st.z = Math.min(3, st.z + 0.1); apply(); } }, '+'), label),
+      el('div', { class: 'crow' },
+        el('button', { class: 'btn ghost small', type: 'button', onclick: () => { Object.assign(cur(), mode === 'desktop' ? DEF : desktop); if (mode === 'phone') phoneOwn = false; apply(); } }, 'Сбросить'),
+        el('button', { class: 'btn ghost small', type: 'button', onclick: close }, 'Отмена'),
+        el('button', { class: 'btn small', type: 'button', onclick: () => {
+          S.site.portrait_crop = same(desktop, DEF) ? '' : fmtCrop(desktop);
+          S.site.portrait_crop_m = phoneOwn && !same(phone, desktop) ? fmtCrop(phone) : '';
+          close(); renderPanel(); paintBar();
+        } }, 'Готово')));
+  });
+}
+function heroPhotoBox() {
+  const slot = S.schema.photos.find(p => p.num === 1), src = photoSrc(slot.field), path = S.site[slot.field];
+  const input = el('input', { type: 'file', accept: 'image/*', id: 'hero-file', onchange: e => { const file = e.target.files[0]; e.target.value = ''; takeFile(slot, file); } });
+  const phoneMode = makeField({ label: 'Как показывать фото на телефоне', value: S.site.hero_phone === 'top' ? 'top' : 'side', type: 'select', options: S.schema.hero.phoneModes,
+    hint: 'На телефоне фото стоит узкой полосой рядом с текстом. Если лицо в неё не помещается, выберите «Сверху на всю ширину».', onSet: v => { S.site.hero_phone = v === 'top' ? 'top' : ''; } });
+  return el('div', { class: 'box', id: 'hero-photo-box' }, el('h2', {}, 'Главное фото (первый экран)'),
+    el('p', { class: 'muted' }, 'Если лицо обрезается, нажмите «Кадрировать»: сдвиньте фото в рамке отдельно для компьютера и для телефона.'),
+    el('div', { class: 'ptile' }, el('div', { class: 'pframe', style: 'aspect-ratio:4/5;max-width:260px' }, src ? el('img', { src, alt: '', style: S.site.portrait_crop ? cropStyle(S.site.portrait_crop) : 'object-position:88% 42%' }) : el('span', {}, 'пусто'))),
+    el('div', { class: 'acts' }, input,
+      el('label', { class: 'btn small', for: 'hero-file', tabindex: 0, onkeydown: keyClick('hero-file') }, src ? 'Заменить фото' : 'Загрузить фото'),
+      src ? el('button', { class: 'btn small', type: 'button', onclick: () => openHeroCrop(src) }, 'Кадрировать') : null,
+      heroChanged() ? el('button', { class: 'btn ghost small', type: 'button', onclick: () => { HERO_KEYS.forEach(k => { S.site[k] = S.orig.site[k] || ''; }); renderPanel(); paintBar(); } }, 'Вернуть кадрирование') : null),
+    el('div', { class: 'flds', style: 'padding:14px 0 0' }, phoneMode));
+}
+function heroPhotoLink() {
+  return el('p', { class: 'muted' }, 'Фото первого экрана и его кадрирование: ',
+    el('button', { class: 'btn ghost small', type: 'button', onclick: () => { S.tab = 'photos'; renderPanel(); window.scrollTo(0, 0); } }, 'открыть вкладку «Фотографии»'),
+    el('span', {}, '. Шрифт и размер цитаты: вкладка «Настройки».'));
+}
+
 function groupCard(name, num) {
   const g = groupByName(name); if (!g) return null;
   return card({ key: 'g:' + name, num: null, title: g.label, gids: [name], link: g.anchor || null, open: S.open.has('g:' + name),
@@ -1140,7 +1300,7 @@ function panelTexts() {
     el('p', { class: 'lead' }, 'Страница состоит из разделов, а раздел из блоков (текст, цитата, фраза, фото). Всё пронумеровано: раздел 3, его блок 3.2. Перетаскивайте за ручку ⠿ или выберите номер в списке; кнопки «+» между карточками добавляют раздел или блок ровно туда. Затем нажмите «Сохранить и опубликовать» внизу.'),
     el('p', { class: 'muted' }, el('a', { href: '../?blocks', target: '_blank', rel: 'noopener' }, 'Открыть сайт с теми же номерами разделов и блоков ↗')),
     el('div', { class: 'bar2' }, search), el('p', { class: 'lead', id: 'nofind', hidden: true }, 'Ничего не найдено. Попробуйте другое слово.'),
-    el('h2', { class: 'subh' }, 'Первый экран'), ...[hero],
+    el('h2', { class: 'subh' }, 'Первый экран'), ...[hero], heroPhotoLink(),
     el('h2', { class: 'subh' }, 'Разделы страницы (сверху вниз)'), pageStrip(), ...sections,
     el('h2', { class: 'subh' }, 'Остальные тексты'), ...rest);
 }
@@ -1341,7 +1501,8 @@ function panelRequests() {
 /* ---------- settings ---------- */
 function settingField(f) {
   const id = 'c-' + f.name, [label, hint] = FRIENDLY[f.name] || [f.label, f.description || ''];
-  const input = el('input', { id, type: 'text', value: String(S.site[f.name] ?? ''), autocomplete: 'off' });
+  const input = f.options ? el('select', { id }, f.options.map(([val, text]) => el('option', { value: val }, text))) : el('input', { id, type: 'text', value: String(S.site[f.name] ?? ''), autocomplete: 'off' });
+  if (f.options) input.value = String(S.site[f.name] || f.options[0][0]);
   const wrap = el('div', { class: 'fld' + (contactChanged(f.name) ? ' chg' : '') }, el('label', { for: id }, label), input, hint ? el('p', { class: 'hint' }, hint) : null);
   input.addEventListener('input', () => { S.site[f.name] = input.value; wrap.classList.toggle('chg', contactChanged(f.name)); paintBar(); });
   input.addEventListener('change', () => {          // tidy up the typical mistakes

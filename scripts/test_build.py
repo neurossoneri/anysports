@@ -39,7 +39,7 @@ def cms_keys(fields, prefix=''):
 def check_consistency(builder):
     """Every key the template asks for has copy; CMS config and JSON agree; the site really has one language; the sections file is sound."""
     template = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
-    wanted = set(re.findall(r'data-(?:i18n|i18n-aria|i18n-alt)="([^"]+)"', template))
+    wanted = set(re.findall(r'data-(?:i18n|i18n-aria|i18n-alt|i18n-link)="([^"]+)"', template))
     site = json.loads((ROOT / 'content/site.json').read_text(encoding='utf-8'))
     values = builder.collect_values(site)
     config = yaml.safe_load((ROOT / '.pages.yml').read_text(encoding='utf-8'))
@@ -113,7 +113,7 @@ def check_static(builder, destination):
         assert pair in css, f'transition missing: {pair}'
 
     # the form, privacy links, no old promises
-    assert 'By sending this form you agree' in home and home.count('href="privacy/"') >= 2, 'consent text and privacy links (form and footer)'
+    assert home.count('href="privacy/"') >= 2 and 'data-privacy' in home, 'privacy links (form note and footer); the wording of the note belongs to the owner'
     assert '30 minutes' not in home.lower() and '30-minute' not in home.lower() and 'free-num' not in home, 'no 30-minute limit'
     assert re.search(r'<a class="button" href="#contact" data-i18n="free\.cta">', home), 'the card leads back to the form'
 
@@ -148,10 +148,10 @@ def check_privacy(destination):
     """The Swiss FADP (art. 19) asks for: who is responsible, why, who receives the data, which countries."""
     page = (destination / 'privacy/index.html').read_text(encoding='utf-8')
     for needle in ('Privacy notice', 'Swiss Federal Act on Data Protection', 'Who is responsible', 'What data I process', 'Who receives your data',
-                   'Disclosure abroad', 'Your consent', 'Your rights', 'FDPIC', '<base href="../">'):
+                   'Disclosure abroad', 'Your consent', 'Your rights', 'FDPIC', 'How long I keep your data', 'Children and young people', 'Sensitive data', 'within 30 days', '<base href="../">'):
         assert needle in page, f'privacy notice lacks: {needle}'
     assert '{{' not in page, 'unresolved placeholder in the privacy notice'
-    assert 'Google Fonts' not in page and not re.search(r'<li>[^<]*Google', page), 'fonts are self-hosted: Google is not a recipient'
+    assert 'Google Fonts' not in page and 'fonts.googleapis' not in page, 'fonts are self-hosted: no font provider is named'
     assert 'stored on this website' in page, 'the notice says where the fonts come from'
     assert 'rel="icon"' in page and 'viewBox="0 0 48 48"' in page, 'privacy page keeps the logo and favicon'
 
@@ -160,7 +160,7 @@ def check_integrity(builder):
     """Honesty of copy, editable FAQ, accessible form."""
     template = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
     assert 'window.close' not in template, 'a web page must not pretend it can close the tab'
-    assert builder.QA_SLOTS == 8 and template.count('<details name="qa" data-qa=') == 8, 'Q&A must have 8 editable slots'
+    assert '<!--@@QA@@-->' in template and 'data-qa=' not in template, 'the questions are built from content/qa.json, not from slots in the template'
     assert '<!--@@SECTIONS@@-->' in template and 'id="contact"' in template and 'id="qa"' in template, 'the template keeps the marker for the sections, the form and the Q&A'
     assert 'id="sessions"' not in template and 'id="intro"' not in template, 'text sections come from content/sections.json, not from the template'
     assert 'aria-describedby="form-status"' in template and 'data-write' not in template and 'splitWrite' not in template
@@ -589,6 +589,58 @@ def check_story_and_closing(builder):
     assert dict(builder.ASIDE_LOOKS).get('closing'), 'the dashboard offers the closing statement'
 
 
+def check_owner_feedback(builder):
+    """Feedback of November 2026: quotes and signatures, plates, seventh theme, wide photo, first-screen photo, privacy dialog, editable Q&A."""
+    css = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
+    pull = re.search(r'\.pull \{([^}]*)\}', css).group(1)
+    assert 'padding-left' not in pull and 'max-width:20em' not in pull, 'quotes: no indent on the left, full column width'
+    assert '.sec:has(.b-text.has-h) .b-text:not(.has-h)' in css, 'plain text without a heading looks like plain text with one in the same section'
+    for needle in ('.theme-final', '.b-band', '.pp-dialog', '.q-by', '[data-tint="sand"]', '[data-face="caps"]', '.hero[data-phone="top"]'):
+        assert needle in css, f'css for {needle}'
+    assert builder.split_signature('Text\n— Name, Book') == ('Text', ['— Name, Book']) and builder.split_signature('— only a dash')[1] == [], 'signature: the lines that start with a dash after the text'
+    cover = 'media/test-cover.webp'
+    sections = {'sections': [{'id': 'one', 'type': 'text', 'title': 'One', 'layout': 'column', 'blocks': [
+        {'type': 'text', 'heading': 'Heading', 'body': 'With heading.', 'note': '', 'look': 'plain'},
+        {'type': 'text', 'heading': '', 'body': 'Without heading.', 'note': '', 'look': 'plain'},
+        {'type': 'quote', 'text': 'Quote text\n— Someone, Somewhere', 'size': 'auto'},
+        {'type': 'aside', 'text': 'Panel text\n— Rick Rubin, The Creative Act', 'look': 'panel', 'photo': '', 'tint': 'sand', 'face': 'bold'},
+        {'type': 'aside', 'text': 'Quiet one', 'look': 'quiet', 'photo': '', 'tint': 'auto', 'face': 'caps'},
+        {'type': 'aside', 'text': 'Photo panel', 'look': 'panel', 'photo': cover, 'tint': 'sand', 'face': 'book'},
+        {'type': 'themes', 'heading': '', 'intro': '', 'finalTitle': 'Seventh', 'finalText': 'Close by.', 'finalPos': 'before', 't1': 'Theme one', 'd1': 'Detail one'},
+        {'type': 'band', 'photo': cover, 'crop': '40,20,1.5', 'height': 'tall', 'blur': 'soft', 'alt': ''},
+        {'type': 'band', 'photo': '', 'crop': '', 'height': 'medium', 'blur': 'none', 'alt': ''},
+    ]}, {'id': 'contact', 'type': 'contact'}, {'id': 'qa', 'type': 'qa'}]}
+
+    def mutate(work, site):
+        (work / 'content/sections.json').write_text(json.dumps(sections, ensure_ascii=False), encoding='utf-8')
+        site.update({'portrait': cover, 'publish_ready': True, 'portrait_crop': '30,40,1.4', 'portrait_crop_m': '20,10,1',
+                     'hero_phone': 'top', 'hero_font': 'caps', 'hero_size': 'large'})
+        data = json.loads((work / 'content/home_en.json').read_text(encoding='utf-8'))
+        data['contact']['formNote'] = 'Please read the [Privacy Policy] first.'
+        (work / 'content/home_en.json').write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
+        (work / 'content/qa.json').unlink(missing_ok=True)
+    temporary, work = build_fixture(builder, mutate, posts=False)
+    with temporary:
+        home = (work / '_site/index.html').read_text(encoding='utf-8')
+    assert '<span class="q-by">— Someone, Somewhere</span>' in home and '<blockquote class="b b-quote pull"' in home, 'quote: signature on a smaller line of its own'
+    panel = re.search(r'<div class="b b-aside quote-panel"[^>]*data-face="bold"[^>]*>', home)
+    assert panel and 'data-tint="sand"' in panel.group(0) and '<span class="q-by">— Rick Rubin, The Creative Act</span>' in home, 'panel: tint, face and signature'
+    assert 'data-face="caps"' in re.search(r'<div class="b b-aside aside-quiet"[^>]*>', home).group(0), 'quiet phrase: face'
+    photo_panel = re.search(r'<div class="b b-aside quote-panel"[^>]*>(?=<figure)', home)
+    assert photo_panel and 'data-tint' not in photo_panel.group(0), 'a panel with a photo does not take a tint'
+    assert home.index('class="theme theme-final"') < home.index('class="theme-grid"'), 'seventh theme can stand before the six'
+    assert home.count('class="b b-band band-h-tall band-blur-soft"') == 1 and home.count('b-band band-h-medium') == 0, 'wide photo: shown with a photo, hidden without'
+    assert 'transform:scale(1.5)' in home[home.index('b-band band-h-tall'):], 'wide photo: crop'
+    assert re.search(r'<img[^>]*data-slot="1"[^>]*style="--hx:30%;--hy:40%;--hz:1.4;--mx:20%;--my:10%;--mz:1"', home), 'first-screen photo: crop for computer and phone'
+    assert '<section class="band band-deep hero" id="hero" data-font="caps" data-size="large" data-phone="top">' in home, 'first screen: font, size, phone layout'
+    assert '<a href="privacy/" data-privacy>Privacy Policy</a>' in home and 'id="privacy-dialog"' in home and '<!--@@' not in home, 'form note link and privacy dialog'
+    assert 'class="qa-group"' not in home, 'without content/qa.json no questions are shown and nothing breaks'
+    admin = (ROOT / 'admin/index.html').read_text(encoding='utf-8')
+    for needle in ('qaEditor', 'qaMoveItem', 'openHeroCrop', 'heroPhotoBox', 'content/qa.json'):
+        assert needle in admin, f'dashboard: {needle}'
+    print('ok owner feedback')
+
+
 def main():
     builder = load_builder()
     check_consistency(builder)
@@ -607,6 +659,7 @@ def main():
     check_text_system(builder)
     check_photo_tools(builder)
     check_story_and_closing(builder)
+    check_owner_feedback(builder)
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
     def full(work, site):
@@ -614,7 +667,9 @@ def main():
                      'portrait': 'media/test-cover.webp', 'story_photo_2': 'media/test-cover.webp', 'eyes_photo': '', 'quote_photo': '',
                      'story_photo_1': '', 'story_photo_3': '', 'story_photo_4': '', 'form_endpoint': 'https://formspree.io/f/abc123', 'inbox_endpoint': 'https://script.google.com/macros/s/AKfycbTEST_123/exec', 'publish_ready': True})
         data = json.loads((work / 'content/home_en.json').read_text(encoding='utf-8'))
-        data['qa']['q3'] = ''
+        qa_fixture = {'groups': [{'title': 'Practical', 'items': [{'q': 'First?', 'a': 'One.'}, {'q': '', 'a': 'Hidden answer'}, {'q': 'Second?', 'a': 'Two.\n\nMore.'}]},
+                                 {'title': '', 'items': [{'q': 'Third?', 'a': 'Three.'}]}, {'title': 'Empty group', 'items': []}]}
+        (work / 'content/qa.json').write_text(json.dumps(qa_fixture), encoding='utf-8')
         (work / 'content/home_en.json').write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
         (work / 'content/sections.json').write_text(json.dumps(sample_sections(builder), ensure_ascii=False), encoding='utf-8')
     temporary, work = build_fixture(builder, full, posts=True)
@@ -632,7 +687,7 @@ def main():
         assert 'id="notes"' in home and 'CMS_VISIBLE_POSTS = {"en":1}' in home
         assert '<article class="blog-card" data-post-lang="en">' in home
         assert '<footer class="site-footer after-sand"' in home, 'with notes the footer fades from the notes band (sand after a teal section)'
-        assert '<details name="qa" data-qa="3" hidden>' in home and '<details name="qa" data-qa="2">' in home
+        assert home.count('<details name="qa">') == 3 and 'Hidden answer' not in home and 'Empty group' not in home and home.count('class="qa-group"') == 2, 'questions come from qa.json: empty questions and groups are not shown'
         assert 'https://demo.github.io/athlete-support/' in home and 'index,follow' in home
         assert 'application/ld+json' in home and 'og:image' in home
         assert 'Testing heading' in article and '<script>alert(1)</script>' not in article
