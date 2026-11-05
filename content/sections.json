@@ -152,7 +152,7 @@
           "photo": "media/photo-20261105-162722-1.webp",
           "crop": "50,72.1,1",
           "height": "medium",
-          "blur": "soft",
+          "blur": "none",
           "alt": ""
         }
       ]
