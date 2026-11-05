@@ -264,14 +264,14 @@
         {
           "type": "photos",
           "s1": "6",
-          "s2": "media/photo-20261102-151413-7.webp",
-          "s3": "media/photo-20261102-151438-8.webp",
+          "s2": "media/photo-2-20261029-092851.webp",
+          "s3": "media/photo-20261105-170530-5.webp",
           "place": "inline",
           "caption": "",
           "alt": "Recent photographs",
           "comp": "trio",
-          "f2": "50,85.1,1",
-          "f3": "50,55.9,1"
+          "f2": "",
+          "f3": "50,100,1"
         }
       ]
     },
