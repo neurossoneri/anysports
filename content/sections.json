@@ -49,9 +49,9 @@
         {
           "type": "aside",
           "text": "The only person you’re ever competing against is yourself. The rest is out of your control.\n— John Wooden, basketball coach.",
-          "look": "closing",
+          "look": "panel",
           "photo": "",
-          "tint": "auto",
+          "tint": "mist",
           "face": "book"
         }
       ]
@@ -78,7 +78,7 @@
         },
         {
           "type": "aside",
-          "text": "\"Faith is rewarded, perhaps, even more than talent or ability. ... We are required to believe in something that doesn't exist in order to allow it to come into being\" \n— Rick Rubin, The Creative Act: A Way of Being",
+          "text": "\"Faith is rewarded, perhaps, even more than talent or ability. ... We are required to believe in something that doesn't exist in order to allow it to come into being.\" \n— Rick Rubin, record producer",
           "look": "panel",
           "photo": ""
         },
