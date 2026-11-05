@@ -87,7 +87,7 @@
           "heading": "",
           "body": "A space to develop the ability to connect with yourself, listen to your inner voice and recognise what it is saying.",
           "note": "",
-          "look": "plain"
+          "look": "lead"
         },
         {
           "type": "text",
@@ -144,12 +144,13 @@
           "t6": "Life beyond sport",
           "d6": "Shifting attention and energy towards other meaningful aspects of life, and developing an identity beyond sport.",
           "finalTitle": "Trusting yourself first",
-          "finalText": "Checking with yourself before and after listening to the advice of family, friends, coaches, doctors and other experts. No one knows whats right for you better than you."
+          "finalText": "Checking with yourself before and after listening to the advice of family, friends, coaches, doctors and other experts. No one knows whats right for you better than you.",
+          "finalPos": "before"
         },
         {
           "type": "band",
-          "photo": "",
-          "crop": "",
+          "photo": "media/photo-20261105-162722-1.webp",
+          "crop": "50,72.1,1",
           "height": "medium",
           "blur": "soft",
           "alt": ""
