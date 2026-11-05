@@ -111,13 +111,13 @@
         {
           "type": "text",
           "heading": "",
-          "body": "Intuition can reconnect us with our inner truth: our values, what makes us happy, what we want from life and how we wish to move through it. Yet this journey is not only about understanding and answers. It is also about learning to accept the unknown, the unpredictable and the uncontrollable. Letting go of the boundaries that stand in the way of your inner alignment and contentment is one of the few skills we practise.",
+          "body": "Intuition can reconnect us with our inner truth: our values, what makes us happy, what we want from life and how we wish to move through it. Yet this journey is not only about understanding and answers. It is also about learning to accept the unknown, the unpredictable and the uncontrollable. Letting go of the boundaries that stand in the way of your inner alignment and contentment is one of the few skills we practise.\n",
           "note": "",
           "look": "plain"
         },
         {
           "type": "quote",
-          "text": "Not everything in life can be understood through logic, nor does everything need to be.",
+          "text": "When we're doing what we love, we don't have to justify it to ourselves or others.  Not everything in life can be understood through logic, nor does everything need to be.",
           "size": "auto"
         },
         {
@@ -164,12 +164,6 @@
       "layout": "rail-left",
       "blocks": [
         {
-          "type": "aside",
-          "text": "\"Failure is the information you need to get where you’re going.\"\n— Rick Rubin, The Creative Act: A Way of Being",
-          "look": "panel",
-          "photo": ""
-        },
-        {
           "type": "photos",
           "comp": "single",
           "s1": "media/photo-20261102-135729-2.webp",
@@ -185,7 +179,14 @@
         },
         {
           "type": "text",
-          "heading": "Transformation is not an easy period but it has a rewarding results",
+          "heading": "",
+          "body": "Transformation is not an easy period but it has a rewarding results",
+          "note": "",
+          "look": "lead"
+        },
+        {
+          "type": "text",
+          "heading": "",
           "body": "It often begins independently of our readiness or desire. At a certain point in life, we feel that something is changing — first inside us.\n\nInitially, we dismiss these shifts, calling them moods or temporary phases, thinking that once something external changes, we’ll return to normal.\n\nBut at some point, we realise this is not something that will simply pass. We can’t run from it or keep denying it. The first step is to acknowledge the truth: we are changing. And we should let it happen.",
           "note": "",
           "look": "plain"
