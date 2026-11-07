@@ -241,13 +241,14 @@
           "type": "photos",
           "s1": "4",
           "s2": "media/photo-20261102-150255-3.webp",
-          "s3": "media/photo-20261102-150442-6.webp",
+          "s3": "media/photo-20261102-150404-5.webp",
           "place": "inline",
           "caption": "From the FIFA archive",
           "alt": "Photographs from the FIFA archive",
           "comp": "trio",
-          "f2": "50,46.1,1",
-          "f3": "50,99.6,1"
+          "f2": "50,50.9,1",
+          "f3": "39.6,30,1",
+          "f1": "19.6,30,1"
         },
         {
           "type": "text",
