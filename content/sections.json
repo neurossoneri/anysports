@@ -35,10 +35,10 @@
         {
           "type": "photos",
           "comp": "single",
-          "s1": "media/photo-7-20261029-093038.webp",
+          "s1": "media/photo-20261107-125750-7.webp",
           "s2": "",
           "s3": "",
-          "f1": "50,85.2,1",
+          "f1": "50,100,1",
           "f2": "",
           "f3": "",
           "zoom": "",
@@ -64,7 +64,7 @@
       "blocks": [
         {
           "type": "photos",
-          "s1": "3",
+          "s1": "media/photo-20261107-125822-8.webp",
           "s2": "",
           "s3": "media/photo-2-20261029-092851.webp",
           "place": "side",
@@ -74,7 +74,7 @@
           "f3": "",
           "zoom": "yes",
           "comp": "single",
-          "f1": "50,48.8,1"
+          "f1": "50,68.7,1"
         },
         {
           "type": "aside",
@@ -149,8 +149,8 @@
         },
         {
           "type": "band",
-          "photo": "media/photo-20261105-162722-1.webp",
-          "crop": "50,72.1,1",
+          "photo": "media/photo-20261107-125910-9.webp",
+          "crop": "50,69.1,1",
           "height": "medium",
           "blur": "none",
           "alt": ""
@@ -166,10 +166,10 @@
         {
           "type": "photos",
           "comp": "single",
-          "s1": "media/photo-20261102-135729-2.webp",
+          "s1": "media/photo-20261107-125935-10.webp",
           "s2": "",
           "s3": "",
-          "f1": "",
+          "f1": "50,21.3,1",
           "f2": "",
           "f3": "",
           "zoom": "",
@@ -263,15 +263,16 @@
         },
         {
           "type": "photos",
-          "s1": "6",
-          "s2": "media/photo-2-20261029-092851.webp",
-          "s3": "media/photo-20261105-170530-5.webp",
+          "s1": "media/photo-20261107-130018-11.webp",
+          "s2": "media/photo-20261107-130305-14.webp",
+          "s3": "media/photo-20261107-130214-13.webp",
           "place": "inline",
           "caption": "",
           "alt": "Recent photographs",
           "comp": "trio",
-          "f2": "",
-          "f3": "50,100,1"
+          "f2": "50,79.5,1",
+          "f3": "50,100,1",
+          "f1": "27.3,44.2,1.3"
         }
       ]
     },
