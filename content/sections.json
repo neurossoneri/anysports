@@ -164,6 +164,14 @@
       "layout": "rail-left",
       "blocks": [
         {
+          "type": "aside",
+          "text": "\"Become who you are.\"\n— Fredrick Nietzsche, philosopher",
+          "look": "panel",
+          "photo": "",
+          "tint": "night",
+          "face": "book"
+        },
+        {
           "type": "photos",
           "comp": "single",
           "s1": "media/photo-20261107-125935-10.webp",
@@ -178,50 +186,54 @@
           "alt": ""
         },
         {
-          "type": "aside",
-          "text": "\"Failure is the information you need to get where you’re going.\"\n— Rick Rubin, record producer",
-          "look": "panel",
-          "photo": "",
-          "tint": "night",
-          "face": "book"
-        },
-        {
           "type": "text",
-          "heading": "",
-          "body": "Sometimes, no matter how much we want to, we hardly hear or recognise the voice of our intuition. \nTo build a reality of our own, we need to be authentic. We should find strength in who we truly are, rather than someone taught and expect us to be. We gotta find the respect for everything we are feeling even and especially if we believe there is something profoundly wrong with us.\n",
+          "heading": "Step back from expectations",
+          "body": "Sometimes, no matter how much we want to, we struggle to hear or recognise the voice of our intuition.\n\nTo build a reality of our own, we need to be authentic. We need to find strength in who we truly are, rather than in who we were taught or expected to be. We need to learn to respect everything we feel — even, and especially, when we believe there is something profoundly wrong with us.\n\n",
           "note": "",
           "look": "plain"
         },
         {
           "type": "quote",
-          "text": "After years of parental advice, education and social conditioning,  in attempt to fit in we often drift far away from who we truly are.",
+          "text": "After years of parental advice, education and social conditioning, in our attempt to fit in, we often drift far away from who we truly are.",
           "size": "auto"
         },
         {
           "type": "text",
           "heading": "",
-          "body": "When this gap becomes too big to ignore, we may begin to recognise it through a persistent sense of inner confusion, constant pressure, in extreme cases - a void where nothing feels alive or purposeful. Things that once mattered lose their power. What used to bring us joy, purpose and satisfaction no longer has a strong effect.",
+          "body": "When this gap becomes too big to ignore, we may begin to recognise it through a persistent sense of inner confusion, constant pressure or, in more extreme cases, a void where nothing feels alive or purposeful. Things that once mattered lose their power. What used to bring us joy, purpose and satisfaction no longer has the same effect.",
           "note": "",
           "look": "plain"
         },
         {
           "type": "text",
           "heading": "Rediscovering what feels like you",
-          "body": "Initially, we tend to dismiss these shifts, calling them moods or temporary phases. We tell ourselves that once we achieve our next goal, we'll become happy.\n \nEventually, we realise that no people, no amount of money and no number of medals can fill the void within us.\n\n",
+          "body": "Initially, we tend to dismiss these shifts, calling them moods or temporary phases. We tell ourselves that once we achieve our next goal, we'll finally be happy.\n\n\n",
           "note": "",
           "look": "plain"
         },
         {
           "type": "quote",
-          "text": "More often than not a change in your outer circumstances can bring a momentary relief, an achievement - an ecstasy followed by setting even bigger goal since that one didnt bring the desired result.\n It is an invitation to step back, reflect and rediscover — or perhaps recall — what makes you unique, fulfilled and whole.",
+          "text": "Eventually, we realise that no people, no amount of money and no number of medals can fill the void within us. It can only be filled with love, self love.",
           "size": "auto"
         },
         {
           "type": "text",
           "heading": "",
-          "body": "At this stage, social pressure can be particularly strong. People may offer well-meaning advice, but the real journey is a private and inward one. Stepping onto this path can bring a temporary sense of social alienation, and that's normal. At this point, building a relationship with yourself becomes so much more important.\n\nYou may feel disconnected from everything familiar without yet having a clear sense of what comes next. That uncertainty deserves to be acknowledged and accepted rather than immediately fixed.",
+          "body": "More often than not, a change in our outer circumstances brings only momentary relief. An achievement brings a moment of ecstasy, only to be followed by the setting of an even bigger goal when the previous one fails to deliver the fulfilment we expected.\n\nPerhaps this is an invitation to step back, reflect and rediscover — or perhaps recall — what makes us unique, fulfilled and whole.\n",
           "note": "",
           "look": "plain"
+        },
+        {
+          "type": "text",
+          "heading": "Unplug",
+          "body": "At this stage, social pressure can be particularly strong. People may offer well-meaning advice, but the real journey is a private and inward one. Stepping onto this path can bring a temporary sense of social alienation, and that's normal. At this point, building a relationship with yourself becomes so much more important.\n\n",
+          "note": "",
+          "look": "plain"
+        },
+        {
+          "type": "quote",
+          "text": "You may feel disconnected from everything familiar without yet having a clear sense of what comes next. That uncertainty deserves to be acknowledged and accepted rather than immediately fixed.\n",
+          "size": "auto"
         },
         {
           "type": "text",
