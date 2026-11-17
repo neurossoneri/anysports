@@ -33,24 +33,10 @@
           "look": "plain"
         },
         {
-          "type": "photos",
-          "comp": "single",
-          "s1": "media/photo-20261107-125750-7.webp",
-          "s2": "",
-          "s3": "",
-          "f1": "50,100,1",
-          "f2": "",
-          "f3": "",
-          "zoom": "",
-          "place": "side",
-          "caption": "",
-          "alt": ""
-        },
-        {
           "type": "aside",
           "text": "The only person you’re ever competing against is yourself. The rest is out of your control.\n— John Wooden, basketball coach.",
           "look": "panel",
-          "photo": "",
+          "photo": "media/photo-20261107-125750-7.webp",
           "tint": "mist",
           "face": "book"
         }

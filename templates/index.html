@@ -43,6 +43,7 @@
       --type-quote-long:400 clamp(1.2rem,1.9vw,1.55rem)/1.5 var(--serif);
       --type-statement:500 clamp(1.75rem,3.2vw,2.8rem)/1.26 var(--serif);
       --type-hand:500 clamp(2rem,3.6vw,3.2rem)/1.2 var(--hand);
+      --type-read:400 clamp(1.02rem,1.3vw,1.12rem)/1.85 var(--sans);   /* основной текст разделов: один вид, как в «Intuition sessions» */
       --type-panel:500 clamp(1.45rem,2.4vw,2rem)/1.4 var(--serif);
     }
     :root[data-theme="dark"] {
@@ -413,7 +414,9 @@
     .aside-closing .statement { max-width:16em; margin-inline:auto; font:400 clamp(1.45rem,2.6vw,2.2rem)/1.42 var(--serif); letter-spacing:-.01em; color:var(--c-text); }
     /* owner-feedback-v2. Обратная связь владелицы (ноябрь 2026). Блок стоит в конце таблицы: он дополняет правила выше. */
     /* Обычный текст без подзаголовка выглядит так же, как обычный текст с подзаголовком в том же разделе. В разделах без подзаголовков ничего не меняется. */
-    .sec:has(.b-text.has-h) .b-text:not(.has-h):not(.b-dropcap) p { font:400 clamp(1.02rem,1.3vw,1.12rem)/1.85 var(--sans); color:var(--c-muted); max-width:62ch; }
+    /* owner-feedback-v3. Один вид основного текста во всех разделах, кроме «историй» с центрированной колонкой (My story: буквица и книжный шрифт). */
+    /* Не зависит от того, есть ли в разделе подзаголовки: так первый раздел, «Intuition sessions» и «Presence sessions» читаются одинаково. */
+    .sec:not(.sec-centered) .b-text:not(.b-dropcap) p { font:var(--type-read); color:var(--c-muted); max-width:62ch; }
     /* Подпись под цитатой или фразой: строка, начатая с тире. Мельче и с новой строки. */
     .q-by { display:block; margin-top:.9em; font:500 .86rem/1.5 var(--sans); letter-spacing:.03em; text-transform:none; text-shadow:none; white-space:pre-line; opacity:.85; }
     /* Плашка: прямой книжный шрифт; цвет подкладки выбирается в панели. «Авто»: на тёмном и бирюзовом фоне плашка светлее фона, на светлом тёмная. */
@@ -432,10 +435,13 @@
     [data-face="caps"] .quote-text { font-size:clamp(1.05rem,1.8vw,1.5rem); text-transform:uppercase; letter-spacing:.05em; font-weight:600; line-height:1.5; }
     [data-face="sans"] .statement, [data-face="sans"] .quote-text { font-family:var(--sans); font-weight:500; letter-spacing:-.005em; }
     /* Седьмая тема списка («Trusting yourself first»): того же размера, что остальные, по центру, вплотную к списку */
-    .theme-final { max-width:none; text-align:center; padding-left:0!important; padding-right:0!important; }
-    .theme-final .glyph { margin-inline:auto; }
-    .theme-final span { margin-inline:auto; }
+    /* owner-feedback-v3: сам блок по центру (ширина одной колонки, как у средней темы), значок и текст по левому краю, как у остальных */
+    .theme-final { max-width:none; text-align:left; }
+    .theme.theme-final { width:calc(100% / 3); margin-inline:auto; padding-left:clamp(18px,2.4vw,30px); padding-right:clamp(18px,2.4vw,30px); }
     .theme-final + .theme-grid { margin-top:0; }
+    @media (max-width:900px) { .theme.theme-final { width:auto; margin-inline:0; padding-left:0; padding-right:0; } }
+    /* owner-feedback-v3: фраза на фото в боковой колонке: кадр держится за нижнюю часть, как было у отдельного фото с камушками */
+    .sec-rail-right .rail .quote-bg img { object-position:50% 100%; }
     /* Широкое фото во всю ширину экрана: передышка между частями раздела, края растворяются в фоне */
     .b-band { width:100vw; margin:clamp(40px,6vw,88px) 0 clamp(40px,6vw,88px) calc(50% - 50vw); }
     .b-band .photo { height:clamp(240px,38vw,560px); background:none; -webkit-mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent); mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent); }
@@ -491,6 +497,7 @@
       *, *::before, *::after { animation-duration:.01ms!important; animation-iteration-count:1!important; animation-delay:0s!important; transition-duration:.01ms!important; transition-delay:0s!important; }
       .scroll-progress { animation:none!important; }
     }
+      /* owner-feedback-v3 (маркер: патч уже применён) */
   </style>
 </head>
 <body>

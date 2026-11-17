@@ -594,7 +594,10 @@ def check_owner_feedback(builder):
     css = (ROOT / 'templates/index.html').read_text(encoding='utf-8')
     pull = re.search(r'\.pull \{([^}]*)\}', css).group(1)
     assert 'padding-left' not in pull and 'max-width:20em' not in pull, 'quotes: no indent on the left, full column width'
-    assert '.sec:has(.b-text.has-h) .b-text:not(.has-h)' in css, 'plain text without a heading looks like plain text with one in the same section'
+    assert '.sec:not(.sec-centered) .b-text:not(.b-dropcap) p { font:var(--type-read)' in css and '--type-read:' in css, 'one reading text for every section except the centered story, with or without subheadings'
+    final = re.search(r'\.theme-final \{([^}]*)\}', css).group(1)
+    assert 'text-align:left' in final and 'center' not in final, 'seventh theme: icon and text are left-aligned like the others'
+    assert re.search(r'\.theme\.theme-final \{[^}]*margin-inline:auto', css), 'seventh theme: the block itself stays in the middle'
     for needle in ('.theme-final', '.b-band', '.pp-dialog', '.q-by', '[data-tint="sand"]', '[data-face="caps"]', '.hero[data-phone="top"]'):
         assert needle in css, f'css for {needle}'
     assert builder.split_signature('Text\n— Name, Book') == ('Text', ['— Name, Book']) and builder.split_signature('— only a dash')[1] == [], 'signature: the lines that start with a dash after the text'
@@ -636,7 +639,7 @@ def check_owner_feedback(builder):
     assert '<a href="privacy/" data-privacy>Privacy Policy</a>' in home and 'id="privacy-dialog"' in home and '<!--@@' not in home, 'form note link and privacy dialog'
     assert 'class="qa-group"' not in home, 'without content/qa.json no questions are shown and nothing breaks'
     admin = (ROOT / 'admin/index.html').read_text(encoding='utf-8')
-    for needle in ('qaEditor', 'qaMoveItem', 'openHeroCrop', 'heroPhotoBox', 'content/qa.json'):
+    for needle in ('qaEditor', 'qaMoveItem', 'openHeroCrop', 'heroPhotoBox', 'content/qa.json', 'panelPrivacy', 'parsePrivacy', 'serializePrivacy', "['privacy', 'Политика']", 'content/privacy.md'):
         assert needle in admin, f'dashboard: {needle}'
     print('ok owner feedback')
 
