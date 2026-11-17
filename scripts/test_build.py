@@ -56,7 +56,7 @@ def check_consistency(builder):
     assert not unused, f'copy that the template never shows: {sorted(unused)}'
     for group in ('story', 'quotes', 'sessions', 'client', 'change', 'about'):
         assert group not in home_en, f'{group} now lives in content/sections.json'
-    for key in ('form_endpoint', 'inbox_endpoint', 'portrait', 'eyes_photo', 'story_photo_1', 'story_photo_4', 'privacy_address'):
+    for key in ('form_endpoint', 'inbox_endpoint', 'notify_telegram', 'portrait', 'eyes_photo', 'story_photo_1', 'story_photo_4', 'privacy_address'):
         assert key in cms_keys(entries['site']['fields']), f'site settings lack {key}'
     for key in ('name_ru', 'name_fr', 'role_ru', 'role_fr'):
         assert key not in site and key not in cms_keys(entries['site']['fields']), f'old language field is back: {key}'
@@ -250,6 +250,7 @@ def check_brand_and_dashboard(builder, destination):
     page = schema['page']
     assert {b['type'] for b in page['blockTypes']} == set(builder.BLOCK_TYPES) and page['slots'] == ['2', '3', '4', '5', '6', '7']
     assert 'banned' in schema and schema['required'] == list(builder.REQUIRED_COPY)
+    assert 'notify_telegram' not in [c['name'] for c in schema['contacts']], 'the Telegram flag is set by the dashboard itself, not typed into Settings'
     admin = (destination / 'admin/index.html').read_text(encoding='utf-8')
     assert 'noindex' in admin and 'fonts.googleapis' not in admin and 'localStorage' in admin
     assert 'takeMany' in admin and 'numberFromName' in admin and 'photo-row' in admin, 'dashboard: one row per numbered photo; several files can be dropped by number'
@@ -314,16 +315,105 @@ def check_smooth(destination):
     assert 'preload" href="assets/fonts/caveat-normal-latin.woff2"' in home, 'the handwriting font is preloaded'
 
 
+NOTIFY_SCRIPT_CHECK = r"""
+// Runs the Google script with stand-in Google services: no network, no account.
+const fs = require('fs'), vm = require('vm'), assert = require('assert');
+const code = fs.readFileSync(process.argv[2], 'utf8').replace("'ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ'", "'test-key-123456'");
+const store = {}, mails = [], calls = [], rows = [['id', 'created', 'name', 'contact', 'message', 'status', 'note', 'source']];
+let telegram = 200;
+const cells = (r, c, nr, nc) => rows.slice(r - 1, r - 1 + (nr || 1)).map(x => x.slice(c - 1, c - 1 + (nc || 1)));
+const sheet = { getDataRange: () => ({ getValues: () => rows }), getLastRow: () => rows.length, appendRow: r => rows.push(r), deleteRow: i => rows.splice(i - 1, 1),
+  getRange: (r, c, nr, nc) => ({ getValues: () => cells(r, c, nr, nc), setValue: v => { rows[r - 1][c - 1] = v; } }) };
+const ctx = {
+  PropertiesService: { getScriptProperties: () => ({ getProperty: k => (k in store ? store[k] : null), setProperty: (k, v) => { store[k] = String(v); }, deleteProperty: k => { delete store[k]; } }) },
+  LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+  CacheService: { getScriptCache: () => ({ get: () => null, put() {} }) },
+  Session: { getEffectiveUser: () => ({ getEmail: () => 'owner@example.com' }) },
+  MailApp: { sendEmail: o => { mails.push(o); } },
+  UrlFetchApp: { fetch: (url, o) => { calls.push({ url, o }); return { getResponseCode: () => telegram,
+    getContentText: () => JSON.stringify({ ok: true, result: [{ message: { chat: { id: 555, type: 'private', first_name: 'Anna' } } }, { message: { chat: { id: -9, type: 'group', title: 'x' } } }] }) }; } },
+  Utilities: { getUuid: () => 'abcdef12-0000' },
+  ContentService: { createTextOutput: t => ({ text: t, setMimeType() { return this; } }), MimeType: { JSON: 1 } },
+  SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: () => sheet, getUrl: () => 'https://sheet.example/' }) },
+};
+vm.createContext(ctx); vm.runInContext(code, ctx);
+const post = o => JSON.parse(ctx.doPost({ postData: { contents: JSON.stringify(o) } }).text);
+const K = 'test-key-123456', TOKEN = '123456789:' + 'A'.repeat(35);
+
+assert.strictEqual(post({ action: 'settings', key: 'wrong-key-1234' }).error, 'key', 'settings need the password');
+let s = post({ action: 'settings', key: K });
+assert.ok(s.ok && s.version === 2 && s.email === '' && s.defaultEmail === 'owner@example.com' && !s.telegram.token);
+
+// the visitor's message: email goes to the Google account while nothing is set up, and no Telegram call is made
+assert.ok(post({ action: 'submit', name: 'Visitor', contact: 'v@example.com', message: 'Hi' }).ok);
+assert.strictEqual(mails.length, 1); assert.strictEqual(mails[0].to, 'owner@example.com'); assert.strictEqual(calls.length, 0);
+
+// validation: nothing is stored when one value is wrong
+assert.strictEqual(post({ action: 'save_settings', key: K, email: 'not-an-email' }).error, 'bademail');
+assert.strictEqual(post({ action: 'save_settings', key: K, email: 'a@x.co', tgToken: 'abc' }).error, 'badtoken');
+assert.strictEqual(post({ action: 'save_settings', key: K, tgChat: '12x' }).error, 'badchat');
+assert.strictEqual(post({ action: 'save_settings', key: K, email: 'a@x.co, b@x.co, c@x.co, d@x.co' }).error, 'bademail', 'at most three addresses');
+assert.strictEqual(post({ action: 'settings', key: K }).email, '', 'a refused save writes nothing');
+
+// finding the chat uses only private chats; the token is never sent back
+let f = post({ action: 'tg_find', key: K, tgToken: TOKEN });
+assert.ok(f.ok && f.chats.length === 1 && f.chats[0].id === '555');
+assert.ok(calls[calls.length - 1].url.endsWith('/getUpdates') && calls[calls.length - 1].url.includes(TOKEN));
+assert.strictEqual(post({ action: 'tg_find', key: K, tgToken: 'nope' }).error, 'badtoken');
+
+// saving: the answer never contains the token
+s = post({ action: 'save_settings', key: K, email: 'me@example.org, you@example.org', tgToken: TOKEN, tgChat: '555' });
+assert.ok(s.ok && s.email === 'me@example.org, you@example.org' && s.telegram.token && s.telegram.chat === '555' && s.telegram.hint === '…' + TOKEN.slice(-4));
+assert.ok(!JSON.stringify(s).includes(TOKEN) && !JSON.stringify(post({ action: 'settings', key: K })).includes(TOKEN), 'the token is never returned');
+
+// a new request now goes to both channels; plain text only
+mails.length = 0; calls.length = 0;
+assert.ok(post({ action: 'submit', name: 'Anna\nBcc: evil@example.com', contact: '@anna_k', message: '<b>Hello</b>' }).ok);
+assert.strictEqual(mails.length, 1); assert.strictEqual(mails[0].to, 'me@example.org,you@example.org'); assert.ok(!/[\r\n]/.test(mails[0].subject), 'no line breaks in the subject');
+assert.strictEqual(calls.length, 1); const sent = JSON.parse(calls[0].o.payload);
+assert.ok(calls[0].url.endsWith('/sendMessage') && sent.chat_id === '555' && sent.text.includes('<b>Hello</b>') && !('parse_mode' in sent), 'Telegram text is sent as plain text');
+
+// a failing Telegram never loses the request; the panel is told why
+telegram = 403; const before = rows.length;
+assert.ok(post({ action: 'submit', name: 'B', contact: 'b@example.com', message: '' }).ok && rows.length === before + 1);
+assert.strictEqual(post({ action: 'settings', key: K }).problems.telegram, 'tgblocked');
+telegram = 200;
+let t = post({ action: 'test_notify', key: K });
+assert.ok(t.ok && t.email === 'ok' && t.telegram === 'ok' && t.emailTo === 'me@example.org,you@example.org');
+assert.strictEqual(post({ action: 'settings', key: K }).problems.telegram, '', 'a working test clears the problem');
+
+// turning Telegram off removes the token and the chat
+s = post({ action: 'save_settings', key: K, tgToken: '', tgChat: '' });
+assert.ok(s.ok && !s.telegram.token && s.telegram.chat === '' && s.email === 'me@example.org, you@example.org');
+console.log('notify script ok');
+"""
+
+
+def check_notify_script(script):
+    """The Google script: settings, Telegram and email, with stand-in Google services (needs Node.js)."""
+    node = shutil.which('node')
+    if not node:
+        return
+    with tempfile.TemporaryDirectory() as folder:
+        (Path(folder) / 'inbox.js').write_text(script, encoding='utf-8')
+        (Path(folder) / 'check.js').write_text(NOTIFY_SCRIPT_CHECK, encoding='utf-8')
+        result = subprocess.run([node, str(Path(folder) / 'check.js'), str(Path(folder) / 'inbox.js')], capture_output=True, text=True)
+        assert result.returncode == 0 and 'notify script ok' in result.stdout, f'notify script check failed: {(result.stderr or result.stdout)[:700]}'
+
+
 def check_inbox(builder, destination):
     """The requests inbox: script file, dashboard tab, form wiring."""
     script = (destination / 'admin/inbox-script.txt').read_text(encoding='utf-8')
-    for needle in ('function doPost', 'ADMIN_KEY', "'submit'", 'LockService', 'setNumberFormat'):
+    for needle in ('function doPost', 'ADMIN_KEY', "'submit'", 'LockService', 'setNumberFormat', 'SCRIPT_VERSION', 'PropertiesService', 'api.telegram.org',
+                   "'save_settings'", "'tg_find'", "'test_notify'"):
         assert needle in script, f'inbox script lacks {needle}'
     admin = (destination / 'admin/index.html').read_text(encoding='utf-8')
-    for needle in ('panelRequests', 'inboxCall', 'inbox-script.txt', 'csvOf', 'panelPhotos'):
+    for needle in ('panelRequests', 'inboxCall', 'inbox-script.txt', 'csvOf', 'panelPhotos', 'panelNotify', 'notifySave', 'notifyLoad', 'notifyFlagChanged'):
         assert needle in admin, f'dashboard lacks {needle}'
     home = (destination / 'index.html').read_text(encoding='utf-8')
     assert "action:'submit'" in home and 'Promise.allSettled' in home, 'the form must also write to the inbox'
+    assert 'api.telegram.org' not in home and 'tg_token' not in home, 'the Telegram bot token never reaches the public site'
+    check_notify_script(script)
     node = shutil.which('node')
     if node:
         with tempfile.TemporaryDirectory() as folder:
@@ -668,7 +758,7 @@ def main():
     def full(work, site):
         site.update({'name_en': 'Test Person', 'email': 'hello@example.com', 'privacy_address': 'Example Street 1, 8000 Zürich, Switzerland',
                      'portrait': 'media/test-cover.webp', 'story_photo_2': 'media/test-cover.webp', 'eyes_photo': '', 'quote_photo': '',
-                     'story_photo_1': '', 'story_photo_3': '', 'story_photo_4': '', 'form_endpoint': 'https://formspree.io/f/abc123', 'inbox_endpoint': 'https://script.google.com/macros/s/AKfycbTEST_123/exec', 'publish_ready': True})
+                     'story_photo_1': '', 'story_photo_3': '', 'story_photo_4': '', 'form_endpoint': 'https://formspree.io/f/abc123', 'inbox_endpoint': 'https://script.google.com/macros/s/AKfycbTEST_123/exec', 'notify_telegram': True, 'publish_ready': True})
         data = json.loads((work / 'content/home_en.json').read_text(encoding='utf-8'))
         qa_fixture = {'groups': [{'title': 'Practical', 'items': [{'q': 'First?', 'a': 'One.'}, {'q': '', 'a': 'Hidden answer'}, {'q': 'Second?', 'a': 'Two.\n\nMore.'}]},
                                  {'title': '', 'items': [{'q': 'Third?', 'a': 'Three.'}]}, {'title': 'Empty group', 'items': []}]}
@@ -687,6 +777,7 @@ def main():
         assert '"formEndpoint":"https://formspree.io/f/abc123"' in home
         assert '"inboxEndpoint":"https://script.google.com/macros/s/AKfycbTEST_123/exec"' in home and '"preview":false' in home
         assert 'Google Sheets' in privacy and 'formspree.io' in privacy, 'privacy notice names the form service and the spreadsheet'
+        assert 'through a Telegram bot' in privacy, 'with Telegram notifications on, the privacy notice names Telegram as a recipient'
         assert 'id="notes"' in home and 'CMS_VISIBLE_POSTS = {"en":1}' in home
         assert '<article class="blog-card" data-post-lang="en">' in home
         assert '<footer class="site-footer after-sand"' in home, 'with notes the footer fades from the notes band (sand after a teal section)'
@@ -707,7 +798,7 @@ def main():
 
     # Defensive build: an insecure form endpoint is dropped, nothing is published, no notes appear.
     def careless(work, site):
-        site.update({'form_endpoint': 'http://insecure.example/submit', 'inbox_endpoint': 'https://evil.example/macros/s/x/exec', 'publish_ready': False,
+        site.update({'form_endpoint': 'http://insecure.example/submit', 'inbox_endpoint': 'https://evil.example/macros/s/x/exec', 'notify_telegram': True, 'publish_ready': False,
                      'portrait': '', 'quote_photo': '', 'eyes_photo': '', 'story_photo_1': '', 'story_photo_2': '', 'story_photo_3': '', 'story_photo_4': ''})
         (work / 'content/sections.json').write_text(json.dumps(sample_sections(builder), ensure_ascii=False), encoding='utf-8')
     temporary, work = build_fixture(builder, careless, posts=False)
@@ -718,6 +809,7 @@ def main():
         assert '"inboxEndpoint":""' in home and 'evil.example' not in home and 'Google Sheets' not in privacy and '"preview":true' in home
         assert 'id="notes"' not in home and 'noindex,nofollow' in home and '<footer class="site-footer after-teal"' in home
         assert 'through the contact form on this website' in privacy and 'opens your own email program' in privacy
+        assert 'through a Telegram bot' not in privacy, 'no working inbox: nothing is forwarded to Telegram, so the notice does not claim it'
         assert '<img data-slot="3"' in home and ' hidden>' not in re.search(r'<figure class="photo hero-photo"[^>]*>', home).group(0), 'before launch every place stays visible'
         assert 'Disallow: /' in (work / '_site/robots.txt').read_text(encoding='utf-8')
     # Smaller copies of the photographs (needs Pillow, which the workflow installs).

@@ -1126,6 +1126,8 @@ def privacy_content(site, warn=True):
         service = 'The contact form sends your message to a script in my own Google account (Google Apps Script), which notifies me by email.'
     if inbox:
         service += ' A copy of your message is also saved in a private spreadsheet in my own Google account (Google Sheets), which I use to keep track of requests and replies. Google processes it on my behalf.'
+    if inbox and site.get('notify_telegram') is True:
+        service += ' A notification with your name, contact details and message is also forwarded to a private chat of mine through a Telegram bot. Telegram processes it under its own privacy policy, partly on servers outside Switzerland.'
     updated = meta.get('updated')
     updated = f'{updated.day} {updated:%B %Y}' if isinstance(updated, (dt.date, dt.datetime)) else str(updated or '')
     for marker, value in (('{{controller}}', '\n'.join(lines)), ('{{form_service}}', service), ('{{updated}}', updated)):
@@ -1200,7 +1202,7 @@ def admin_schema(site):
         groups.append({'name': group['name'], 'label': group.get('label', group['name']),
                        'anchor': SECTION_ANCHORS.get(group['name'], ''),
                        'fields': [leaf(f) for f in group['fields']]})
-    skip = set(PHOTO_FIELDS) | {'publish_ready', 'portrait_crop', 'portrait_crop_m', 'hero_phone'}   # the first-screen crop and layout are set with the dashboard's own tool
+    skip = set(PHOTO_FIELDS) | {'publish_ready', 'notify_telegram', 'portrait_crop', 'portrait_crop_m', 'hero_phone'}   # the first-screen crop and layout are set with the dashboard's own tool
     contacts = [leaf(f) for f in entries['site']['fields'] if f['name'] not in skip]
     return {
         'repo': os.environ.get('GITHUB_REPOSITORY', ''),

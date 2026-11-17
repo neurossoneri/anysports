@@ -106,6 +106,9 @@ content:
     label: Адрес приёма заявок (Google Apps Script, https://script.google.com/...)
     description: Заполняется в панели /admin/ на вкладке «Заявки». Сообщения из формы на сайте попадают в вашу Google-таблицу.
     type: string
+  - name: notify_telegram
+    label: 'Уведомления о заявках приходят в Telegram (ставится само, когда вы подключаете Telegram в панели /admin/, вкладка «Заявки»)'
+    type: boolean
   - name: public_url
     label: Public site URL (optional, https://...)
     type: string

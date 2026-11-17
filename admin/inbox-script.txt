@@ -3,7 +3,7 @@
  *
  * Что делает:
  *   1. Принимает сообщения из формы на сайте и записывает их в эту таблицу (лист «Заявки»).
- *   2. Присылает вам письмо о каждой новой заявке (на почту вашего Google-аккаунта).
+ *   2. Присылает вам письмо о каждой новой заявке (на любую вашу почту) и, если хотите, сообщение в Telegram.
  *   3. Отдаёт список заявок панели управления /admin/ (только по вашему паролю).
  *
  * Как подключить, подробно: панель /admin/ → вкладка «Заявки».
@@ -14,8 +14,17 @@
 // его же нужно будет один раз ввести в панели управления.
 var ADMIN_KEY = 'ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ';
 
-// Куда присылать уведомления. Пусто = на почту вашего Google-аккаунта.
+// Куда присылать уведомления. Лучше ничего здесь не менять: адрес почты и Telegram настраиваются
+// в панели /admin/ (вкладка «Заявки» → «Уведомления о новых заявках») и хранятся в настройках скрипта.
+// Пусто = на почту вашего Google-аккаунта.
 var NOTIFY_EMAIL = '';
+
+// Версия скрипта. По ней панель понимает, что код в Google нужно обновить.
+var SCRIPT_VERSION = 2;
+
+var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+var TG_TOKEN_RE = /^\d{6,12}:[A-Za-z0-9_-]{30,60}$/;
+var TG_CHAT_RE = /^-?\d{1,20}$/;
 
 var SHEET_NAME = 'Заявки';
 var HEAD = ['id', 'created', 'name', 'contact', 'message', 'status', 'note', 'source'];
@@ -33,12 +42,16 @@ function doPost(e) {
     var req = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     var action = String(req.action || '');
     if (action === 'submit') return json_(submit_(req));
-    if (['list', 'update', 'delete', 'add'].indexOf(action) === -1) return json_({ ok: false, error: 'bad' });
+    if (['list', 'update', 'delete', 'add', 'settings', 'save_settings', 'tg_find', 'test_notify'].indexOf(action) === -1) return json_({ ok: false, error: 'bad' });
     var denied = checkKey_(req.key);
     if (denied) return json_({ ok: false, error: denied });
     if (action === 'list') return json_(list_());
     if (action === 'update') return json_(update_(req));
     if (action === 'delete') return json_(remove_(req));
+    if (action === 'settings') return json_(settingsInfo_());
+    if (action === 'save_settings') return json_(saveSettings_(req));
+    if (action === 'tg_find') return json_(tgFind_(req));
+    if (action === 'test_notify') return json_(testNotify_());
     return json_(add_(req));
   } catch (err) {
     return json_({ ok: false, error: 'server' });
@@ -67,10 +80,20 @@ function submit_(req) {
 }
 
 function notify_(item) {
+  var cfg = config_();
+  notifyEmail_(item, cfg);
+  notifyTelegram_(item, cfg);
+}
+
+function recipients_(cfg) {
+  return cfg.email.length ? cfg.email.join(',') : (NOTIFY_EMAIL || Session.getEffectiveUser().getEmail() || '');
+}
+
+function notifyEmail_(item, cfg) {
   try {
-    var to = NOTIFY_EMAIL || Session.getEffectiveUser().getEmail();
+    var to = recipients_(cfg);
     if (!to) return;
-    var options = { to: to, subject: 'Новая заявка с сайта: ' + item.name, body: [
+    var options = { to: to, subject: ('Новая заявка с сайта: ' + item.name).replace(/\s+/g, ' ').slice(0, 200), body: [
       'Имя: ' + item.name,
       'Как связаться: ' + item.contact,
       '',
@@ -78,9 +101,124 @@ function notify_(item) {
       '',
       'Все заявки: ' + SpreadsheetApp.getActiveSpreadsheet().getUrl()
     ].join('\n') };
-    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(item.contact)) options.replyTo = item.contact;
+    if (EMAIL_RE.test(item.contact)) options.replyTo = item.contact;
     MailApp.sendEmail(options);
-  } catch (err) { /* письмо не ушло (лимит почты), заявка всё равно сохранена */ }
+    problem_('err_email', '');
+  } catch (err) { problem_('err_email', 'mail'); }   // письмо не ушло (лимит почты), заявка всё равно сохранена
+}
+
+function notifyTelegram_(item, cfg) {
+  if (!cfg.tgToken || !cfg.tgChat) return;
+  var text = ['Новая заявка с сайта', '', 'Имя: ' + item.name, 'Как связаться: ' + item.contact, '', item.message || '(без сообщения)'].join('\n');
+  var result = tgSend_(cfg.tgToken, cfg.tgChat, text);
+  problem_('err_tg', result === 'ok' ? '' : result);     // не дошло: заявка всё равно сохранена, а панель покажет причину
+}
+
+/** Отправка в Telegram. Возвращает 'ok' или код ошибки (его же понимает панель). Простой текст, без разметки. */
+function tgSend_(token, chat, text) {
+  try {
+    var response = UrlFetchApp.fetch('https://api.telegram.org/bot' + token + '/sendMessage', {
+      method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+      payload: JSON.stringify({ chat_id: chat, text: String(text).slice(0, 4000), disable_web_page_preview: true })
+    });
+    var code = response.getResponseCode();
+    if (code === 200) return 'ok';
+    if (code === 401 || code === 404) return 'tgtoken';
+    if (code === 403) return 'tgblocked';
+    if (code === 400) return 'tgchat';
+    return 'tgnet';
+  } catch (err) { return 'tgnet'; }
+}
+
+/* ---------- notification settings (stored in this script's own properties, never on the website) ---------- */
+
+function props_() { return PropertiesService.getScriptProperties(); }
+
+function config_() {
+  var p = props_();
+  return {
+    email: String(p.getProperty('notify_email') || '').split(/[,;\s]+/).filter(function (x) { return EMAIL_RE.test(x); }).slice(0, 3),
+    tgToken: p.getProperty('tg_token') || '',
+    tgChat: p.getProperty('tg_chat') || ''
+  };
+}
+
+function problem_(key, value) {
+  try { if (value) props_().setProperty(key, value); else props_().deleteProperty(key); } catch (err) {}
+}
+
+/** Что показать в панели. Токен бота наружу не отдаётся никогда: только «задан ли он» и его последние 4 знака. */
+function settingsInfo_() {
+  var p = props_(), cfg = config_();
+  return {
+    ok: true, version: SCRIPT_VERSION,
+    defaultEmail: NOTIFY_EMAIL || Session.getEffectiveUser().getEmail() || '',
+    email: cfg.email.join(', '),
+    telegram: { token: !!cfg.tgToken, hint: cfg.tgToken ? '…' + cfg.tgToken.slice(-4) : '', chat: cfg.tgChat },
+    problems: { email: p.getProperty('err_email') || '', telegram: p.getProperty('err_tg') || '' }
+  };
+}
+
+function saveSettings_(req) {
+  var p = props_(), email, token, chat;
+  if (req.email !== undefined) {                       // сначала проверяем всё, потом пишем: либо всё сохранено, либо ничего
+    var list = String(req.email || '').split(/[,;\s]+/).filter(Boolean);
+    if (list.length > 3) return { ok: false, error: 'bademail' };
+    for (var i = 0; i < list.length; i++) if (!EMAIL_RE.test(list[i]) || list[i].length > 160) return { ok: false, error: 'bademail' };
+    email = list.join(',');
+  }
+  if (req.tgToken !== undefined) {
+    token = String(req.tgToken || '').trim();
+    if (token && !TG_TOKEN_RE.test(token)) return { ok: false, error: 'badtoken' };
+  }
+  if (req.tgChat !== undefined) {
+    chat = String(req.tgChat || '').trim();
+    if (chat && !TG_CHAT_RE.test(chat)) return { ok: false, error: 'badchat' };
+  }
+  if (email !== undefined) { if (email) p.setProperty('notify_email', email); else p.deleteProperty('notify_email'); p.deleteProperty('err_email'); }
+  if (token !== undefined) {
+    if (token) p.setProperty('tg_token', token); else { p.deleteProperty('tg_token'); p.deleteProperty('tg_chat'); }
+    p.deleteProperty('err_tg');
+  }
+  if (chat !== undefined) { if (chat) p.setProperty('tg_chat', chat); else p.deleteProperty('tg_chat'); p.deleteProperty('err_tg'); }
+  return settingsInfo_();
+}
+
+/** Ищет чат владелицы: тех, кто написал боту (в личных сообщениях). Нужен, чтобы не искать номер чата вручную. */
+function tgFind_(req) {
+  var token = String(req.tgToken || '').trim() || props_().getProperty('tg_token') || '';
+  if (!TG_TOKEN_RE.test(token)) return { ok: false, error: 'badtoken' };
+  try {
+    var response = UrlFetchApp.fetch('https://api.telegram.org/bot' + token + '/getUpdates', { muteHttpExceptions: true });
+    var code = response.getResponseCode();
+    if (code === 401 || code === 404) return { ok: false, error: 'tgtoken' };
+    if (code !== 200) return { ok: false, error: 'tgnet' };
+    var data = JSON.parse(response.getContentText()), seen = {}, chats = [];
+    (data.result || []).forEach(function (u) {
+      var m = u.message || u.edited_message || u.my_chat_member, c = m && m.chat;
+      if (!c || c.type !== 'private' || seen[c.id]) return;
+      seen[c.id] = true;
+      chats.push({ id: String(c.id), name: [c.first_name, c.last_name].filter(Boolean).join(' ') || (c.username ? '@' + c.username : 'без имени') });
+    });
+    if (!chats.length) return { ok: false, error: 'tgnone' };
+    return { ok: true, chats: chats.slice(0, 5) };
+  } catch (err) { return { ok: false, error: 'tgnet' }; }
+}
+
+function testNotify_() {
+  var cfg = config_(), out = { ok: true, email: 'fail', emailTo: '', telegram: 'off' };
+  try {
+    var to = recipients_(cfg);
+    if (to) {
+      MailApp.sendEmail({ to: to, subject: 'Проверка уведомлений Sport Intuitive', body: 'Это тестовое письмо. Так будут приходить новые заявки с сайта.' });
+      out.email = 'ok'; out.emailTo = to; problem_('err_email', '');
+    }
+  } catch (err) { problem_('err_email', 'mail'); }
+  if (cfg.tgToken && cfg.tgChat) {
+    out.telegram = tgSend_(cfg.tgToken, cfg.tgChat, 'Проверка: сюда будут приходить новые заявки с сайта.');
+    problem_('err_tg', out.telegram === 'ok' ? '' : out.telegram);
+  }
+  return out;
 }
 
 /* ---------- from the dashboard (password required) ---------- */

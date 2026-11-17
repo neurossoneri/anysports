@@ -59,7 +59,7 @@ First person, calm, warm, short sentences. Questions are asked gently and never 
 ## 6. Interaction details
 
 - **Fork:** "It resonated" scrolls on to the change section. "Not yet" asks the browser to close the tab; if the browser refuses (the usual case), a calm farewell appears with a way back. The rest of the page is inert while the farewell is open, and the browser Back button closes it instead of leaving the site.
-- **Form:** name, how to reach you, optional message. Sent to a form service (see README) that forwards to the owner's inbox. Hidden honeypot against bots. Without a service the form falls back to the visitor's mail app. A note asks visitors not to share sensitive information.
+- **Form:** name, how to reach you, optional message. Sent to a form service (see README) that forwards to the owner's inbox. Hidden honeypot against bots. A notification about each request also goes to the owner's email and, optionally, to a private Telegram chat (set in the dashboard, handled by the owner's own Google script; see docs/DASHBOARD.md). Without a service the form falls back to the visitor's mail app. A note asks visitors not to share sensitive information.
 - **Languages:** RU / EN / FR with the language switcher; Russian is baked into the static HTML.
 
 ## 7. Content model

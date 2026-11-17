@@ -197,6 +197,13 @@ code{background:var(--soft);padding:1px 6px;border-radius:6px;font-size:.9em}
 .login ol{padding-left:22px}.login li{margin-bottom:8px}
 .login input[type=password],.login input[type=text]{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:8px;margin:6px 0 14px;background:#fff}
 .pub{max-width:760px}
+.fld input[type=password]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.fld input[type=password]:focus{border-color:var(--blue);outline:2px solid rgba(47,111,179,.15);outline-offset:0}
+.nbox{margin-bottom:16px}
+.nsub{font:600 .98rem/1.3 var(--serif);margin:20px 0 8px}
+.tgrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tgrow input{flex:1;min-width:180px}
+.chatlist{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
 
 /* ---- панель сохранения: простая полоса внизу ---- */
 .save{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding:10px max(clamp(14px,3vw,24px),calc((100vw - 1040px) / 2 + 24px))}
@@ -222,6 +229,7 @@ const S = { schema: null, token: '', repo: '', branch: 'main', site: {}, home: {
             open: new Set(), req: { items: null, loaded: false, loading: false, error: '', code: '', keyProblem: '', filter: 'new', q: '' } };
 const clone = o => JSON.parse(JSON.stringify(o));
 S.lib = { items: null, loading: false, error: '' }; S.deleted = new Set();
+S.notify = newNotify();
 const enc = p => p.split('/').map(encodeURIComponent).join('/');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const getv = (obj, group, name) => ((obj && obj[group] && obj[group][name]) || '');
@@ -303,14 +311,14 @@ const readyChanged = () => !!S.site.publish_ready !== !!S.orig.site.publish_read
 
 /** Everything that differs from what is saved on GitHub, grouped for the UI and the commit message. */
 function changes() {
-  const out = { text: {}, textCount: 0, pageCount: pageChangeCount(), contacts: [], photos: [], ready: readyChanged(), qa: qaChanged() ? 1 : 0, hero: heroChanged() ? 1 : 0, privacy: privacyChanged() ? 1 : 0 };
+  const out = { text: {}, textCount: 0, pageCount: pageChangeCount(), contacts: [], photos: [], ready: readyChanged(), qa: qaChanged() ? 1 : 0, hero: heroChanged() ? 1 : 0, privacy: privacyChanged() ? 1 : 0, notify: notifyFlagChanged() ? 1 : 0 };
   for (const lang of S.schema.langs) for (const sec of S.schema.groups) for (const f of sec.fields) {
     if (textChanged(lang, sec.name, f.name)) { out.text[lang] = (out.text[lang] || 0) + 1; out.textCount++; }
   }
   for (const f of S.schema.contacts) if (contactChanged(f.name)) out.contacts.push(f.name);
   for (const p of S.schema.photos) if (photoChanged(p.field)) out.photos.push(p.num);
   out.library = pendingKept().filter(([, p]) => p.lib && !p.saved).length + S.deleted.size;
-  out.total = out.textCount + out.pageCount + out.contacts.length + out.photos.length + out.library + (out.ready ? 1 : 0) + out.qa + out.hero + out.privacy;
+  out.total = out.textCount + out.pageCount + out.contacts.length + out.photos.length + out.library + (out.ready ? 1 : 0) + out.qa + out.hero + out.privacy + out.notify;
   return out;
 }
 
@@ -380,6 +388,7 @@ function commitMessage(c) {
   if (c.pageCount) parts.push('разделы и блоки страницы');
   if (c.qa) parts.push('вопросы и ответы');
   if (c.privacy) parts.push('политика конфиденциальности');
+  if (c.notify) parts.push(tgOn() ? 'уведомления в Telegram включены (строка в политике)' : 'уведомления в Telegram выключены (строка в политике)');
   if (c.hero) parts.push('кадрирование главного фото');
   if (c.photos.length) parts.push('фото ' + c.photos.join(', '));
   if (c.library) parts.push('библиотека фото');
@@ -392,6 +401,7 @@ function commitMessage(c) {
 async function commitChanges(step) {
   step = step || function () {};
   const c = changes();
+  if (S.notify.loaded && tgOn() !== !!S.site.notify_telegram) S.site.notify_telegram = tgOn();   // the privacy notice follows what the script really does
   const files = [];
   const add = (path, obj, orig) => { if (JSON.stringify(obj) !== JSON.stringify(orig)) files.push({ path, text: JSON.stringify(obj, null, 2) + '\n' }); };
   add('content/site.json', S.site, S.orig.site);
@@ -495,6 +505,15 @@ const INBOX_MESSAGES = {
   bad: 'Скрипт не принял данные. Проверьте, что заполнено имя.',
   busy: 'Слишком много заявок за минуту. Попробуйте чуть позже.',
   server: 'В скрипте произошла ошибка. Откройте его в Google и посмотрите «Выполнения» (Executions).',
+  bademail: 'Скрипт не принял адрес почты. Проверьте, что адреса написаны без ошибок и что их не больше трёх.',
+  badtoken: 'Токен бота выглядит неверно. Скопируйте его целиком из сообщения @BotFather, без пробелов.',
+  badchat: 'Номер чата должен быть числом. Проще всего нажать «Найти мой чат».',
+  tgtoken: 'Telegram не принял токен бота. Проверьте, что он скопирован целиком, без пробелов.',
+  tgchat: 'Telegram не нашёл ваш чат с ботом. Откройте своего бота в Telegram, нажмите «Start» (или напишите ему «привет») и снова нажмите «Найти мой чат».',
+  tgblocked: 'Бот заблокирован или остановлен в вашем Telegram. Откройте бота, нажмите «Start» и повторите.',
+  tgnone: 'Бот пока ничего не получал. Откройте своего бота в Telegram, нажмите «Start» (или напишите ему «привет») и сразу снова нажмите «Найти мой чат».',
+  tgnet: 'Не удалось связаться с Telegram. Попробуйте ещё раз через минуту.',
+  mail: 'Письмо не отправилось: возможно, исчерпан дневной лимит Google или адрес указан с ошибкой.',
 };
 function inboxFail(code, message) { const e = new Error(message); e.code = code; return e; }
 async function inboxCall(action, data) {
@@ -544,6 +563,67 @@ function csvOf(items) {
   (items || []).forEach(r => rows.push([r.at, r.name, r.contact, r.message, STATUS_LABEL[r.status] || r.status, r.note, r.source === 'site' ? 'сайт' : 'вручную']));
   return '\ufeff' + rows.map(r => r.map(q).join(',')).join('\r\n');
 }
+
+/* ----- notifications: where the script sends a message about every new request (email and Telegram). The bot token lives only in the owner's Google script. ----- */
+function newNotify() { return { loaded: false, loading: false, error: '', outdated: false, data: null, draft: null, busy: '', status: null, chats: null, open: null }; }
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const TG_TOKEN_RE = /^\d{6,12}:[A-Za-z0-9_-]{30,60}$/;
+const TG_CHAT_RE = /^-?\d{1,20}$/;
+const splitEmails = text => String(text || '').split(/[,;\s]+/).filter(Boolean);
+const tgOn = () => { const t = S.notify.data && S.notify.data.telegram; return !!(t && t.token && t.chat); };
+/** The site's privacy notice must mention Telegram exactly when the script forwards messages there. */
+const notifyFlagChanged = () => !!S.notify.loaded && tgOn() !== !!S.orig.site.notify_telegram;
+const draftFrom = data => ({ email: data.email || '', token: '', chat: (data.telegram && data.telegram.chat) || '' });
+function notifyDirty() {
+  const N = S.notify;
+  if (!N.data || !N.draft) return false;
+  return splitEmails(N.draft.email).join(', ') !== (N.data.email || '') || !!N.draft.token.trim() || N.draft.chat.trim() !== N.data.telegram.chat;
+}
+/** A problem in what was typed (as a sentence), or '' when it can be saved. */
+function notifyProblem(d, data) {
+  const list = splitEmails(d.email);
+  if (list.length > 3) return 'Можно указать не больше трёх адресов почты.';
+  const wrong = list.find(x => !EMAIL_RE.test(x));
+  if (wrong) return 'Адрес «' + wrong + '» не похож на email. Проверьте, нет ли опечатки.';
+  const token = d.token.trim(), chat = d.chat.trim();
+  if (token && !TG_TOKEN_RE.test(token)) return 'Токен бота выглядит иначе. Он состоит из цифр, двоеточия и букв, например 123456789:AAH… Скопируйте его целиком из сообщения @BotFather.';
+  if (chat && !TG_CHAT_RE.test(chat)) return 'Номер чата — это число, например 123456789. Проще всего нажать «Найти мой чат».';
+  const hasToken = !!token || !!(data && data.telegram && data.telegram.token);
+  if (hasToken !== !!chat) return hasToken ? 'Для Telegram нужен ещё номер чата: нажмите «Найти мой чат».' : 'Номер чата указан, а токена бота нет. Вставьте токен или очистите номер чата.';
+  return '';
+}
+async function notifyLoad() {
+  const N = S.notify;
+  if (N.loading) return;
+  N.loading = true; N.error = ''; N.outdated = false;
+  try { N.data = await inboxCall('settings'); N.draft = draftFrom(N.data); N.loaded = true; }
+  catch (e) { if (e.code === 'bad') N.outdated = true; else N.error = e.message; }   // a script from before this update does not know the action
+  N.loading = false;
+}
+async function notifySave() {
+  const N = S.notify, d = N.draft;
+  const problem = notifyProblem(d, N.data);
+  if (problem) throw new Error(problem);
+  const body = { email: splitEmails(d.email).join(', '), tgChat: d.chat.trim() };
+  if (d.token.trim()) body.tgToken = d.token.trim();
+  N.data = await inboxCall('save_settings', body);
+  N.draft = draftFrom(N.data); N.chats = null;
+  return N.data;
+}
+async function notifyDisableTelegram() {
+  const N = S.notify;
+  N.data = await inboxCall('save_settings', { tgToken: '', tgChat: '' });
+  N.draft.token = ''; N.draft.chat = ''; N.chats = null;
+  return N.data;
+}
+async function notifyFind() {
+  const N = S.notify, typed = N.draft.token.trim();
+  if (typed && !TG_TOKEN_RE.test(typed)) throw new Error(INBOX_MESSAGES.badtoken);
+  if (!typed && !(N.data && N.data.telegram.token)) throw new Error('Сначала вставьте токен бота (его присылает @BotFather).');
+  N.chats = (await inboxCall('tg_find', typed ? { tgToken: typed } : {})).chats || [];
+  return N.chats;
+}
+const notifyTest = () => inboxCall('test_notify');
 
 /* ----- page structure: sections and blocks (pure functions, no DOM, so they can be tested) ----- */
 const blockSpec = type => ((S.schema.page && S.schema.page.blockTypes) || []).find(b => b.type === type);
@@ -639,7 +719,8 @@ function qaMoveItem(gi, ii, toGi, toIi) {
   return true;
 }
 root.__dash = { S, newBlock, newSection, newSectionId, insertAt, moveItem, pageChangeCount, secChanged, slotUsage, blockPreview, gh, loadAll, changes, validate, commitChanges, photoPath, usedPending, watchDeploy, latestRun, setv, getv, explain, commitMessage,
-                inboxCall, requestCounts, contactAction, timeAgo, csvOf, INBOX_URL_RE, normalizeQa, qaChanged, heroChanged, qaMoveItem, qaAddGroup, qaAddItem };
+                inboxCall, notifyLoad, notifySave, notifyFind, notifyTest, notifyDisableTelegram, notifyProblem, notifyDirty, notifyFlagChanged, splitEmails, tgOn,
+                requestCounts, contactAction, timeAgo, csvOf, INBOX_URL_RE, normalizeQa, qaChanged, heroChanged, qaMoveItem, qaAddGroup, qaAddItem };
 if (typeof document === 'undefined') { if (typeof module !== 'undefined') module.exports = root.__dash; return; }
 
 /* ================= interface ================= */
@@ -1426,7 +1507,7 @@ function requestsSetup() {
     }
   };
   return el('div', { class: 'box' }, el('h2', {}, 'Подключить заявки (один раз, минут 10)'),
-    el('p', { class: 'muted' }, 'Сообщения из формы будут попадать в вашу собственную Google-таблицу и приходить вам на почту. А здесь вы увидите их списком и сможете отмечать, кому уже ответили. Платных сервисов не нужно.'),
+    el('p', { class: 'muted' }, 'Сообщения из формы будут попадать в вашу собственную Google-таблицу и приходить вам на почту. А здесь вы увидите их списком и сможете отмечать, кому уже ответили. Платных сервисов не нужно. Когда подключите, здесь же настроите, куда присылать уведомления: на любую вашу почту и в Telegram.'),
     el('ol', { class: 'steps' },
       el('li', {}, el('span', {}, 'Откройте ', el('a', { href: 'https://sheets.new', target: '_blank', rel: 'noopener' }, 'sheets.new ↗'), ' и создайте пустую таблицу. Назовите её, например, «Заявки Sport Intuitive».')),
       el('li', {}, el('span', {}, 'В таблице выберите меню «Расширения» → «Apps Script». Откроется редактор кода: удалите всё, что в нём есть.')),
@@ -1493,6 +1574,115 @@ function requestCard(r, onChange) {
       } }, 'Удалить')));
   return card;
 }
+/* ---------- notifications: email and Telegram ---------- */
+async function fetchNotify() {
+  await notifyLoad();
+  if (S.tab === 'requests') renderPanel();
+}
+function testResult(r) {
+  const good = [], bad = [];
+  if (r.email === 'ok') good.push('Письмо отправлено на ' + r.emailTo + '. Если его нет во «Входящих», загляните в «Спам».');
+  else bad.push(INBOX_MESSAGES.mail);
+  if (r.telegram === 'ok') good.push('Сообщение в Telegram отправлено: проверьте чат с ботом.');
+  else if (r.telegram !== 'off') bad.push(INBOX_MESSAGES[r.telegram] || INBOX_MESSAGES.tgnet);
+  return { kind: bad.length ? 'bad' : 'ok', content: [...good, ...bad].map(t => el('div', {}, t)) };
+}
+function notifyOutdated() {
+  const status = el('p', { class: 'muted', role: 'status' });
+  const copy = el('button', { class: 'btn small', type: 'button', onclick: async () => {
+    try { const text = await (await fetch('inbox-script.txt', { cache: 'no-store' })).text(); await navigator.clipboard.writeText(text); copy.textContent = 'Скопировано ✓'; }
+    catch (e) { status.textContent = 'Не получилось скопировать. Код лежит в репозитории: admin/inbox-script.txt'; }
+    setTimeout(() => { copy.textContent = 'Скопировать новый код'; }, 3000);
+  } }, 'Скопировать новый код');
+  return el('div', {},
+    el('div', { class: 'note warn' }, 'Код скрипта в Google старый: он ещё не умеет настраивать уведомления. Обновите его один раз (минуты три):'),
+    el('ol', { class: 'steps' },
+      el('li', {}, el('span', {}, 'Нажмите ', copy)),
+      el('li', {}, el('span', {}, 'Откройте свою таблицу заявок → «Расширения» → «Apps Script». Выделите весь код (Ctrl+A или ⌘A) и вставьте новый.')),
+      el('li', {}, el('span', {}, 'В начале кода снова замените ', el('code', {}, 'ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ'), ' на тот же пароль, что был раньше. Нажмите значок дискеты («Сохранить»).')),
+      el('li', {}, el('span', {}, '«Начать развёртывание» → «Управление развёртываниями» → значок карандаша → «Версия»: «Новая версия» → «Развернуть». Google спросит разрешение на доступ к внешним сервисам: он нужен для Telegram. Адрес веб-приложения при этом не меняется.')),
+      el('li', {}, el('span', {}, 'Вернитесь сюда и нажмите «Проверить снова».'))),
+    el('div', { class: 'row', style: 'margin-top:0' }, el('button', { class: 'btn', type: 'button', onclick: () => { S.notify.outdated = false; S.notify.loaded = false; renderPanel(); } }, 'Проверить снова'), status));
+}
+function notifyForm() {
+  const N = S.notify, d = N.draft, data = N.data, busy = !!N.busy, out = [];
+  if (data.problems && data.problems.telegram) out.push(el('div', { class: 'note warn' }, 'Последнее сообщение в Telegram не дошло. ' + (INBOX_MESSAGES[data.problems.telegram] || '')));
+  if (data.problems && data.problems.email) out.push(el('div', { class: 'note warn' }, 'Последнее письмо о заявке не отправилось. ' + INBOX_MESSAGES.mail));
+
+  const mail = el('input', { type: 'text', id: 'nt-email', value: d.email, placeholder: 'ваша-почта@example.com', autocomplete: 'off', maxlength: 500 });
+  const token = el('input', { type: 'password', id: 'nt-token', value: d.token, autocomplete: 'off',
+    placeholder: data.telegram.token ? 'Токен сохранён (' + data.telegram.hint + '). Чтобы заменить, вставьте новый' : '123456789:AAH…' });
+  const chat = el('input', { type: 'text', id: 'nt-chat', value: d.chat, placeholder: 'число, например 123456789', autocomplete: 'off', inputmode: 'numeric' });
+  const hint = el('span', { class: 'muted' }, 'Есть несохранённые изменения: сначала нажмите «Сохранить уведомления».');
+  const saveBtn = el('button', { class: 'btn', type: 'button' }, 'Сохранить уведомления');
+  const testBtn = el('button', { class: 'btn ghost', type: 'button' }, 'Отправить тест');
+  const touch = () => { const dirty = notifyDirty(); saveBtn.disabled = !dirty || busy; testBtn.disabled = dirty || busy; hint.hidden = !dirty; };
+  mail.addEventListener('input', () => { d.email = mail.value; touch(); });     // no redraw while typing: it would steal the cursor
+  token.addEventListener('input', () => { d.token = token.value; touch(); });
+  chat.addEventListener('input', () => { d.chat = chat.value; touch(); });
+
+  const run = async (label, work) => {
+    N.open = true; N.busy = label; N.status = null; renderPanel();
+    try { await work(); } catch (e) { N.status = { kind: 'bad', content: e.message }; }
+    N.busy = ''; paintBar(); renderPanel();
+  };
+  saveBtn.addEventListener('click', () => run('save', async () => {
+    await notifySave();
+    const publish = notifyFlagChanged();
+    N.status = publish
+      ? { kind: 'warn', content: 'Сохранено. Теперь нажмите «Сохранить и опубликовать» внизу: страница о конфиденциальности добавит (или уберёт) строку о Telegram. Сделайте это сразу, чтобы текст для посетителей совпадал с тем, что происходит на самом деле.' }
+      : { kind: 'ok', content: 'Сохранено. Нажмите «Отправить тест», чтобы убедиться, что всё доходит.' };
+  }));
+  testBtn.addEventListener('click', () => run('test', async () => { N.status = testResult(await notifyTest()); }));
+
+  const siteMail = String(S.site.email || '').trim();
+  out.push(
+    el('h3', { class: 'nsub' }, '1. Почта'),
+    el('div', { class: 'fld' }, el('label', { for: 'nt-email' }, 'Куда присылать письма о новых заявках'), mail,
+      el('p', { class: 'hint' }, 'Можно указать до трёх адресов через запятую (любой почтовый сервис). Если оставить пустым, письма придут на почту вашего Google-аккаунта' + (data.defaultEmail ? ' (' + data.defaultEmail + ')' : '') + '.')),
+    EMAIL_RE.test(siteMail) ? el('div', { class: 'row', style: 'margin-top:0' }, el('button', { class: 'btn ghost small', type: 'button', onclick: () => { d.email = siteMail; mail.value = siteMail; touch(); } }, 'Подставить email с сайта (' + siteMail + ')')) : null,
+
+    el('h3', { class: 'nsub' }, '2. Telegram (по желанию)'),
+    el('p', { class: 'muted', style: 'margin-top:0' }, 'Каждая новая заявка придёт вам личным сообщением от вашего собственного бота. Бот создаётся бесплатно, за минуту.'),
+    el('ol', { class: 'steps' },
+      el('li', {}, el('span', {}, 'В Telegram найдите ', el('b', {}, '@BotFather'), ' (с синей галочкой), нажмите «Start» и отправьте ', el('code', {}, '/newbot'), '. Придумайте имя бота и его адрес: он должен заканчиваться на ', el('code', {}, 'bot'), ', например ', el('code', {}, 'si_zayavki_bot'), '. BotFather пришлёт токен: длинную строку с двоеточием.')),
+      el('li', {}, el('span', {}, 'Откройте своего бота (ссылка есть в сообщении BotFather), нажмите «Start» и напишите ему «привет». Без этого бот не сможет писать вам первым.')),
+      el('li', {}, el('span', {}, 'Вставьте токен ниже, нажмите «Найти мой чат» и выберите себя в списке.')),
+      el('li', {}, el('span', {}, 'Нажмите «Сохранить уведомления», затем «Отправить тест».'))),
+    el('div', { class: 'fld' }, el('label', { for: 'nt-token' }, 'Токен бота'), token,
+      el('p', { class: 'hint' }, 'Токен хранится только в вашем скрипте Google: на сайт и в репозиторий он не попадает, и панель его обратно не показывает. Не пересылайте его никому.')),
+    el('div', { class: 'fld' }, el('label', { for: 'nt-chat' }, 'Номер вашего чата'),
+      el('div', { class: 'tgrow' }, chat, el('button', { class: 'btn ghost small', type: 'button', disabled: busy, onclick: () => run('find', async () => { await notifyFind(); N.status = { kind: 'ok', content: 'Нашёл чат. Нажмите на свой:' }; }) }, 'Найти мой чат')),
+      N.chats && N.chats.length ? el('div', { class: 'chatlist' }, N.chats.map(c => el('button', { class: 'btn small', type: 'button', onclick: () => {
+        d.chat = c.id; N.chats = null; N.open = true; N.status = { kind: 'ok', content: 'Выбран чат «' + c.name + '». Теперь нажмите «Сохранить уведомления».' }; renderPanel();
+      } }, c.name + ' · ' + c.id))) : null),
+    el('p', { class: 'hint' }, 'Сообщения посетителей будут проходить через Telegram. Сайт сам добавит об этом строку на страницу о конфиденциальности, когда вы нажмёте «Сохранить и опубликовать».'),
+
+    el('div', { class: 'row' }, saveBtn, testBtn,
+      tgOn() ? el('button', { class: 'btn danger small', type: 'button', disabled: busy, onclick: () => { if (confirm('Отключить Telegram? Токен будет удалён из скрипта, сообщения в Telegram приходить перестанут.')) run('off', async () => {
+        await notifyDisableTelegram();
+        N.status = { kind: notifyFlagChanged() ? 'warn' : 'ok', content: notifyFlagChanged() ? 'Telegram отключён. Нажмите «Сохранить и опубликовать» внизу, чтобы строка о Telegram ушла из политики.' : 'Telegram отключён.' };
+      }); } }, 'Отключить Telegram') : null,
+      hint),
+    N.busy ? el('p', { class: 'muted', role: 'status' }, N.busy === 'find' ? 'Ищу чат…' : N.busy === 'test' ? 'Отправляю тест…' : 'Сохраняю…') : null,
+    N.status ? el('div', { class: 'note ' + N.status.kind, role: 'status', style: 'margin:12px 0 0' }, ...[].concat(N.status.content)) : null);
+  touch();
+  return out;
+}
+function panelNotify() {
+  const N = S.notify;
+  if (!N.loaded && !N.loading && !N.error && !N.outdated) fetchNotify();
+  const configured = N.loaded && (!!N.data.email || tgOn());
+  const summary = N.loaded ? 'Уведомления о заявках: ' + (N.data.email || 'почта Google-аккаунта') + (tgOn() ? ' + Telegram' : '') : 'Уведомления о новых заявках (почта и Telegram)';
+  const isOpen = N.open === null ? (N.outdated || !!N.error || (N.loaded && !configured)) : N.open;
+  const inner = el('div', { class: 'inner' });
+  if (N.outdated) inner.append(notifyOutdated());
+  else if (N.error) inner.append(el('div', { class: 'note bad' }, N.error), el('div', { class: 'row' }, el('button', { class: 'btn small', type: 'button', onclick: () => { N.error = ''; N.loaded = false; renderPanel(); } }, 'Повторить')));
+  else if (!N.loaded) inner.append(el('p', { class: 'muted' }, 'Загружаю настройки…'));
+  else inner.append(...notifyForm());
+  return el('details', { class: 'more nbox', open: isOpen, ontoggle: e => { N.open = e.target.open; } }, el('summary', {}, summary), inner);
+}
+
 function panelRequests() {
   const q = S.req;
   const head = [el('h1', {}, 'Заявки'), el('p', { class: 'lead' }, 'Сообщения из формы на сайте. Заявки сохраняются сразу: нажимать «Сохранить и опубликовать» для них не нужно.')];
@@ -1542,7 +1732,7 @@ function panelRequests() {
   return el('div', {}, ...head,
     el('div', { class: 'row', style: 'margin:0 0 16px' }, el('button', { class: 'btn ghost small', onclick: () => { q.loaded = false; fetchRequests(); } }, 'Обновить'),
       el('button', { class: 'btn ghost small', disabled: !q.items.length, onclick: csv }, 'Скачать таблицей (CSV)')),
-    pills, list, add());
+    panelNotify(), pills, list, add());
 }
 
 /* ---------- settings ---------- */
@@ -1605,7 +1795,7 @@ function panelPrivacy() {
     el('div', { class: 'box' }, el('h2', {}, 'Метки, которые подставляются сами'),
       el('p', { class: 'hint', style: 'margin-top:0' }, 'Не удаляйте и не переписывайте эти метки: на их место сайт сам вставляет актуальные данные.'),
       el('ul', {}, el('li', {}, el('code', {}, '{{controller}}'), ': ваше имя, адрес и email из вкладки «Настройки».'),
-        el('li', {}, el('code', {}, '{{form_service}}'), ': кто получает сообщения из формы (сервис форм, почта, ваша Google-таблица). Меняется, когда вы подключаете «Заявки».'),
+        el('li', {}, el('code', {}, '{{form_service}}'), ': кто получает сообщения из формы (сервис форм, почта, ваша Google-таблица, Telegram). Меняется, когда вы подключаете «Заявки» или Telegram.'),
         el('li', {}, el('code', {}, '{{updated}}'), ': дата из поля выше.'))),
     el('p', { class: 'muted' }, 'Это шаблон, а не юридическая консультация. Если вы начнёте передавать данные ещё кому-то (новый сервис, рассылка, аналитика), добавьте этого получателя в раздел «Who receives your data».'));
 }
@@ -1618,7 +1808,7 @@ function renderPanel() {
 
 /* ---------- shell and login ---------- */
 function logout(message) {
-  LS.del('si-admin-token'); LS.del(INBOX_KEY); S.token = ''; S.dirty = 0;
+  LS.del('si-admin-token'); LS.del(INBOX_KEY); S.token = ''; S.dirty = 0; S.notify = newNotify();
   renderLogin(message || '');
 }
 function shell() {
