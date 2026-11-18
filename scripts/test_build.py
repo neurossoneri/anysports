@@ -411,7 +411,7 @@ def check_inbox(builder, destination):
                    "'save_settings'", "'tg_find'", "'test_notify'"):
         assert needle in script, f'inbox script lacks {needle}'
     admin = (destination / 'admin/index.html').read_text(encoding='utf-8')
-    for needle in ('panelRequests', 'inboxCall', 'inbox-script.txt', 'csvOf', 'panelPhotos', 'panelNotify', 'notifySave', 'notifyLoad', 'notifyFlagChanged', 'genPassword', 'scriptWithPassword'):
+    for needle in ('panelRequests', 'inboxCall', 'inbox-script.txt', 'csvOf', 'panelPhotos', 'panelNotify', 'notifySave', 'notifyLoad', 'notifyFlagChanged', 'genPassword', 'scriptWithPassword', 'inboxUrlFrom'):
         assert needle in admin, f'dashboard lacks {needle}'
     home = (destination / 'index.html').read_text(encoding='utf-8')
     assert "action:'submit'" in home and 'Promise.allSettled' in home, 'the form must also write to the inbox'
@@ -427,6 +427,29 @@ def check_inbox(builder, destination):
     assert builder.inbox_endpoint({'inbox_endpoint': 'https://script.google.com/macros/s/AKfy_1-x/exec'}).endswith('/exec')
     assert builder.inbox_endpoint_quiet({'inbox_endpoint': 'https://evil.example/macros/s/x/exec'}) == ''
     assert builder.inbox_endpoint_quiet({'inbox_endpoint': 'http://script.google.com/macros/s/x/exec'}) == ''
+    if node:
+        panel_script = [s for s in re.findall(r'<script>(.*?)</script>', admin, re.S) if len(s) > 400][-1]
+        with tempfile.TemporaryDirectory() as folder:
+            module = Path(folder) / 'panel.js'
+            module.write_text(panel_script, encoding='utf-8')
+            check = Path(folder) / 'urls.js'
+            check.write_text(r"""
+const d = require(process.argv[2]), assert = require('assert');
+const ID = 'AKfycb' + 'x'.repeat(30), good = 'https://script.google.com/macros/s/' + ID + '/exec', pick = d.inboxUrlFrom;
+assert.strictEqual(pick(good).url, good);
+assert.strictEqual(pick('  ' + good + ' \n').url, good, 'spaces around the address');
+assert.strictEqual(pick('"' + good + '"').url, good, 'quotes around the address');
+assert.strictEqual(pick('https://script.google.com/macros/u/1/s/' + ID + '/exec').url, good, 'several Google accounts in the browser');
+assert.strictEqual(pick(good + '?x=1').url, good);
+assert.strictEqual(pick('https://script.google.com/a/macros/example.com/s/' + ID + '/exec').url, 'https://script.google.com/a/macros/example.com/s/' + ID + '/exec', 'Google Workspace address');
+const byId = pick(ID); assert.strictEqual(byId.url, good); assert.ok(byId.fixed, 'the deployment id is turned into the address');
+assert.ok(/таблиц/.test(pick('https://docs.google.com/spreadsheets/d/1FX_abc/edit?usp=sharing').error), 'a spreadsheet address is named as such');
+assert.ok(/тестов/.test(pick('https://script.google.com/macros/s/' + ID + '/dev').error), 'a /dev address is named as a test address');
+assert.ok(/редактор/.test(pick('https://script.google.com/home/projects/1abcDEF/edit').error), 'an editor address is named as such');
+assert.ok(pick('').error && pick('привет').error && pick('https://evil.example/macros/s/' + ID + '/exec').error, 'anything else is refused');
+""", encoding='utf-8')
+            result = subprocess.run([node, str(check), str(module)], capture_output=True, text=True)
+            assert result.returncode == 0, f'inboxUrlFrom: {result.stderr[:600]}'
 
 
 def check_page_polish(destination):

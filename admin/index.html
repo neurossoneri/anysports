@@ -493,6 +493,20 @@ async function prepareImage(file) {
 /* ----- requests: a Google Apps Script web app that stores the website's form messages in the owner's own spreadsheet ----- */
 const INBOX_KEY = 'si-admin-inbox-key';
 const INBOX_URL_RE = /^https:\/\/script\.google\.com\/(?:a\/macros\/[\w.-]+|macros)\/s\/[\w-]+\/exec$/i;
+/** Takes whatever was pasted and returns the web-app address, or says in plain words what was pasted instead. */
+function inboxUrlFrom(raw) {
+  let t = String(raw || '').trim().replace(/^[<"'`]+|[>"'`.,;]+$/g, '').trim();
+  if (!t) return { error: 'Вставьте адрес веб-приложения из Google (он заканчивается на /exec).' };
+  const found = /https?:\/\/\S+/.exec(t);
+  if (found) t = found[0].replace(/[>"'`.,;]+$/, '');
+  if (/^AKfy[\w-]{20,}$/.test(t)) return { url: 'https://script.google.com/macros/s/' + t + '/exec', fixed: 'Вы вставили «идентификатор развёртывания»: я сама сделала из него нужный адрес.' };
+  if (/^https?:\/\/docs\.google\.com\/spreadsheets\//i.test(t)) return { error: 'Это адрес самой таблицы. Нужен другой: адрес «веб-приложения». Он появляется в окне после кнопки «Развернуть», начинается с https://script.google.com/macros/s/ и заканчивается на /exec.' };
+  if (/^https?:\/\/script\.google\.com\/(?:home|d\/|u\/\d+\/home)/i.test(t) || /\/edit(?:[?#]|$)/.test(t)) return { error: 'Это адрес редактора кода (он виден в строке браузера). Нужен адрес из окна после кнопки «Развернуть»: «URL веб-приложения», он заканчивается на /exec.' };
+  if (/\/dev(?:[?#]|$)/.test(t)) return { error: 'Это тестовый адрес (он заканчивается на /dev). Нужен адрес, который заканчивается на /exec: «URL веб-приложения» из окна после кнопки «Развернуть».' };
+  const u = t.replace(/^http:/i, 'https:').replace(/[?#].*$/, '').replace(/\/+$/, '').replace(/\/macros\/u\/\d+\/s\//i, '/macros/s/');
+  if (INBOX_URL_RE.test(u)) return { url: u };
+  return { error: 'Не получилось распознать адрес. Он должен начинаться с https://script.google.com/macros/s/ и заканчиваться на /exec. Его показывает Google в окне после кнопки «Развернуть», в строке «URL веб-приложения».' };
+}
 const STATUS = [['new', 'Новая'], ['work', 'В работе'], ['done', 'Готово']];
 const STATUS_LABEL = Object.fromEntries(STATUS);
 const inboxUrl = () => String(S.site.inbox_endpoint || '').trim();
@@ -539,7 +553,7 @@ async function inboxCall(action, data) {
   } catch (e) { throw inboxFail('net', 'Не удалось связаться с таблицей заявок. Проверьте интернет. Если с ним всё в порядке, проверьте, что при развёртывании скрипта выбрано «У кого есть доступ: Все».'); }
   let j = null;
   try { j = await r.json(); } catch (e) { /* not JSON: Google sent a sign-in page */ }
-  if (!j) throw inboxFail('format', 'Таблица ответила не так, как ожидалось. Проверьте, что при развёртывании выбрано «Запуск от имени: Я» и «У кого есть доступ: Все».');
+  if (!j) throw inboxFail('format', 'Google ответил страницей входа, а не данными. Почти всегда это значит, что при развёртывании выбрано не «Все». Исправьте: в Apps Script нажмите «Начать развёртывание» → «Управление развёртываниями» → значок карандаша → «У кого есть доступ»: «Все», «Версия»: «Новая версия» → «Развернуть». Адрес при этом не меняется. Проверьте также «Запуск от имени»: «Я».');
   if (j.ok !== true) throw inboxFail(j.error || 'server', INBOX_MESSAGES[j.error] || INBOX_MESSAGES.server);
   return j;
 }
@@ -733,7 +747,7 @@ function qaMoveItem(gi, ii, toGi, toIi) {
 }
 root.__dash = { S, newBlock, newSection, newSectionId, insertAt, moveItem, pageChangeCount, secChanged, slotUsage, blockPreview, gh, loadAll, changes, validate, commitChanges, photoPath, usedPending, watchDeploy, latestRun, setv, getv, explain, commitMessage,
                 inboxCall, notifyLoad, notifySave, notifyFind, notifyTest, notifyDisableTelegram, notifyProblem, notifyDirty, notifyFlagChanged, splitEmails, tgOn,
-                requestCounts, contactAction, timeAgo, csvOf, INBOX_URL_RE, normalizeQa, qaChanged, heroChanged, qaMoveItem, qaAddGroup, qaAddItem };
+                requestCounts, contactAction, timeAgo, csvOf, INBOX_URL_RE, inboxUrlFrom, normalizeQa, qaChanged, heroChanged, qaMoveItem, qaAddGroup, qaAddItem };
 if (typeof document === 'undefined') { if (typeof module !== 'undefined') module.exports = root.__dash; return; }
 
 /* ================= interface ================= */
@@ -1504,12 +1518,13 @@ function requestsSetup() {
     setTimeout(() => { copy.textContent = 'Скопировать код скрипта'; }, 3000);
   } }, 'Скопировать код скрипта');
   const connect = async () => {
-    const u = url.value.trim(), k = key.value.trim();
-    if (!INBOX_URL_RE.test(u)) { status.textContent = 'Адрес должен выглядеть так: https://script.google.com/macros/s/…/exec'; return; }
+    const parsed = inboxUrlFrom(url.value), k = key.value.trim();
+    if (parsed.error) { status.textContent = parsed.error; return; }
+    const u = parsed.url; url.value = u;
     if (!k) { status.textContent = 'Введите пароль, который вы вписали в скрипт.'; return; }
     const before = S.site.inbox_endpoint;
     S.site.inbox_endpoint = u; LS.set(INBOX_KEY, k);
-    status.textContent = 'Проверяю подключение…';
+    status.textContent = (parsed.fixed ? parsed.fixed + ' ' : '') + 'Проверяю подключение…';
     try {
       S.req.items = (await inboxCall('list')).items || []; S.req.loaded = true; S.req.keyProblem = '';
       setNotice('ok', [el('strong', {}, 'Подключено! '), 'Теперь нажмите «Сохранить и опубликовать» внизу: адрес попадёт на сайт, и форма начнёт присылать заявки сюда. Через 2–3 минуты отправьте с сайта тестовое сообщение.']);
@@ -1526,7 +1541,7 @@ function requestsSetup() {
       el('li', {}, el('span', {}, 'В таблице выберите меню «Расширения» → «Apps Script». Откроется редактор кода: удалите всё, что в нём есть.')),
       el('li', {}, el('span', {}, 'Вставьте код скрипта: кнопка копирует его сразу с готовым паролем, ничего править не нужно. ', copy, ' Нажмите значок дискеты («Сохранить»).')),
       el('li', {}, el('span', {}, 'Справа вверху нажмите «Начать развёртывание» → «Новое развёртывание» → значок шестерёнки → «Веб-приложение». «Запуск от имени»: «Я». «У кого есть доступ»: «Все». Нажмите «Развернуть» и разрешите доступ (Google спросит один раз; если пишет «приложение не проверено», выберите «Дополнительно» → «Перейти»).')),
-      el('li', {}, el('span', {}, 'Скопируйте «URL веб-приложения» и вставьте его сюда (пароль подставлен сам):'))),
+      el('li', {}, el('span', {}, 'В окне после «Развернуть» скопируйте «URL веб-приложения» (длинная ссылка, заканчивается на /exec; это не «Идентификатор развёртывания» и не адрес из строки браузера) и вставьте сюда. Пароль подставлен сам:'))),
     el('details', { class: 'more', ontoggle: e => { if (e.target.open) loadCode(); } }, el('summary', {}, 'Показать код скрипта'), el('div', { class: 'inner' }, code)),
     el('label', { for: 'inbox-url', style: 'display:block' }, el('strong', {}, 'Адрес веб-приложения')), url,
     el('label', { for: 'inbox-key', style: 'display:block' }, el('strong', {}, 'Пароль')), key,
