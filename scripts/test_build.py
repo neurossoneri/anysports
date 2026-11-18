@@ -321,11 +321,11 @@ NOTIFY_SCRIPT_CHECK = r"""
 // Runs the Google script with stand-in Google services: no network, no account.
 const fs = require('fs'), vm = require('vm'), assert = require('assert');
 const code = fs.readFileSync(process.argv[2], 'utf8').replace("'ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ'", "'test-key-123456'");
-const store = {}, mails = [], calls = [], rows = [['id', 'created', 'name', 'contact', 'message', 'status', 'note', 'source']];
+const store = {}, mails = [], calls = [], formats = [], rows = [['id', 'created', 'name', 'contact', 'message', 'status', 'note', 'source']];
 let telegram = 200;
 const cells = (r, c, nr, nc) => rows.slice(r - 1, r - 1 + (nr || 1)).map(x => x.slice(c - 1, c - 1 + (nc || 1)));
 const sheet = { getDataRange: () => ({ getValues: () => rows }), getLastRow: () => rows.length, appendRow: r => rows.push(r), deleteRow: i => rows.splice(i - 1, 1),
-  getRange: (r, c, nr, nc) => ({ getValues: () => cells(r, c, nr, nc), setValue: v => { rows[r - 1][c - 1] = v; } }) };
+  getRange: (r, c, nr, nc) => ({ getValues: () => cells(r, c, nr, nc), setValue: v => { rows[r - 1][c - 1] = v; }, setNumberFormat(f) { formats.push([r, c, nr, nc, f]); return this; } }) };
 const ctx = {
   PropertiesService: { getScriptProperties: () => ({ getProperty: k => (k in store ? store[k] : null), setProperty: (k, v) => { store[k] = String(v); }, deleteProperty: k => { delete store[k]; } }) },
   LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
@@ -349,6 +349,7 @@ assert.ok(s.ok && s.version === 2 && s.email === '' && s.defaultEmail === 'owner
 // the visitor's message: email goes to the Google account while nothing is set up, and no Telegram call is made
 assert.ok(post({ action: 'submit', name: 'Visitor', contact: 'v@example.com', message: 'Hi' }).ok);
 assert.strictEqual(mails.length, 1); assert.strictEqual(mails[0].to, 'owner@example.com'); assert.strictEqual(calls.length, 0);
+assert.ok(formats.length === 1 && formats[0][0] === 2 && formats[0][1] === 1 && formats[0][3] === 8 && formats[0][4] === '@', 'a new row is formatted as plain text before it is written: no formulas');
 
 // validation: nothing is stored when one value is wrong
 assert.strictEqual(post({ action: 'save_settings', key: K, email: 'not-an-email' }).error, 'bademail');
@@ -410,7 +411,7 @@ def check_inbox(builder, destination):
                    "'save_settings'", "'tg_find'", "'test_notify'"):
         assert needle in script, f'inbox script lacks {needle}'
     admin = (destination / 'admin/index.html').read_text(encoding='utf-8')
-    for needle in ('panelRequests', 'inboxCall', 'inbox-script.txt', 'csvOf', 'panelPhotos', 'panelNotify', 'notifySave', 'notifyLoad', 'notifyFlagChanged'):
+    for needle in ('panelRequests', 'inboxCall', 'inbox-script.txt', 'csvOf', 'panelPhotos', 'panelNotify', 'notifySave', 'notifyLoad', 'notifyFlagChanged', 'genPassword', 'scriptWithPassword'):
         assert needle in admin, f'dashboard lacks {needle}'
     home = (destination / 'index.html').read_text(encoding='utf-8')
     assert "action:'submit'" in home and 'Promise.allSettled' in home, 'the form must also write to the inbox'

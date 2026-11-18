@@ -497,8 +497,21 @@ const STATUS = [['new', 'Новая'], ['work', 'В работе'], ['done', 'Г
 const STATUS_LABEL = Object.fromEntries(STATUS);
 const inboxUrl = () => String(S.site.inbox_endpoint || '').trim();
 const inboxKey = () => LS.get(INBOX_KEY);
+const GEN_KEY = 'si-admin-inbox-gen';
+const PASSWORD_MARK = "'ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ'";
+/** The password for the Google script is made up by the dashboard, so nothing has to be typed into the code. The same one every time. */
+function genPassword() {
+  let p = LS.get(GEN_KEY);
+  if (p.length >= 16) return p;
+  const abc = 'abcdefghjkmnpqrstuvwxyz23456789', bytes = new Uint8Array(24);
+  globalThis.crypto.getRandomValues(bytes);
+  p = Array.from(bytes, b => abc[b % abc.length]).join('');
+  LS.set(GEN_KEY, p);
+  return p;
+}
+const scriptWithPassword = (text, password) => (/^[^'"\\\s]{12,200}$/.test(password || '') && String(text).split(PASSWORD_MARK).length === 2 ? String(text).replace(PASSWORD_MARK, () => "'" + password + "'") : String(text));
 const INBOX_MESSAGES = {
-  key: 'Пароль не подошёл. Введите тот, что вы вписали в скрипт (ADMIN_KEY).',
+  key: 'Пароль не подошёл. Он виден в начале кода скрипта в Google (строка ADMIN_KEY).',
   nokey: 'В скрипте не задан пароль. Откройте скрипт в Google, замените ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ на свой пароль (12 символов и больше), сохраните и разверните заново («Новая версия»).',
   locked: 'Слишком много неверных паролей. Подождите 10 минут и попробуйте снова.',
   notfound: 'Такой заявки уже нет. Нажмите «Обновить».',
@@ -1473,14 +1486,14 @@ async function fetchRequests() {
   if (S.tab === 'requests') renderPanel();
 }
 function requestsSetup() {
-  const url = el('input', { type: 'text', id: 'inbox-url', placeholder: 'https://script.google.com/macros/s/…/exec', autocomplete: 'off' });
-  const key = el('input', { type: 'password', id: 'inbox-key', placeholder: 'пароль, который вы вписали в скрипт', autocomplete: 'off' });
+  const url = el('input', { type: 'text', id: 'inbox-url', placeholder: 'https://script.google.com/macros/s/…/exec', autocomplete: 'off', style: 'display:block;width:100%;box-sizing:border-box;margin:6px 0 16px;padding:11px 14px;border:1px solid var(--line);border-radius:8px;background:#fff' });
+  const key = el('input', { type: 'password', id: 'inbox-key', value: genPassword(), placeholder: 'пароль из скрипта', autocomplete: 'off', style: 'display:block;width:100%;box-sizing:border-box;margin:6px 0 16px;padding:11px 14px;border:1px solid var(--line);border-radius:8px;background:#fff' });
   const status = el('p', { class: 'muted', role: 'status' });
   const code = el('textarea', { readonly: true, rows: 10, style: 'width:100%;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--line);border-radius:12px;padding:10px', 'aria-label': 'Код скрипта' });
   let loaded = '';
   const loadCode = async () => {
     if (loaded) return loaded;
-    try { loaded = await (await fetch('inbox-script.txt', { cache: 'no-store' })).text(); } catch (e) { loaded = ''; }
+    try { loaded = scriptWithPassword(await (await fetch('inbox-script.txt', { cache: 'no-store' })).text(), genPassword()); } catch (e) { loaded = ''; }
     code.value = loaded || 'Не удалось загрузить код. Он лежит в репозитории: admin/inbox-script.txt';
     return loaded;
   };
@@ -1506,27 +1519,26 @@ function requestsSetup() {
       status.textContent = e.message;
     }
   };
-  return el('div', { class: 'box' }, el('h2', {}, 'Подключить заявки (один раз, минут 10)'),
+  return el('div', { class: 'box' }, el('h2', {}, 'Подключить заявки (один раз, минут 5)'),
     el('p', { class: 'muted' }, 'Сообщения из формы будут попадать в вашу собственную Google-таблицу и приходить вам на почту. А здесь вы увидите их списком и сможете отмечать, кому уже ответили. Платных сервисов не нужно. Когда подключите, здесь же настроите, куда присылать уведомления: на любую вашу почту и в Telegram.'),
     el('ol', { class: 'steps' },
-      el('li', {}, el('span', {}, 'Откройте ', el('a', { href: 'https://sheets.new', target: '_blank', rel: 'noopener' }, 'sheets.new ↗'), ' и создайте пустую таблицу. Назовите её, например, «Заявки Sport Intuitive».')),
+      el('li', {}, el('span', {}, 'Откройте свою Google-таблицу для заявок (или создайте новую: ', el('a', { href: 'https://sheets.new', target: '_blank', rel: 'noopener' }, 'sheets.new ↗'), ').')),
       el('li', {}, el('span', {}, 'В таблице выберите меню «Расширения» → «Apps Script». Откроется редактор кода: удалите всё, что в нём есть.')),
-      el('li', {}, el('span', {}, 'Вставьте код скрипта. ', copy)),
-      el('li', {}, el('span', {}, 'В начале кода замените ', el('code', {}, 'ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ'), ' на свой пароль (12 символов и больше, придумайте и запомните). Нажмите значок дискеты («Сохранить»).')),
+      el('li', {}, el('span', {}, 'Вставьте код скрипта: кнопка копирует его сразу с готовым паролем, ничего править не нужно. ', copy, ' Нажмите значок дискеты («Сохранить»).')),
       el('li', {}, el('span', {}, 'Справа вверху нажмите «Начать развёртывание» → «Новое развёртывание» → значок шестерёнки → «Веб-приложение». «Запуск от имени»: «Я». «У кого есть доступ»: «Все». Нажмите «Развернуть» и разрешите доступ (Google спросит один раз; если пишет «приложение не проверено», выберите «Дополнительно» → «Перейти»).')),
-      el('li', {}, el('span', {}, 'Скопируйте «URL веб-приложения» и вставьте его сюда вместе с паролем:'))),
+      el('li', {}, el('span', {}, 'Скопируйте «URL веб-приложения» и вставьте его сюда (пароль подставлен сам):'))),
     el('details', { class: 'more', ontoggle: e => { if (e.target.open) loadCode(); } }, el('summary', {}, 'Показать код скрипта'), el('div', { class: 'inner' }, code)),
-    el('label', { for: 'inbox-url' }, el('strong', {}, 'Адрес веб-приложения')), url,
-    el('label', { for: 'inbox-key' }, el('strong', {}, 'Пароль')), key,
+    el('label', { for: 'inbox-url', style: 'display:block' }, el('strong', {}, 'Адрес веб-приложения')), url,
+    el('label', { for: 'inbox-key', style: 'display:block' }, el('strong', {}, 'Пароль')), key,
     el('div', { class: 'row', style: 'margin-top:0' }, el('button', { class: 'btn', onclick: connect }, 'Подключить'), status),
-    el('p', { class: 'muted', style: 'margin-bottom:0' }, 'Сообщения посетителей будут храниться в вашей Google-таблице. Сайт сам добавит об этом строку на страницу о конфиденциальности. Если вы позже измените скрипт, в Google нужно заново нажать «Управление развёртываниями» → «Изменить» → «Новая версия».'));
+    el('p', { class: 'muted', style: 'margin-bottom:0' }, 'Сообщения посетителей будут храниться в вашей Google-таблице. Сайт сам добавит об этом строку на страницу о конфиденциальности. Пароль сохранён в этом браузере; на другом устройстве его можно посмотреть в начале кода скрипта в Google (строка ADMIN_KEY). Если вы позже измените скрипт, в Google нужно заново нажать «Управление развёртываниями» → «Изменить» → «Новая версия».'));
 }
 function requestsKeyBox() {
-  const key = el('input', { type: 'password', id: 'inbox-key2', placeholder: 'пароль из скрипта', autocomplete: 'off' });
+  const key = el('input', { type: 'password', id: 'inbox-key2', value: LS.get(GEN_KEY), placeholder: 'пароль из скрипта', autocomplete: 'off' });
   const go = () => { if (!key.value.trim()) return; LS.set(INBOX_KEY, key.value.trim()); S.req.keyProblem = ''; S.req.loaded = false; fetchRequests(); };
   key.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
   return el('div', { class: 'box' }, el('h2', {}, 'Введите пароль заявок'),
-    S.req.keyProblem ? el('div', { class: 'note bad' }, S.req.keyProblem) : el('p', { class: 'muted' }, 'Это пароль, который вы вписали в скрипт (ADMIN_KEY). Он хранится только в этом браузере.'),
+    S.req.keyProblem ? el('div', { class: 'note bad' }, S.req.keyProblem) : el('p', { class: 'muted' }, 'Это пароль из скрипта. Если вы копировали код кнопкой в панели, он уже подставлен; иначе его видно в начале кода в Google («Расширения» → «Apps Script», строка ADMIN_KEY). Он хранится только в этом браузере.'),
     key, el('div', { class: 'row', style: 'margin-top:12px' }, el('button', { class: 'btn', onclick: go }, 'Открыть заявки')));
 }
 function counts() {
@@ -1590,7 +1602,7 @@ function testResult(r) {
 function notifyOutdated() {
   const status = el('p', { class: 'muted', role: 'status' });
   const copy = el('button', { class: 'btn small', type: 'button', onclick: async () => {
-    try { const text = await (await fetch('inbox-script.txt', { cache: 'no-store' })).text(); await navigator.clipboard.writeText(text); copy.textContent = 'Скопировано ✓'; }
+    try { const text = scriptWithPassword(await (await fetch('inbox-script.txt', { cache: 'no-store' })).text(), inboxKey() || LS.get(GEN_KEY)); await navigator.clipboard.writeText(text); copy.textContent = 'Скопировано ✓'; }
     catch (e) { status.textContent = 'Не получилось скопировать. Код лежит в репозитории: admin/inbox-script.txt'; }
     setTimeout(() => { copy.textContent = 'Скопировать новый код'; }, 3000);
   } }, 'Скопировать новый код');
@@ -1599,7 +1611,8 @@ function notifyOutdated() {
     el('ol', { class: 'steps' },
       el('li', {}, el('span', {}, 'Нажмите ', copy)),
       el('li', {}, el('span', {}, 'Откройте свою таблицу заявок → «Расширения» → «Apps Script». Выделите весь код (Ctrl+A или ⌘A) и вставьте новый.')),
-      el('li', {}, el('span', {}, 'В начале кода снова замените ', el('code', {}, 'ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ'), ' на тот же пароль, что был раньше. Нажмите значок дискеты («Сохранить»).')),
+      el('li', {}, (inboxKey() || LS.get(GEN_KEY)) ? el('span', {}, 'Пароль в новом коде уже тот же, что был раньше: ничего менять не нужно. Нажмите значок дискеты («Сохранить»).')
+        : el('span', {}, 'В начале кода снова замените ', el('code', {}, 'ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ'), ' на тот же пароль, что был раньше. Нажмите значок дискеты («Сохранить»).')),
       el('li', {}, el('span', {}, '«Начать развёртывание» → «Управление развёртываниями» → значок карандаша → «Версия»: «Новая версия» → «Развернуть». Google спросит разрешение на доступ к внешним сервисам: он нужен для Telegram. Адрес веб-приложения при этом не меняется.')),
       el('li', {}, el('span', {}, 'Вернитесь сюда и нажмите «Проверить снова».'))),
     el('div', { class: 'row', style: 'margin-top:0' }, el('button', { class: 'btn', type: 'button', onclick: () => { S.notify.outdated = false; S.notify.loaded = false; renderPanel(); } }, 'Проверить снова'), status));
