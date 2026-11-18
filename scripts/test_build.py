@@ -458,6 +458,7 @@ def build_fixture(builder, mutate, posts):
     (work / 'media/test-cover.webp').write_bytes(b'fake image bytes')
     (work / 'content/posts').mkdir(exist_ok=True)
     site = json.loads((work / 'content/site.json').read_text(encoding='utf-8'))
+    site['public_url'] = ''   # the owner's own domain must never change what the checks expect
     mutate(work, site)
     (work / 'content/site.json').write_text(json.dumps(site, ensure_ascii=False), encoding='utf-8')
     for path in (work / 'content/posts').glob('*.md'):
@@ -798,7 +799,7 @@ def main():
 
     # Defensive build: an insecure form endpoint is dropped, nothing is published, no notes appear.
     def careless(work, site):
-        site.update({'form_endpoint': 'http://insecure.example/submit', 'inbox_endpoint': 'https://evil.example/macros/s/x/exec', 'notify_telegram': True, 'publish_ready': False,
+        site.update({'email': '', 'form_endpoint': 'http://insecure.example/submit', 'inbox_endpoint': 'https://evil.example/macros/s/x/exec', 'notify_telegram': True, 'publish_ready': False,
                      'portrait': '', 'quote_photo': '', 'eyes_photo': '', 'story_photo_1': '', 'story_photo_2': '', 'story_photo_3': '', 'story_photo_4': ''})
         (work / 'content/sections.json').write_text(json.dumps(sample_sections(builder), ensure_ascii=False), encoding='utf-8')
     temporary, work = build_fixture(builder, careless, posts=False)
