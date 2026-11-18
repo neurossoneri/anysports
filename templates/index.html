@@ -31,7 +31,7 @@
       --glass:rgba(247,241,228,.6); --focus:#2f6fb3;
       --header-muted:#a3b9cc;
       /* Soft controls that hover above the page */
-      --r-pill:999px; --r-soft:14px;
+      --r-pill:999px; --r-soft:14px; --r-panel:26px; --quote-grad:linear-gradient(110deg,#25598f,#237d76 60%,#287f69); --quote-grad-night:linear-gradient(110deg,#1a3f6a,#145a56 60%,#17604d);
       --float:0 1px 0 rgba(255,255,255,.3) inset,0 14px 28px -16px rgba(6,18,30,.55),0 4px 10px -5px rgba(6,18,30,.28);
       --float-hi:0 1px 0 rgba(255,255,255,.4) inset,0 22px 36px -16px rgba(6,18,30,.6),0 8px 16px -8px rgba(6,18,30,.3);
       /* text-system-v1. Три вида текста определены здесь один раз: меняйте значения, и вся страница последует за ними.
@@ -193,7 +193,7 @@
     .sec-centered .pull { margin-inline:auto; }
 
     /* Statements set aside, like a photo: handwritten, on a cold panel or on the page itself */
-    .quote-panel { position:relative; isolation:isolate; display:grid; align-content:end; min-height:clamp(360px,44vw,640px); padding:clamp(28px,4vw,52px); color:#fff; overflow:hidden; background:linear-gradient(150deg,#0b2c44,#0f4a5b 60%,#14604f); }
+    .quote-panel { position:relative; isolation:isolate; display:grid; align-content:end; min-height:clamp(360px,44vw,640px); padding:clamp(28px,4vw,52px); color:#fff; overflow:hidden; border-radius:var(--r-panel); background:var(--quote-grad); box-shadow:0 1px 0 rgba(255,255,255,.22) inset,0 22px 40px -22px rgba(31,138,116,.75); }
     .blocks > .quote-panel { min-height:clamp(260px,32vw,420px); }
     .quote-panel .quote-bg { position:absolute; inset:0; z-index:-2; }
     .quote-panel::before { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(6,18,30,.05),rgba(6,18,30,.72)); }
@@ -423,9 +423,9 @@
     .quote-panel .quote-text { font:var(--type-panel); letter-spacing:-.005em; }
     .quote-panel:not(:has(.quote-bg)) { min-height:0; align-content:center; }
     .quote-panel:not(:has(.quote-bg))::before { content:none; }
-    .band-deep .quote-panel, .band-teal .quote-panel { background:linear-gradient(150deg,#1d527a,#216f8a 58%,#268c85); box-shadow:inset 0 0 0 1px rgba(141,189,240,.3),0 28px 50px -32px rgba(0,0,0,.75); }
-    .quote-panel[data-tint="night"] { background:linear-gradient(150deg,#0b2c44,#0f4a5b 60%,#14604f); box-shadow:none; }
-    .quote-panel[data-tint="sea"] { background:linear-gradient(150deg,#1d527a,#216f8a 58%,#268c85); box-shadow:inset 0 0 0 1px rgba(141,189,240,.3),0 28px 50px -32px rgba(0,0,0,.75); }
+    .band-deep .quote-panel, .band-teal .quote-panel { background:var(--quote-grad); box-shadow:inset 0 0 0 1px rgba(141,189,240,.3),0 28px 50px -32px rgba(0,0,0,.75); }
+    .quote-panel[data-tint="night"] { background:var(--quote-grad-night); box-shadow:none; }
+    .quote-panel[data-tint="sea"] { background:var(--quote-grad); box-shadow:inset 0 0 0 1px rgba(141,189,240,.3),0 28px 50px -32px rgba(0,0,0,.75); }
     .quote-panel[data-tint="sand"] { background:linear-gradient(150deg,#f2e9d6,#e6d9bd); box-shadow:inset 0 0 0 1px rgba(16,36,58,.14); }
     .quote-panel[data-tint="mist"] { background:linear-gradient(150deg,#e4eef8,#cfe0f1); box-shadow:inset 0 0 0 1px rgba(16,36,58,.14); }
     .quote-panel[data-tint="sand"] .quote-text, .quote-panel[data-tint="mist"] .quote-text { color:#10243a; text-shadow:none; }

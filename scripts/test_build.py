@@ -269,10 +269,10 @@ def check_brand_and_dashboard(builder, destination):
 
 
 def check_soft_controls(destination):
-    """Rounded corners belong to buttons and fields only; photos, panels and sections stay square. No "up" button."""
+    """Rounded corners belong to buttons, fields and the quotation panels; photos, other panels and sections stay square. No "up" button."""
     css = (destination / 'assets/site.css').read_text(encoding='utf-8')
     articles_css = (destination / 'assets/articles.css').read_text(encoding='utf-8')
-    allowed = ('.button', '.icon-button', '.contact-links', 'summary::after', '.field', '.slot-badge', '.num-badge', '.skip', '.lb-close')
+    allowed = ('.button', '.icon-button', '.contact-links', 'summary::after', '.field', '.slot-badge', '.num-badge', '.skip', '.lb-close', '.quote-panel')
     for sheet in (css, articles_css):
         for selector, body in re.findall(r'([^{}]+)\{([^{}]*border-radius[^{}]*)\}', sheet):
             values = re.findall(r'border-radius\s*:\s*([^;}]+)', body)
@@ -282,9 +282,11 @@ def check_soft_controls(destination):
     for must in ('.button { display:inline-flex', '.qa summary::after {', '.contact-links a {'):
         rule = css[css.index(must):].split('}', 1)[0]
         assert 'border-radius' in rule, f'{must} should be soft'
-    for square in ('.photo {', '.quote-panel {', '.free {', '.blog-card {', '.b-panel {', '.b-photos .photo {'):
+    for square in ('.photo {', '.free {', '.blog-card {', '.b-panel {', '.b-photos .photo {'):
         rule = css[css.index(square):].split('}', 1)[0]
         assert 'border-radius' not in rule, f'{square} stays square'
+    quote = css[css.index('.quote-panel {'):].split('}', 1)[0]
+    assert 'border-radius:var(--r-panel)' in quote and 'var(--quote-grad)' in quote, 'quotation panels: soft corners and the colours of the Send button'
     home = (destination / 'index.html').read_text(encoding='utf-8')
     assert 'to-top' not in home and 'to-top' not in css, 'the up button is gone'
     assert 'id="top"' in home and 'href="#top"' in home, 'the footer link still goes up'
