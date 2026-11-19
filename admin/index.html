@@ -226,7 +226,7 @@ const LS = {
 };
 const S = { schema: null, token: '', repo: '', branch: 'main', site: {}, home: {}, page: { sections: [] }, uid: 0, raw: {}, qa: { groups: [] }, orig: { site: {}, home: {}, page: { sections: [] }, qa: { groups: [] } },
             pending: {}, tab: 'photos', lang: 'en', filter: '', run: null, busy: '', notice: null, dirty: 0,
-            open: new Set(), req: { items: null, loaded: false, loading: false, error: '', code: '', keyProblem: '', filter: 'new', q: '' } };
+            open: new Set(), req: newReq() };
 const clone = o => JSON.parse(JSON.stringify(o));
 S.lib = { items: null, loading: false, error: '' }; S.deleted = new Set();
 S.notify = newNotify();
@@ -531,7 +531,10 @@ const INBOX_MESSAGES = {
   notfound: 'Такой заявки уже нет. Нажмите «Обновить».',
   bad: 'Скрипт не принял данные. Проверьте, что заполнено имя.',
   busy: 'Слишком много заявок за минуту. Попробуйте чуть позже.',
-  server: 'В скрипте произошла ошибка. Откройте его в Google и посмотрите «Выполнения» (Executions).',
+  server: 'В скрипте произошла ошибка. Ниже, в блоке «Управление подключением и журнал», нажмите «Проверить подключение»: он покажет, какой шаг не работает. Журнал можно скопировать и прислать.',
+  locked: 'Скрипт сейчас занят другой операцией. Подождите несколько секунд и повторите.',
+  off: 'Приём заявок приостановлен. Нажмите «Возобновить приём заявок» в блоке «Управление подключением и журнал».',
+  timeout: 'Google не ответил за 45 секунд. Нажмите «Повторить»; если так каждый раз, откройте «Управление подключением и журнал» → «Проверить подключение».',
   bademail: 'Скрипт не принял адрес почты. Проверьте, что адреса написаны без ошибок и что их не больше трёх.',
   badtoken: 'Токен бота выглядит неверно. Скопируйте его целиком из сообщения @BotFather, без пробелов.',
   badchat: 'Номер чата должен быть числом. Проще всего нажать «Найти мой чат».',
@@ -543,20 +546,61 @@ const INBOX_MESSAGES = {
   mail: 'Письмо не отправилось: возможно, исчерпан дневной лимит Google или адрес указан с ошибкой.',
 };
 function inboxFail(code, message) { const e = new Error(message); e.code = code; return e; }
+/* ---------- panel log: what the panel asked the script and what came back (never passwords, never visitors' data) ---------- */
+const INBOX_LOG_KEY = 'si-admin-inbox-log';
+const INBOX_LIMITS = { timeout: 45000 };
+const scrub = v => String(v == null ? '' : v).replace(/\d{6,12}:[A-Za-z0-9_-]{30,60}/g, '[токен]').replace(/\s+/g, ' ').slice(0, 300);
+function logRead() { try { const a = JSON.parse(LS.get(INBOX_LOG_KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+function logAdd(action, ok, code, ms, detail) {
+  const a = logRead();
+  a.push({ t: new Date().toISOString(), action: scrub(action), ok: !!ok, code: scrub(code), ms: Math.round(ms) || 0, detail: scrub(detail) });
+  LS.set(INBOX_LOG_KEY, JSON.stringify(a.slice(-60)));
+}
+const logClear = () => LS.del(INBOX_LOG_KEY);
+const pad2 = n => String(n).padStart(2, '0');
+const logStamp = iso => { const d = new Date(iso); return isNaN(d) ? String(iso || '') : `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`; };
+/** One text for copying to whoever helps: first the panel's own calls, then (if loaded) what the Google script wrote. */
+function logText(scriptItems) {
+  const mine = logRead().slice().reverse().map(x => `${logStamp(x.t)} · ${x.action} · ${x.ok ? 'ok' : 'ошибка ' + x.code} · ${x.ms} мс${x.detail ? ' · ' + x.detail : ''}`);
+  const out = ['=== Журнал панели (этот браузер) ===', ...(mine.length ? mine : ['(пока пусто)'])];
+  if (scriptItems) out.push('', '=== Журнал скрипта (Google) ===', ...(scriptItems.length ? scriptItems.map(x => `${logStamp(x.t)} · ${x.level} · ${x.step} · ${x.msg}`) : ['(пока пусто)']));
+  return out.join('\n');
+}
 async function inboxCall(action, data) {
-  const url = inboxUrl();
-  if (!INBOX_URL_RE.test(url)) throw inboxFail('url', 'Адрес приёма заявок указан неверно. Он должен выглядеть так: https://script.google.com/macros/s/…/exec');
-  let r;
+  const url = inboxUrl(), started = Date.now();
+  const fail = (code, message, detail) => { logAdd(action, false, code, Date.now() - started, detail); const e = inboxFail(code, message); e.detail = scrub(detail); return e; };
+  if (!INBOX_URL_RE.test(url)) throw fail('url', 'Адрес приёма заявок указан неверно. Он должен выглядеть так: https://script.google.com/macros/s/…/exec');
+  const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+  const timer = ctl ? setTimeout(() => ctl.abort(), INBOX_LIMITS.timeout) : 0;
+  const timedOut = () => !!(ctl && ctl.signal.aborted);
+  let j = null, r;
   try {
-    r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, cache: 'no-store',
-                           body: JSON.stringify({ action, key: inboxKey(), ...(data || {}) }) });
-  } catch (e) { throw inboxFail('net', 'Не удалось связаться с таблицей заявок. Проверьте интернет. Если с ним всё в порядке, проверьте, что при развёртывании скрипта выбрано «У кого есть доступ: Все».'); }
-  let j = null;
-  try { j = await r.json(); } catch (e) { /* not JSON: Google sent a sign-in page */ }
-  if (!j) throw inboxFail('format', 'Google ответил страницей входа, а не данными. Почти всегда это значит, что при развёртывании выбрано не «Все». Исправьте: в Apps Script нажмите «Начать развёртывание» → «Управление развёртываниями» → значок карандаша → «У кого есть доступ»: «Все», «Версия»: «Новая версия» → «Развернуть». Адрес при этом не меняется. Проверьте также «Запуск от имени»: «Я».');
-  if (j.ok !== true) throw inboxFail(j.error || 'server', INBOX_MESSAGES[j.error] || INBOX_MESSAGES.server);
+    try {
+      r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, cache: 'no-store', ...(ctl ? { signal: ctl.signal } : {}),
+                             body: JSON.stringify({ action, key: inboxKey(), ...(data || {}) }) });
+    } catch (e) {
+      if (timedOut()) throw fail('timeout', INBOX_MESSAGES.timeout);
+      throw fail('net', 'Не удалось связаться с таблицей заявок. Проверьте интернет. Если с ним всё в порядке, проверьте, что при развёртывании скрипта выбрано «У кого есть доступ: Все».', e && e.message);
+    }
+    try { j = await r.json(); } catch (e) { if (timedOut()) throw fail('timeout', INBOX_MESSAGES.timeout); /* not JSON: Google sent a sign-in page */ }
+  } finally { clearTimeout(timer); }
+  if (!j) throw fail('format', 'Google ответил страницей входа, а не данными. Почти всегда это значит, что при развёртывании выбрано не «Все». Исправьте: в Apps Script нажмите «Начать развёртывание» → «Управление развёртываниями» → значок карандаша → «У кого есть доступ»: «Все», «Версия»: «Новая версия» → «Развернуть». Адрес при этом не меняется. Проверьте также «Запуск от имени»: «Я».', 'HTTP ' + (r && r.status));
+  if (j.ok !== true) {
+    const code = j.error || 'server', base = INBOX_MESSAGES[code] || INBOX_MESSAGES.server, detail = scrub(j.detail);
+    throw fail(code, base + (detail ? ' Подробности от скрипта: ' + detail : ''), detail);
+  }
+  logAdd(action, true, 'ok', Date.now() - started, '');
   return j;
 }
+const DIAG_LABELS = { lock: 'Блокировка скрипта', props: 'Настройки скрипта', book: 'Доступ к таблице', sheet: 'Лист «Заявки»', header: 'Заголовки столбцов', read: 'Чтение заявок', mail: 'Почта Google', log: 'Журнал' };
+const diagText = j => ((j && j.steps) || []).map(s => `${s.ok ? '✓' : '✗'} ${DIAG_LABELS[s.name] || s.name} · ${s.ms} мс${s.detail ? ' · ' + scrub(s.detail) : ''}`);
+async function inboxDiagnose() { const j = await inboxCall('diagnose'); S.req.enabled = j.enabled !== false; return j; }
+async function inboxScriptLog() { return (await inboxCall('log')).items || []; }
+async function inboxToggle(enabled) { const j = await inboxCall('set_enabled', { enabled: !!enabled }); S.req.enabled = j.enabled !== false; return S.req.enabled; }
+/** Unlinks the site from the script. Nothing is deleted in Google. The site itself changes after "Save and publish". */
+function inboxDisconnect() { S.site.inbox_endpoint = ''; LS.del(INBOX_KEY); S.req = newReq(); S.notify = newNotify(); }
+/** Starts from nothing: also forgets the password that was made for the script, so a new one is made together with the new code. */
+function inboxReset() { inboxDisconnect(); LS.del(GEN_KEY); logClear(); }
 function requestCounts(items) {
   const n = { new: 0, work: 0, done: 0, all: 0 };
   (items || []).forEach(r => { n[r.status] = (n[r.status] || 0) + 1; n.all++; });
@@ -593,6 +637,7 @@ function csvOf(items) {
 
 /* ----- notifications: where the script sends a message about every new request (email and Telegram). The bot token lives only in the owner's Google script. ----- */
 function newNotify() { return { loaded: false, loading: false, error: '', outdated: false, data: null, draft: null, busy: '', status: null, chats: null, open: null }; }
+function newReq() { return { items: null, loaded: false, loading: false, error: '', code: '', keyProblem: '', filter: 'new', q: '', enabled: null, toolsOpen: false }; }
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TG_TOKEN_RE = /^\d{6,12}:[A-Za-z0-9_-]{30,60}$/;
 const TG_CHAT_RE = /^-?\d{1,20}$/;
@@ -623,7 +668,7 @@ async function notifyLoad() {
   const N = S.notify;
   if (N.loading) return;
   N.loading = true; N.error = ''; N.outdated = false;
-  try { N.data = await inboxCall('settings'); N.draft = draftFrom(N.data); N.loaded = true; }
+  try { N.data = await inboxCall('settings'); N.draft = draftFrom(N.data); S.req.enabled = N.data.enabled !== false; N.loaded = true; }
   catch (e) { if (e.code === 'bad') N.outdated = true; else N.error = e.message; }   // a script from before this update does not know the action
   N.loading = false;
 }
@@ -746,7 +791,7 @@ function qaMoveItem(gi, ii, toGi, toIi) {
   return true;
 }
 root.__dash = { S, newBlock, newSection, newSectionId, insertAt, moveItem, pageChangeCount, secChanged, slotUsage, blockPreview, gh, loadAll, changes, validate, commitChanges, photoPath, usedPending, watchDeploy, latestRun, setv, getv, explain, commitMessage,
-                inboxCall, notifyLoad, notifySave, notifyFind, notifyTest, notifyDisableTelegram, notifyProblem, notifyDirty, notifyFlagChanged, splitEmails, tgOn,
+                inboxCall, inboxDiagnose, inboxScriptLog, inboxToggle, inboxDisconnect, inboxReset, logRead, logAdd, logClear, logText, diagText, newReq, INBOX_LIMITS, notifyLoad, notifySave, notifyFind, notifyTest, notifyDisableTelegram, notifyProblem, notifyDirty, notifyFlagChanged, splitEmails, tgOn,
                 requestCounts, contactAction, timeAgo, csvOf, INBOX_URL_RE, inboxUrlFrom, normalizeQa, qaChanged, heroChanged, qaMoveItem, qaAddGroup, qaAddItem };
 if (typeof document === 'undefined') { if (typeof module !== 'undefined') module.exports = root.__dash; return; }
 
@@ -1556,6 +1601,87 @@ function requestsKeyBox() {
     S.req.keyProblem ? el('div', { class: 'note bad' }, S.req.keyProblem) : el('p', { class: 'muted' }, 'Это пароль из скрипта. Если вы копировали код кнопкой в панели, он уже подставлен; иначе его видно в начале кода в Google («Расширения» → «Apps Script», строка ADMIN_KEY). Он хранится только в этом браузере.'),
     key, el('div', { class: 'row', style: 'margin-top:12px' }, el('button', { class: 'btn', onclick: go }, 'Открыть заявки')));
 }
+/* ---------- connection tools: check, pause, unlink, start over, log (inbox-diagnostics-v1) ---------- */
+function requestsTools(mode, open) {
+  const connected = mode === 'connected' && !!inboxUrl();
+  const note = el('p', { class: 'muted', role: 'status' });
+  const result = el('div', {});
+  let scriptItems = null;
+  const logBox = el('textarea', { readonly: true, rows: 9, 'aria-label': 'Журнал', style: 'width:100%;box-sizing:border-box;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--line);border-radius:12px;padding:10px' });
+  const paintLog = () => { logBox.value = logText(scriptItems); };
+  // These buttons only change the nodes in this block: no redraw of the whole panel, so a click is never lost under the cursor.
+  const run = async (btn, fn) => { btn.disabled = true; try { await fn(); } catch (e) { note.textContent = e.code === 'bad' ? 'Код скрипта в Google старый: он ещё не умеет этого. Нажмите «Скопировать новый код скрипта» и обновите его в Google (шаги появятся здесь).' : e.message; } btn.disabled = false; paintLog(); };
+
+  const diag = el('button', { class: 'btn small', type: 'button', onclick: () => run(diag, async () => {
+    note.textContent = 'Проверяю по шагам. Это может занять до минуты…'; result.replaceChildren();
+    const j = await inboxDiagnose();
+    result.replaceChildren(el('ul', { style: 'margin:8px 0;padding-left:18px;font-size:13px' }, ...diagText(j).map(line => el('li', line.startsWith('✗') ? { style: 'font-weight:600' } : {}, line))));
+    note.textContent = (j.steps || []).every(s => s.ok) ? 'Все шаги прошли. Если форма на сайте всё равно не отправляется, скопируйте журнал ниже и пришлите мне.' : 'Шаги с ✗ не прошли: причина написана рядом. Скопируйте журнал ниже и пришлите мне.';
+    syncToggle();
+  }) }, 'Проверить подключение');
+
+  const toggle = el('button', { class: 'btn ghost small', type: 'button' });
+  const syncToggle = () => { toggle.textContent = S.req.enabled === false ? 'Возобновить приём заявок' : 'Приостановить приём заявок'; };
+  toggle.addEventListener('click', () => run(toggle, async () => {
+    const pause = S.req.enabled !== false;
+    if (pause && !confirm('Форма на сайте перестанет принимать заявки: посетители увидят «Could not send», пока вы не возобновите приём. Таблица и старые заявки не меняются. Приостановить?')) return;
+    note.textContent = pause ? 'Приостанавливаю…' : 'Возобновляю…';
+    await inboxToggle(!pause);
+    note.textContent = pause ? 'Приём приостановлен. Возобновить можно этой же кнопкой.' : 'Приём заявок возобновлён.';
+    syncToggle();
+  }));
+  syncToggle();
+
+  const disconnect = el('button', { class: 'btn ghost small', type: 'button', onclick: () => {
+    if (!confirm('Адрес скрипта уберётся из настроек сайта: форма перестанет писать в таблицу. Заявки в вашей Google-таблице останутся. Изменение попадёт на сайт после «Сохранить и опубликовать». Отключить?')) return;
+    inboxDisconnect();
+    setNotice('ok', [el('strong', {}, 'Отключено. '), 'Чтобы форма на сайте перестала писать в таблицу, нажмите «Сохранить и опубликовать» внизу. Подключить снова можно здесь же: пароль остался прежним.']);
+    paintBar(); renderPanel();
+  } }, 'Отключить от сайта');
+
+  const reset = el('button', { class: 'btn ghost small', type: 'button', onclick: () => {
+    if (!confirm('Панель забудет адрес скрипта и пароль, а в настройках сайта адрес уберётся. Заявки в вашей Google-таблице останутся. Потом нужно будет заново вставить код и сделать развёртывание (панель покажет шаги, пароль будет новый). Удалить подключение и начать заново?')) return;
+    inboxReset();
+    setNotice('ok', [el('strong', {}, 'Подключение удалено. '), 'Нажмите «Сохранить и опубликовать» внизу, если адрес был на сайте. Старый скрипт в Google можно выключить: Apps Script → «Начать развёртывание» → «Управление развёртываниями» → «Архивировать». Затем подключите заново по шагам ниже.']);
+    paintBar(); renderPanel();
+  } }, 'Удалить подключение и начать заново');
+
+  const loadScriptLog = el('button', { class: 'btn ghost small', type: 'button', onclick: () => run(loadScriptLog, async () => {
+    note.textContent = 'Загружаю журнал из Google…'; scriptItems = await inboxScriptLog(); note.textContent = 'Журнал скрипта загружен: он в конце окна ниже.';
+  }) }, 'Загрузить журнал скрипта');
+  const copyLog = el('button', { class: 'btn ghost small', type: 'button', onclick: async () => {
+    paintLog();
+    try { await navigator.clipboard.writeText(logBox.value); copyLog.textContent = 'Скопировано ✓'; }
+    catch (e) { copyLog.textContent = 'Выделите текст и скопируйте'; logBox.select(); }
+    setTimeout(() => { copyLog.textContent = 'Скопировать журнал'; }, 3000);
+  } }, 'Скопировать журнал');
+  const clear = el('button', { class: 'btn ghost small', type: 'button', onclick: () => run(clear, async () => {
+    logClear();
+    if (connected) { try { await inboxCall('clear_log'); } catch (e) { /* the script log stays: the panel log is already empty */ } if (scriptItems) scriptItems = []; }
+    note.textContent = 'Журнал очищен.';
+  }) }, 'Очистить журнал');
+  const copyCode = el('button', { class: 'btn ghost small', type: 'button', onclick: async () => {
+    try {
+      const text = scriptWithPassword(await (await fetch('inbox-script.txt', { cache: 'no-store' })).text(), inboxKey() || LS.get(GEN_KEY));
+      await navigator.clipboard.writeText(text); copyCode.textContent = 'Скопировано ✓';
+      note.textContent = 'Новый код скопирован. В Google: Apps Script → выделите весь код (Ctrl+A) → вставьте → «Сохранить» → «Начать развёртывание» → «Управление развёртываниями» → карандаш → «Версия»: «Новая версия» → «Развернуть». Адрес не изменится. Потом нажмите «Проверить подключение».';
+    } catch (e) { note.textContent = 'Не получилось скопировать. Код лежит в репозитории: admin/inbox-script.txt'; }
+    setTimeout(() => { copyCode.textContent = 'Скопировать новый код скрипта'; }, 3000);
+  } }, 'Скопировать новый код скрипта');
+  paintLog();
+
+  return el('details', { class: 'more', open: !!open || !!S.req.toolsOpen, ontoggle: e => { S.req.toolsOpen = e.target.open; } },
+    el('summary', {}, connected ? 'Управление подключением и журнал' : 'Журнал и «начать заново»'),
+    el('div', { class: 'inner' },
+      el('p', { class: 'muted' }, connected
+        ? 'Если заявки не приходят или здесь ошибка: нажмите «Проверить подключение», потом скопируйте журнал. Ни одна из этих кнопок не удаляет заявки в Google-таблице.'
+        : 'Здесь записано, что панель пыталась сделать при подключении. Если что-то не получилось, скопируйте журнал. «Начать заново» даёт новый пароль и чистый ход подключения; заявки в таблице не трогает.'),
+      el('div', { class: 'row', style: 'margin-top:0' }, ...(connected ? [diag, toggle, copyCode, disconnect] : []), reset),
+      note, result,
+      el('p', { class: 'muted', style: 'margin:14px 0 6px' }, el('strong', {}, 'Журнал')),
+      logBox,
+      el('div', { class: 'row', style: 'margin-top:8px' }, ...(connected ? [loadScriptLog] : []), copyLog, clear)));
+}
 function counts() {
   const n = requestCounts(S.req.items);
   return [['new', 'Новые', n.new], ['work', 'В работе', n.work], ['done', 'Готово', n.done], ['all', 'Все', n.all]];
@@ -1714,12 +1840,12 @@ function panelNotify() {
 function panelRequests() {
   const q = S.req;
   const head = [el('h1', {}, 'Заявки'), el('p', { class: 'lead' }, 'Сообщения из формы на сайте. Заявки сохраняются сразу: нажимать «Сохранить и опубликовать» для них не нужно.')];
-  if (!inboxUrl()) return el('div', {}, ...head, requestsSetup());
-  if (!inboxKey()) return el('div', {}, ...head, requestsKeyBox());
+  if (!inboxUrl()) return el('div', {}, ...head, requestsSetup(), requestsTools('setup'));
+  if (!inboxKey()) return el('div', {}, ...head, requestsKeyBox(), requestsTools('connected'));
   if (!q.loaded && !q.loading && !q.error) fetchRequests();
   if (q.error) return el('div', {}, ...head, el('div', { class: 'note bad' }, q.error),
     el('div', { class: 'row' }, el('button', { class: 'btn', onclick: () => { q.error = ''; fetchRequests(); } }, 'Повторить'),
-      el('button', { class: 'btn ghost', onclick: () => { LS.del(INBOX_KEY); q.error = ''; q.loaded = false; renderPanel(); } }, 'Ввести пароль заново')));
+      el('button', { class: 'btn ghost', onclick: () => { LS.del(INBOX_KEY); q.error = ''; q.loaded = false; renderPanel(); } }, 'Ввести пароль заново')), requestsTools('connected', true));
   if (!q.loaded) return el('div', {}, ...head, el('p', { class: 'muted' }, 'Загружаю заявки…'));
 
   const pills = el('div', { class: 'filters' });
@@ -1760,7 +1886,7 @@ function panelRequests() {
   return el('div', {}, ...head,
     el('div', { class: 'row', style: 'margin:0 0 16px' }, el('button', { class: 'btn ghost small', onclick: () => { q.loaded = false; fetchRequests(); } }, 'Обновить'),
       el('button', { class: 'btn ghost small', disabled: !q.items.length, onclick: csv }, 'Скачать таблицей (CSV)')),
-    panelNotify(), pills, list, add());
+    panelNotify(), pills, list, add(), requestsTools('connected'));
 }
 
 /* ---------- settings ---------- */

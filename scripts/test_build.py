@@ -322,21 +322,30 @@ NOTIFY_SCRIPT_CHECK = r"""
 const fs = require('fs'), vm = require('vm'), assert = require('assert');
 const code = fs.readFileSync(process.argv[2], 'utf8').replace("'ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ'", "'test-key-123456'");
 const store = {}, mails = [], calls = [], formats = [], rows = [['id', 'created', 'name', 'contact', 'message', 'status', 'note', 'source']];
-let telegram = 200;
-const cells = (r, c, nr, nc) => rows.slice(r - 1, r - 1 + (nr || 1)).map(x => x.slice(c - 1, c - 1 + (nc || 1)));
-const sheet = { getDataRange: () => ({ getValues: () => rows }), getLastRow: () => rows.length, appendRow: r => rows.push(r), deleteRow: i => rows.splice(i - 1, 1),
-  getRange: (r, c, nr, nc) => ({ getValues: () => cells(r, c, nr, nc), setValue: v => { rows[r - 1][c - 1] = v; }, setNumberFormat(f) { formats.push([r, c, nr, nc, f]); return this; } }) };
+const logRows = [], logFormats = [];
+let telegram = 200, breakSheet = null, lockOk = true;
+// A sheet that keeps its rows in an array. breakSheet makes reading the requests sheet fail with that message.
+const makeSheet = (data, fmts, main) => ({
+  getDataRange: () => { if (main && breakSheet) throw new Error(breakSheet); return { getValues: () => data }; },
+  getLastRow: () => data.length, getMaxRows: () => 1000, setFrozenRows() {},
+  appendRow: r => data.push(r), deleteRow: i => data.splice(i - 1, 1), deleteRows: (i, n) => data.splice(i - 1, n),
+  getRange: (r, c, nr, nc) => ({
+    getValues: () => data.slice(r - 1, r - 1 + (nr || 1)).map(x => x.slice(c - 1, c - 1 + (nc || 1))),
+    setValues: v => { v.forEach((row, k) => { data[r - 1 + k] = row.slice(); }); return { setFontWeight() {} }; },
+    setValue: v => { data[r - 1][c - 1] = v; },
+    setNumberFormat(f) { fmts.push([r, c, nr, nc, f]); return this; } }) });
+const sheet = makeSheet(rows, formats, true), logSheet = makeSheet(logRows, logFormats, false);
 const ctx = {
   PropertiesService: { getScriptProperties: () => ({ getProperty: k => (k in store ? store[k] : null), setProperty: (k, v) => { store[k] = String(v); }, deleteProperty: k => { delete store[k]; } }) },
-  LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+  LockService: { getScriptLock: () => ({ waitLock() {}, tryLock: () => lockOk, releaseLock() {} }) },
   CacheService: { getScriptCache: () => ({ get: () => null, put() {} }) },
   Session: { getEffectiveUser: () => ({ getEmail: () => 'owner@example.com' }) },
-  MailApp: { sendEmail: o => { mails.push(o); } },
+  MailApp: { sendEmail: o => { mails.push(o); }, getRemainingDailyQuota: () => 99 },
   UrlFetchApp: { fetch: (url, o) => { calls.push({ url, o }); return { getResponseCode: () => telegram,
     getContentText: () => JSON.stringify({ ok: true, result: [{ message: { chat: { id: 555, type: 'private', first_name: 'Anna' } } }, { message: { chat: { id: -9, type: 'group', title: 'x' } } }] }) }; } },
   Utilities: { getUuid: () => 'abcdef12-0000' },
   ContentService: { createTextOutput: t => ({ text: t, setMimeType() { return this; } }), MimeType: { JSON: 1 } },
-  SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: () => sheet, getUrl: () => 'https://sheet.example/' }) },
+  SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: n => (n === 'Заявки' ? sheet : (n === 'Журнал' && logRows.length ? logSheet : null)), insertSheet: () => logSheet, getUrl: () => 'https://sheet.example/', getName: () => 'Test' }) },
 };
 vm.createContext(ctx); vm.runInContext(code, ctx);
 const post = o => JSON.parse(ctx.doPost({ postData: { contents: JSON.stringify(o) } }).text);
@@ -344,7 +353,7 @@ const K = 'test-key-123456', TOKEN = '123456789:' + 'A'.repeat(35);
 
 assert.strictEqual(post({ action: 'settings', key: 'wrong-key-1234' }).error, 'key', 'settings need the password');
 let s = post({ action: 'settings', key: K });
-assert.ok(s.ok && s.version === 2 && s.email === '' && s.defaultEmail === 'owner@example.com' && !s.telegram.token);
+assert.ok(s.ok && s.version === 3 && s.email === '' && s.defaultEmail === 'owner@example.com' && !s.telegram.token);
 
 // the visitor's message: email goes to the Google account while nothing is set up, and no Telegram call is made
 assert.ok(post({ action: 'submit', name: 'Visitor', contact: 'v@example.com', message: 'Hi' }).ok);
@@ -388,6 +397,43 @@ assert.strictEqual(post({ action: 'settings', key: K }).problems.telegram, '', '
 // turning Telegram off removes the token and the chat
 s = post({ action: 'save_settings', key: K, tgToken: '', tgChat: '' });
 assert.ok(s.ok && !s.telegram.token && s.telegram.chat === '' && s.email === 'me@example.org, you@example.org');
+// v3 (inbox-diagnostics-v1): diagnostics, pause, soft lock, readable errors, a log without personal data
+let dg = post({ action: 'diagnose', key: K });
+assert.ok(dg.ok && dg.version === 3 && dg.enabled === true && dg.steps.length >= 7, 'diagnose answers: ' + JSON.stringify(dg).slice(0, 300));
+assert.ok(dg.steps.every(x => x.ok), 'every step passes with healthy services: ' + JSON.stringify(dg.steps.filter(x => !x.ok)));
+assert.ok(dg.steps.some(x => x.name === 'mail' && /99/.test(x.detail)), 'the mail quota is shown');
+assert.strictEqual(post({ action: 'diagnose', key: 'wrong-key-1234' }).error, 'key', 'diagnose needs the password');
+
+// pause: nothing is stored while paused; resuming works
+let n0 = rows.length;
+assert.strictEqual(post({ action: 'set_enabled', key: K, enabled: false }).enabled, false);
+assert.strictEqual(post({ action: 'settings', key: K }).enabled, false);
+assert.strictEqual(post({ action: 'submit', name: 'Paused', contact: 'p@example.com', message: '' }).error, 'off');
+assert.strictEqual(rows.length, n0, 'a paused inbox stores nothing');
+assert.strictEqual(post({ action: 'set_enabled', key: K, enabled: true }).enabled, true);
+assert.ok(post({ action: 'submit', name: 'Resumed', contact: 'r@example.com', message: '' }).ok && rows.length === n0 + 1);
+
+// a busy lock never loses a visitor's request, but does not let an edit through
+lockOk = false; n0 = rows.length;
+assert.ok(post({ action: 'submit', name: 'Busy', contact: 'busy@example.com', message: '' }).ok && rows.length === n0 + 1, 'the visitor request is still stored');
+assert.strictEqual(post({ action: 'delete', key: K, id: 'abcdef12' }).error, 'locked');
+assert.strictEqual(rows.length, n0 + 1, 'a refused edit changes nothing');
+lockOk = true;
+
+// an error inside the script comes back as a readable reason, and a token never leaks into it
+breakSheet = 'boom https://api.telegram.org/bot' + TOKEN + '/x';
+const broken = post({ action: 'list', key: K });
+assert.strictEqual(broken.error, 'server');
+assert.ok(/boom/.test(broken.detail) && !broken.detail.includes(TOKEN) && broken.step === 'list', 'detail: ' + broken.detail);
+breakSheet = null;
+assert.ok(post({ action: 'list', key: K }).ok, 'works again once the cause is gone');
+
+// the log says what happened, without names, contacts, the password or the token
+const lg = post({ action: 'log', key: K }), lgText = JSON.stringify(lg.items);
+assert.ok(lg.ok && lg.items.length > 5 && /boom/.test(lgText) && /submit/.test(lgText) && /блокировка/.test(lgText), 'the log tells what happened');
+for (const secret of ['Anna', 'Visitor', 'Busy', 'v@example.com', 'b@example.com', 'busy@example.com', 'p@example.com', TOKEN, K]) assert.ok(!lgText.includes(secret), 'the log never holds ' + secret);
+assert.ok(post({ action: 'clear_log', key: K }).ok && post({ action: 'log', key: K }).items.length === 0, 'the log can be cleared');
+assert.strictEqual(post({ action: 'log', key: 'wrong-key-1234' }).error, 'key', 'the log needs the password');
 console.log('notify script ok');
 """
 
@@ -404,14 +450,70 @@ def check_notify_script(script):
         assert result.returncode == 0 and 'notify script ok' in result.stdout, f'notify script check failed: {(result.stderr or result.stdout)[:700]}'
 
 
+# inbox-diagnostics-v1
+INBOX_TOOLS_CHECK = r'''
+// The dashboard's connection tools, without a browser: a stand-in localStorage and fetch.
+const store = {};
+globalThis.localStorage = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); }, removeItem: k => { delete store[k]; } };
+const d = require(process.argv[2]), assert = require('assert');
+const ID = 'AKfycb' + 'x'.repeat(30), URL_ = 'https://script.google.com/macros/s/' + ID + '/exec', TOKEN = '123456789:' + 'A'.repeat(35), PW = 'pw-1234567890123';
+let answer = { ok: true }, calls = [], hang = false, html = false;
+globalThis.fetch = (url, o) => {
+  calls.push(JSON.parse(o.body));
+  if (hang) return new Promise((resolve, reject) => o.signal.addEventListener('abort', () => reject(new Error('aborted'))));
+  return Promise.resolve({ status: 200, json: async () => { if (html) throw new Error('not json'); return answer; } });
+};
+d.S.site.inbox_endpoint = URL_; store['si-admin-inbox-key'] = PW;
+(async () => {
+  await d.inboxCall('list');
+  assert.strictEqual(d.logRead().length, 1);
+  assert.ok(d.logRead()[0].ok && d.logRead()[0].action === 'list');
+  assert.strictEqual(calls[0].key, PW, 'the password is sent to the script');
+  assert.ok(!store['si-admin-inbox-log'].includes(PW), 'the password is never written to the log');
+
+  answer = { ok: false, error: 'server', detail: 'boom ' + TOKEN };                       // a readable reason, no token
+  let err = await d.inboxCall('list').then(() => null, e => e);
+  assert.ok(err && err.code === 'server' && /boom/.test(err.message) && /Проверить подключение/.test(err.message) && !err.message.includes(TOKEN));
+  assert.ok(/ошибка server/.test(d.logText()) && !d.logText().includes(TOKEN) && !d.logText().includes(PW));
+
+  html = true; err = await d.inboxCall('list').then(() => null, e => e); html = false;       // Google sent a sign-in page
+  assert.strictEqual(err.code, 'format');
+
+  hang = true; d.INBOX_LIMITS.timeout = 40;                                                  // Google never answers
+  err = await d.inboxCall('list').then(() => null, e => e); hang = false;
+  assert.strictEqual(err.code, 'timeout');
+
+  answer = { ok: true, version: 3, enabled: false, steps: [{ name: 'lock', ok: true, ms: 3, detail: '' }, { name: 'sheet', ok: false, ms: 12, detail: 'нет листа' }] };
+  const j = await d.inboxDiagnose(), lines = d.diagText(j);
+  assert.strictEqual(d.S.req.enabled, false);
+  assert.ok(lines[0].startsWith('✓') && lines[1].startsWith('✗') && /нет листа/.test(lines[1]));
+  answer = { ok: true, enabled: true };
+  assert.strictEqual(await d.inboxToggle(true), true);
+  assert.deepStrictEqual([calls[calls.length - 1].action, calls[calls.length - 1].enabled], ['set_enabled', true]);
+
+  for (let i = 0; i < 80; i++) d.logAdd('x', true, 'ok', 1, '');                             // the panel log stays short
+  assert.strictEqual(d.logRead().length, 60);
+  assert.ok(/Журнал скрипта/.test(d.logText([{ t: '2026-11-19T10:00:00.000Z', level: 'error', step: 'list', msg: 'boom' }])));
+
+  store['si-admin-inbox-gen'] = PW;                                                          // unlink: the site forgets the script, the password stays
+  d.inboxDisconnect();
+  assert.strictEqual(d.S.site.inbox_endpoint, '');
+  assert.ok(!('si-admin-inbox-key' in store) && store['si-admin-inbox-gen'] === PW);
+  assert.ok(d.S.req.loaded === false && d.S.req.enabled === null);
+  d.S.site.inbox_endpoint = URL_; store['si-admin-inbox-key'] = PW;                          // start over: the generated password and the log go too
+  d.inboxReset();
+  assert.ok(!('si-admin-inbox-gen' in store) && !('si-admin-inbox-log' in store) && d.S.site.inbox_endpoint === '');
+  console.log('inbox tools ok');
+})().catch(e => { console.error(e); process.exit(1); });
+'''
 def check_inbox(builder, destination):
     """The requests inbox: script file, dashboard tab, form wiring."""
     script = (destination / 'admin/inbox-script.txt').read_text(encoding='utf-8')
     for needle in ('function doPost', 'ADMIN_KEY', "'submit'", 'LockService', 'setNumberFormat', 'SCRIPT_VERSION', 'PropertiesService', 'api.telegram.org',
-                   "'save_settings'", "'tg_find'", "'test_notify'"):
+                   "'save_settings'", "'tg_find'", "'test_notify'", "'diagnose'", "'set_enabled'", "'clear_log'", 'tryLock', 'LOG_SHEET', 'errText_'):
         assert needle in script, f'inbox script lacks {needle}'
     admin = (destination / 'admin/index.html').read_text(encoding='utf-8')
-    for needle in ('panelRequests', 'inboxCall', 'inbox-script.txt', 'csvOf', 'panelPhotos', 'panelNotify', 'notifySave', 'notifyLoad', 'notifyFlagChanged', 'genPassword', 'scriptWithPassword', 'inboxUrlFrom'):
+    for needle in ('panelRequests', 'inboxCall', 'inbox-script.txt', 'csvOf', 'panelPhotos', 'panelNotify', 'notifySave', 'notifyLoad', 'notifyFlagChanged', 'genPassword', 'scriptWithPassword', 'inboxUrlFrom', 'requestsTools', 'inboxDiagnose', 'inboxDisconnect', 'inboxReset', 'logText', 'inbox-diagnostics-v1'):
         assert needle in admin, f'dashboard lacks {needle}'
     home = (destination / 'index.html').read_text(encoding='utf-8')
     assert "action:'submit'" in home and 'Promise.allSettled' in home, 'the form must also write to the inbox'
@@ -450,6 +552,10 @@ assert.ok(pick('').error && pick('привет').error && pick('https://evil.exa
 """, encoding='utf-8')
             result = subprocess.run([node, str(check), str(module)], capture_output=True, text=True)
             assert result.returncode == 0, f'inboxUrlFrom: {result.stderr[:600]}'
+            tools = Path(folder) / 'tools.js'   # inbox-diagnostics-v1
+            tools.write_text(INBOX_TOOLS_CHECK, encoding='utf-8')
+            result = subprocess.run([node, str(tools), str(module)], capture_output=True, text=True)
+            assert result.returncode == 0 and 'inbox tools ok' in result.stdout, f'inbox tools: {(result.stderr or result.stdout)[:800]}'
 
 
 def check_page_polish(destination):

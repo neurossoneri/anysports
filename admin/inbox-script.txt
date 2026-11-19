@@ -20,49 +20,153 @@ var ADMIN_KEY = 'ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ';
 var NOTIFY_EMAIL = '';
 
 // Версия скрипта. По ней панель понимает, что код в Google нужно обновить.
-var SCRIPT_VERSION = 2;
+var SCRIPT_VERSION = 3;
 
 var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 var TG_TOKEN_RE = /^\d{6,12}:[A-Za-z0-9_-]{30,60}$/;
 var TG_CHAT_RE = /^-?\d{1,20}$/;
 
 var SHEET_NAME = 'Заявки';
+var LOG_SHEET = 'Журнал';
+var LOG_HEAD = ['time', 'level', 'step', 'message'];
+var LOG_KEEP = 300;                       // сколько строк журнала хранить: старые удаляются сами
 var HEAD = ['id', 'created', 'name', 'contact', 'message', 'status', 'note', 'source'];
 var STATUSES = ['new', 'work', 'done'];
 var MAX = { name: 120, contact: 160, message: 4000, note: 2000 };
+var READ_ACTIONS = ['list', 'settings', 'diagnose', 'log'];                 // только читают: блокировка не нужна
+var WRITE_ACTIONS = ['update', 'delete', 'add', 'save_settings', 'tg_find', 'test_notify', 'set_enabled', 'clear_log'];
 
 function doGet() {
-  return json_({ ok: true, service: 'sport-intuitive-inbox' });
+  return json_({ ok: true, service: 'sport-intuitive-inbox', version: SCRIPT_VERSION });
 }
 
 function doPost(e) {
-  var lock = LockService.getScriptLock();
+  var started = Date.now(), action = '', lock = null, locked = false;
   try {
-    lock.waitLock(20000);
     var req = JSON.parse((e && e.postData && e.postData.contents) || '{}');
-    var action = String(req.action || '');
-    if (action === 'submit') return json_(submit_(req));
-    if (['list', 'update', 'delete', 'add', 'settings', 'save_settings', 'tg_find', 'test_notify'].indexOf(action) === -1) return json_({ ok: false, error: 'bad' });
-    var denied = checkKey_(req.key);
-    if (denied) return json_({ ok: false, error: denied });
-    if (action === 'list') return json_(list_());
-    if (action === 'update') return json_(update_(req));
-    if (action === 'delete') return json_(remove_(req));
-    if (action === 'settings') return json_(settingsInfo_());
-    if (action === 'save_settings') return json_(saveSettings_(req));
-    if (action === 'tg_find') return json_(tgFind_(req));
-    if (action === 'test_notify') return json_(testNotify_());
-    return json_(add_(req));
+    action = String(req.action || '');
+    if (action !== 'submit' && READ_ACTIONS.concat(WRITE_ACTIONS).indexOf(action) === -1) return json_({ ok: false, error: 'bad' });
+    if (action !== 'submit') {
+      var denied = checkKey_(req.key);
+      if (denied) { log_('warn', action, 'отказ: ' + denied); return json_({ ok: false, error: denied }); }
+    }
+    // Блокировка нужна, только чтобы две правки не наложились. Заявка с сайта не должна пропасть из-за неё:
+    // appendRow сам по себе безопасен, поэтому при занятой блокировке заявка всё равно записывается (и это попадает в журнал).
+    if (action === 'submit' || WRITE_ACTIONS.indexOf(action) !== -1) {
+      lock = LockService.getScriptLock();
+      locked = lock.tryLock(8000);
+      if (!locked) {
+        log_('warn', action, 'блокировка занята более 8 с');
+        if (action !== 'submit') return json_({ ok: false, error: 'locked' });
+      }
+    }
+    var out;
+    if (action === 'submit') out = submit_(req);
+    else if (action === 'list') out = list_();
+    else if (action === 'update') out = update_(req);
+    else if (action === 'delete') out = remove_(req);
+    else if (action === 'settings') out = settingsInfo_();
+    else if (action === 'save_settings') out = saveSettings_(req);
+    else if (action === 'tg_find') out = tgFind_(req);
+    else if (action === 'test_notify') out = testNotify_();
+    else if (action === 'set_enabled') out = setEnabled_(req);
+    else if (action === 'diagnose') out = diagnose_();
+    else if (action === 'log') out = readLog_();
+    else if (action === 'clear_log') out = clearLog_();
+    else out = add_(req);
+    var ms = Date.now() - started;
+    if (action === 'submit') log_(out && out.ok ? 'info' : 'warn', 'submit', (out && out.ok ? 'заявка записана' : 'заявка не записана: ' + (out && out.error)) + ', ' + ms + ' мс');
+    else if (ms > 10000) log_('warn', action, 'медленно: ' + ms + ' мс');
+    return json_(out);
   } catch (err) {
-    return json_({ ok: false, error: 'server' });
+    log_('error', action || '?', errText_(err) + ', ' + (Date.now() - started) + ' мс');
+    return json_({ ok: false, error: 'server', detail: errText_(err), step: action });
   } finally {
-    try { lock.releaseLock(); } catch (x) {}
+    if (lock && locked) { try { lock.releaseLock(); } catch (x) {} }
   }
+}
+
+/* ---------- журнал: лист «Журнал» в этой же таблице (без имён и текстов заявок) ---------- */
+
+/** Короткий текст ошибки. Токен Telegram вырезается, чтобы он не попал в журнал. */
+function errText_(err) {
+  var text = String(err && err.message ? err.message : err);
+  return text.replace(/\d{6,12}:[A-Za-z0-9_-]{30,60}/g, '[токен]').replace(/\s+/g, ' ').slice(0, 300);
+}
+
+/** Пишет строку в журнал. Сам никогда не падает: журнал не должен ломать приём заявок. */
+function log_(level, step, message) {
+  try { console.log('[' + level + '] ' + step + ': ' + message); } catch (x) {}
+  try {
+    var book = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = book.getSheetByName(LOG_SHEET);
+    if (!sheet) {
+      sheet = book.insertSheet(LOG_SHEET);
+      sheet.getRange(1, 1, 1, LOG_HEAD.length).setValues([LOG_HEAD]).setFontWeight('bold');
+      sheet.setFrozenRows(1);
+    }
+    var row = sheet.getLastRow() + 1;
+    sheet.getRange(row, 1, 1, LOG_HEAD.length).setNumberFormat('@');
+    sheet.appendRow([new Date().toISOString(), String(level), String(step).slice(0, 40), errText_(message)]);
+    if (sheet.getLastRow() > LOG_KEEP + 100) sheet.deleteRows(2, sheet.getLastRow() - LOG_KEEP - 1);
+  } catch (err) {}
+}
+
+function readLog_() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(LOG_SHEET), items = [];
+  if (sheet) {
+    var rows = sheet.getDataRange().getValues();
+    for (var i = rows.length - 1; i >= 1 && items.length < 80; i--) items.push({ t: String(rows[i][0]), level: String(rows[i][1]), step: String(rows[i][2]), msg: String(rows[i][3]) });
+  }
+  return { ok: true, items: items };
+}
+
+function clearLog_() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(LOG_SHEET);
+  if (sheet && sheet.getLastRow() > 1) sheet.deleteRows(2, sheet.getLastRow() - 1);
+  return { ok: true };
+}
+
+/** Проверка по шагам: что работает, что нет и сколько миллисекунд занял каждый шаг. Панель показывает результат списком. */
+function diagnose_() {
+  var steps = [];
+  function run(name, fn) {
+    var t = Date.now(), ok = true, detail = '';
+    try { detail = String(fn() || ''); } catch (err) { ok = false; detail = errText_(err); }
+    steps.push({ name: name, ok: ok, ms: Date.now() - t, detail: detail });
+  }
+  run('lock', function () { var l = LockService.getScriptLock(), got = l.tryLock(3000); if (!got) throw new Error('занята'); l.releaseLock(); });
+  run('props', function () { return props_().getProperty('enabled') === '0' ? 'приём приостановлен' : 'приём включён'; });
+  run('book', function () { var b = SpreadsheetApp.getActiveSpreadsheet(); if (!b) throw new Error('скрипт не привязан к таблице: откройте Apps Script из самой таблицы (Расширения → Apps Script)'); return b.getName ? b.getName() : ''; });
+  run('sheet', function () { return 'строк: ' + sheet_().getLastRow(); });
+  run('header', function () {
+    var head = sheet_().getRange(1, 1, 1, HEAD.length).getValues()[0].map(String);
+    if (head.join('|') !== HEAD.join('|')) throw new Error('заголовки листа не совпадают: ' + head.join(', '));
+    return '';
+  });
+  run('read', function () { return 'прочитано строк: ' + sheet_().getDataRange().getValues().length; });
+  run('mail', function () { return 'осталось писем сегодня: ' + MailApp.getRemainingDailyQuota(); });
+  run('log', function () {
+    var book = SpreadsheetApp.getActiveSpreadsheet(), sheet = book.getSheetByName(LOG_SHEET);
+    if (!sheet) { log_('info', 'diagnose', 'проверка'); sheet = book.getSheetByName(LOG_SHEET); }
+    if (!sheet) throw new Error('лист «Журнал» не создался');
+    return '';
+  });
+  var enabled = props_().getProperty('enabled') !== '0';
+  log_('info', 'diagnose', 'проверка: ' + steps.filter(function (x) { return !x.ok; }).length + ' ошибок');
+  return { ok: true, version: SCRIPT_VERSION, enabled: enabled, steps: steps };
+}
+
+function setEnabled_(req) {
+  if (req.enabled) props_().deleteProperty('enabled'); else props_().setProperty('enabled', '0');
+  log_('info', 'set_enabled', req.enabled ? 'приём заявок возобновлён' : 'приём заявок приостановлен');
+  return { ok: true, enabled: !!req.enabled };
 }
 
 /* ---------- from the website ---------- */
 
 function submit_(req) {
+  if (props_().getProperty('enabled') === '0') return { ok: false, error: 'off' };      // приём приостановлен в панели
   var item = {
     name: clean_(req.name, MAX.name),
     contact: clean_(req.contact, MAX.contact),
@@ -74,8 +178,11 @@ function submit_(req) {
   item.status = 'new';
   item.note = '';
   item.source = 'site';
+  var t0 = Date.now();
   append_(sheet, item);
+  var saved = Date.now() - t0;
   notify_(item);
+  log_('info', 'submit', 'запись в таблицу: ' + saved + ' мс, уведомления: ' + (Date.now() - t0 - saved) + ' мс');
   return { ok: true };
 }
 
@@ -104,7 +211,7 @@ function notifyEmail_(item, cfg) {
     if (EMAIL_RE.test(item.contact)) options.replyTo = item.contact;
     MailApp.sendEmail(options);
     problem_('err_email', '');
-  } catch (err) { problem_('err_email', 'mail'); }   // письмо не ушло (лимит почты), заявка всё равно сохранена
+  } catch (err) { problem_('err_email', 'mail'); log_('error', 'mail', errText_(err)); }   // письмо не ушло (лимит почты), заявка всё равно сохранена
 }
 
 function notifyTelegram_(item, cfg) {
@@ -112,6 +219,7 @@ function notifyTelegram_(item, cfg) {
   var text = ['Новая заявка с сайта', '', 'Имя: ' + item.name, 'Как связаться: ' + item.contact, '', item.message || '(без сообщения)'].join('\n');
   var result = tgSend_(cfg.tgToken, cfg.tgChat, text);
   problem_('err_tg', result === 'ok' ? '' : result);     // не дошло: заявка всё равно сохранена, а панель покажет причину
+  if (result !== 'ok') log_('warn', 'telegram', 'не отправлено: ' + result);
 }
 
 /** Отправка в Telegram. Возвращает 'ok' или код ошибки (его же понимает панель). Простой текст, без разметки. */
@@ -151,7 +259,7 @@ function problem_(key, value) {
 function settingsInfo_() {
   var p = props_(), cfg = config_();
   return {
-    ok: true, version: SCRIPT_VERSION,
+    ok: true, version: SCRIPT_VERSION, enabled: p.getProperty('enabled') !== '0',
     defaultEmail: NOTIFY_EMAIL || Session.getEffectiveUser().getEmail() || '',
     email: cfg.email.join(', '),
     telegram: { token: !!cfg.tgToken, hint: cfg.tgToken ? '…' + cfg.tgToken.slice(-4) : '', chat: cfg.tgChat },
