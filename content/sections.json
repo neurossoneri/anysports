@@ -40,6 +40,20 @@
           "tint": "night",
           "face": "book",
           "crop": ""
+        },
+        {
+          "type": "photos",
+          "comp": "single",
+          "s1": "media/photo-20261119-143219-1.webp",
+          "s2": "",
+          "s3": "",
+          "f1": "",
+          "f2": "",
+          "f3": "",
+          "zoom": "",
+          "place": "side",
+          "caption": "",
+          "alt": ""
         }
       ]
     },
