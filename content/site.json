@@ -6,7 +6,7 @@
   "form_endpoint": "",
   "quote_photo": "media/photo-2-20261029-092851.webp",
   "privacy_address": "",
-  "inbox_endpoint": "",
+  "inbox_endpoint": "https://script.google.com/macros/s/AKfycbyBNyT69N0Xfo97AKOUwL-JS2WCPStti0nC9OMhs_enOG-G7vmMxg9BnbljczIHm12fxA/exec",
   "portrait": "media/photo-1-20261031-184047.webp",
   "eyes_photo": "media/photo-3-20261029-092919.webp",
   "story_photo_1": "media/photo-4-20261029-092935.webp",
