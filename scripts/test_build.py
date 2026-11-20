@@ -353,7 +353,7 @@ const K = 'test-key-123456', TOKEN = '123456789:' + 'A'.repeat(35);
 
 assert.strictEqual(post({ action: 'settings', key: 'wrong-key-1234' }).error, 'key', 'settings need the password');
 let s = post({ action: 'settings', key: K });
-assert.ok(s.ok && s.version === 3 && s.email === '' && s.defaultEmail === 'owner@example.com' && !s.telegram.token);
+assert.ok(s.ok && s.version === 4 && s.email === '' && s.defaultEmail === 'owner@example.com' && !s.telegram.token);
 
 // the visitor's message: email goes to the Google account while nothing is set up, and no Telegram call is made
 assert.ok(post({ action: 'submit', name: 'Visitor', contact: 'v@example.com', message: 'Hi' }).ok);
@@ -399,7 +399,7 @@ s = post({ action: 'save_settings', key: K, tgToken: '', tgChat: '' });
 assert.ok(s.ok && !s.telegram.token && s.telegram.chat === '' && s.email === 'me@example.org, you@example.org');
 // v3 (inbox-diagnostics-v1): diagnostics, pause, soft lock, readable errors, a log without personal data
 let dg = post({ action: 'diagnose', key: K });
-assert.ok(dg.ok && dg.version === 3 && dg.enabled === true && dg.steps.length >= 7, 'diagnose answers: ' + JSON.stringify(dg).slice(0, 300));
+assert.ok(dg.ok && dg.version === 4 && dg.enabled === true && dg.steps.length >= 7, 'diagnose answers: ' + JSON.stringify(dg).slice(0, 300));
 assert.ok(dg.steps.every(x => x.ok), 'every step passes with healthy services: ' + JSON.stringify(dg.steps.filter(x => !x.ok)));
 assert.ok(dg.steps.some(x => x.name === 'mail' && /99/.test(x.detail)), 'the mail quota is shown');
 assert.strictEqual(post({ action: 'diagnose', key: 'wrong-key-1234' }).error, 'key', 'diagnose needs the password');
@@ -867,6 +867,160 @@ def check_owner_feedback(builder):
     print('ok owner feedback')
 
 
+# owner-controls-v1
+OWNER_NODE_SCRIPT = r"""// owner-controls-v1: setup, переключатели «на почту» и «в таблицу», ничего не теряется
+mails.length = 0; calls.length = 0;
+assert.strictEqual(ctx.setup(), true, 'setup returns true after the test email');
+assert.strictEqual(mails.length, 1, 'setup sends exactly one test email'); assert.strictEqual(mails[0].to, 'me@example.org,you@example.org');
+let st = post({ action: 'settings', key: K });
+assert.ok(st.version === 4 && st.sendEmail === true && st.saveSheet === true, 'both switches are on until the owner changes them');
+assert.strictEqual(post({ action: 'save_settings', key: K, sendEmail: false, saveSheet: false }).error, 'nochannel', 'at least one way for a request must stay on');
+assert.strictEqual(post({ action: 'settings', key: K }).sendEmail, true, 'a refused save writes nothing');
+// email off, table on: the request is stored and no letter is sent
+assert.ok(post({ action: 'save_settings', key: K, sendEmail: false }).ok);
+mails.length = 0; let r0 = rows.length;
+assert.ok(post({ action: 'submit', name: 'NoMail', contact: 'n@example.com', message: 'x' }).ok);
+assert.ok(mails.length === 0 && rows.length === r0 + 1, 'email off: stored in the table, no letter');
+// email on, table off: a letter goes out and the table stays as it was
+assert.ok(post({ action: 'save_settings', key: K, sendEmail: true, saveSheet: false }).ok);
+r0 = rows.length;
+assert.ok(post({ action: 'submit', name: 'NoTable', contact: 'm@example.com', message: 'y' }).ok);
+assert.ok(mails.length === 1 && rows.length === r0 && !mails[0].body.includes('Все заявки:') && /не записывалась/.test(mails[0].body), 'table off: a letter, nothing stored');
+// nothing is lost even if the properties say "everything off" (a hand-edited script)
+store.send_email = '0'; store.save_sheet = '0'; mails.length = 0; r0 = rows.length;
+assert.ok(post({ action: 'submit', name: 'Safety', contact: 's@example.com', message: 'z' }).ok && rows.length === r0 + 1, 'with every way off, the table still takes the request');
+delete store.send_email; delete store.save_sheet;
+assert.ok(post({ action: 'save_settings', key: K, sendEmail: true, saveSheet: true }).ok);
+// the values at the top of the code are the defaults while the panel has not changed anything
+const baked = code.replace('var SEND_EMAIL = true;', 'var SEND_EMAIL = false;').replace('var NOTIFY_EMAIL = \'\';', 'var NOTIFY_EMAIL = \'baked@example.org\';');
+assert.ok(baked !== code && baked.includes('SEND_EMAIL = false') && baked.includes('baked@example.org'));
+console.log('owner controls script ok');
+"""
+OWNER_PANEL_SCRIPT = r"""
+const store = {};
+globalThis.localStorage = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); }, removeItem: k => { delete store[k]; } };
+const d = require(process.argv[2]), assert = require('assert');
+const raw = "var ADMIN_KEY = 'ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ';\nvar NOTIFY_EMAIL = '';\nvar SEND_EMAIL = true;\nvar SAVE_TO_SHEET = true;\n";
+assert.strictEqual(d.scriptWithOptions(raw, {}), raw, 'no choices: the code stays as it is');
+let o = d.scriptWithOptions(raw, { email: 'me@example.org', send: false, save: true });
+assert.ok(o.includes("var NOTIFY_EMAIL = 'me@example.org';") && o.includes('var SEND_EMAIL = false;') && o.includes('var SAVE_TO_SHEET = true;'), 'the choices are written into the code');
+assert.strictEqual(d.scriptWithOptions(raw, { email: "x';evil()//@a.co" }), raw, 'an address with quotes never reaches the code');
+assert.strictEqual(d.scriptWithOptions(raw, { save: false }).includes('var SAVE_TO_SHEET = false;'), true);
+// the choices are remembered in this browser and come back into every copy of the code
+assert.deepStrictEqual(d.inboxOpts(), { email: '', send: true, save: true });
+d.setInboxOpts({ email: 'me@example.org', send: false, save: true });
+assert.deepStrictEqual(d.inboxOpts(), { email: 'me@example.org', send: false, save: true });
+const full = d.scriptWithPassword(raw, 'abcdefghijklmnop1234');
+assert.ok(full.includes("var ADMIN_KEY = 'abcdefghijklmnop1234';") && full.includes("NOTIFY_EMAIL = 'me@example.org'") && full.includes('SEND_EMAIL = false'), 'password and choices together');
+// the switches of the site
+d.S.site = { contact_form_enabled: true, free_cta_enabled: true, free_cta_email: '', email: '' }; d.S.orig.site = JSON.parse(JSON.stringify(d.S.site));
+assert.strictEqual(d.controlsChanged(), false);
+d.S.site.free_cta_enabled = false; assert.strictEqual(d.controlsChanged(), true);
+d.S.orig.site = {}; d.S.site = { contact_form_enabled: true, free_cta_enabled: true, free_cta_email: '' };
+assert.strictEqual(d.controlsChanged(), false, 'a missing key means "on": no phantom change');
+d.S.site = { contact_form_enabled: false, free_cta_enabled: true, free_cta_email: '', email: '' };
+assert.strictEqual(d.freeButtonOutcome().kind, 'bad', 'no email and no form: the button cannot work, and the panel says so');
+d.S.site.free_cta_email = 'hi@example.org'; assert.ok(d.freeButtonOutcome().kind === 'ok' && /hi@example.org/.test(d.freeButtonOutcome().text));
+d.S.site.free_cta_email = 'hi@'; assert.strictEqual(d.freeButtonOutcome().kind, 'bad', 'a mistyped address is named');
+// what the privacy notice follows
+d.S.notify.data = { version: 3, telegram: { token: false, chat: '' } };
+assert.deepStrictEqual(d.privacyFlags(), { notify_telegram: false }, 'an old script does not report the new switches');
+d.S.notify.data = { version: 4, sendEmail: false, saveSheet: true, telegram: { token: true, chat: '5' } };
+assert.deepStrictEqual(d.privacyFlags(), { notify_telegram: true, inbox_sheet: true, inbox_email: false });
+// a draft with every way switched off is refused; one way is enough
+assert.ok(/хотя бы одно/.test(d.notifyProblem({ email: '', token: '', chat: '', send: false, save: false }, { telegram: { token: false } })));
+assert.strictEqual(d.notifyProblem({ email: '', token: '', chat: '', send: true, save: false }, { telegram: { token: false } }), '');
+console.log('owner controls panel ok');
+"""
+
+
+def check_owner_controls(builder):
+    """The window "Write to me", the closing button, the links to them, the privacy notice and the dashboard's helpers (owner-controls-v1)."""
+    def built(posts=False, **extra):
+        def mutate(work, site):
+            site.update(extra)
+            (work / 'content/sections.json').write_text(json.dumps(sample_sections(builder), ensure_ascii=False), encoding='utf-8')
+        return build_fixture(builder, mutate, posts=posts)
+
+    def read(work, name):
+        return (work / '_site' / name).read_text(encoding='utf-8')
+
+    # default: nothing changes for a site whose owner has not touched the switches
+    temporary, work = built(email='', free_cta_email='')
+    with temporary:
+        home = read(work, 'index.html')
+        assert 'href="#contact" data-i18n="free.cta"' in home and 'id="contact"' in home and 'id="contact-form"' in home, 'by default the button leads to the form'
+        assert 'class="free free-solo"' not in home
+        assert 'if (form) form.addEventListener' in home
+
+    # the button opens the owner's email program
+    temporary, work = built(free_cta_email='hi@example.com', email='')
+    with temporary:
+        home, privacy = read(work, 'index.html'), read(work, 'privacy/index.html')
+        assert 'href="mailto:hi@example.com?subject=An%20introductory%20conversation" data-i18n="free.cta">' in home, 'the button is a mailto link'
+        assert 'href="#contact" data-i18n="free.cta"' not in home and 'id="contact"' in home
+        assert 'hi@example.com' in privacy, 'the address of the button is the contact of the privacy notice when there is no other'
+
+    # button off: the heading and the text stay, the button goes
+    temporary, work = built(free_cta_enabled=False, free_cta_email='hi@example.com')
+    with temporary:
+        home = read(work, 'index.html')
+        assert 'data-i18n="free.cta"' not in home and 'class="free free-solo"' in home and 'An introductory conversation costs you nothing' in home
+
+    # form off, an address set: no form window, every link to it leads to the email
+    temporary, work = built(posts=True, contact_form_enabled=False, free_cta_email='hi@example.com', email='',
+                            inbox_endpoint='https://script.google.com/macros/s/AKfycbTEST_123/exec', notify_telegram=True)
+    with temporary:
+        home, privacy = read(work, 'index.html'), read(work, 'privacy/index.html')
+        article = read(work, 'en/articles/sample/index.html')
+        assert 'id="contact"' not in home and 'id="contact-form"' not in home and 'name="_gotcha"' not in home and '<!--@@' not in home, 'the form window is gone from the page'
+        assert 'href="mailto:hi@example.com" data-i18n="qa.ask"' in home and 'mailto:hi@example.com?subject=' in home
+        assert 'href="mailto:hi@example.com">Contact</a>' in article and './#contact' not in article, 'the article menu leads to the email'
+        assert 'no contact form' in privacy and 'Google Sheets' not in privacy and 'Telegram bot' not in privacy, 'the notice does not describe a form that is not there'
+        assert 'contact' not in re.findall(r'<section class="band[^"]*" id="([\w-]+)"', home) and 'qa' in re.findall(r'<section class="band[^"]*" id="([\w-]+)"', home), 'the other sections stay'
+
+    # form off and nowhere to write: the links that led to the form are left out, nothing is broken
+    temporary, work = built(contact_form_enabled=False, free_cta_enabled=True, free_cta_email='', email='')
+    with temporary:
+        home, privacy = read(work, 'index.html'), read(work, 'privacy/index.html')
+        assert 'data-i18n="free.cta"' not in home and 'data-i18n="qa.ask"' not in home and 'id="free"' in home and 'href="#contact"' not in home
+        assert 'channels named on this website' in privacy
+
+    # the script's switches are reflected in the notice
+    temporary, work = built(inbox_endpoint='https://script.google.com/macros/s/AKfycbTEST_123/exec', inbox_sheet=False, inbox_email=False, notify_telegram=False)
+    with temporary:
+        privacy = read(work, 'privacy/index.html')
+        assert 'Google Apps Script' in privacy and 'Google Sheets' not in privacy and 'notifies me by email' not in privacy
+    temporary, work = built(inbox_endpoint='https://script.google.com/macros/s/AKfycbTEST_123/exec')
+    with temporary:
+        privacy = read(work, 'privacy/index.html')
+        assert 'Google Sheets' in privacy and 'notifies me by email' in privacy, 'with the switches at their default the notice is as before'
+
+    # the script file and the dashboard
+    script = (ROOT / '_site/admin/inbox-script.txt').read_text(encoding='utf-8')
+    for needle in ('function setup()', 'var SEND_EMAIL = true;', 'var SAVE_TO_SHEET = true;', 'recentBurst_', "'nochannel'"):
+        assert needle in script, f'inbox script lacks {needle}'
+    admin = (ROOT / '_site/admin/index.html').read_text(encoding='utf-8')
+    for needle in ('panelSiteControls', 'scriptWithOptions', 'privacyFlags', 'Open a new spreadsheet', 'Run setup', 'Web app URL', 'Execute as', 'Who has access', 'Authorize access'):
+        assert needle in admin, f'dashboard lacks {needle}'
+    node = shutil.which('node')
+    if node:
+        with tempfile.TemporaryDirectory() as folder:
+            Path(folder, 'inbox.js').write_text(script, encoding='utf-8')
+            check = Path(folder, 'check.js')
+            check.write_text(NOTIFY_SCRIPT_CHECK.replace("console.log('notify script ok');", OWNER_NODE_SCRIPT), encoding='utf-8')
+            result = subprocess.run([node, str(check), str(Path(folder, 'inbox.js'))], capture_output=True, text=True)
+            assert result.returncode == 0 and 'owner controls script ok' in result.stdout, f'owner controls (script): {(result.stderr or result.stdout)[:800]}'
+            baked = script.replace('var SEND_EMAIL = true;', 'var SEND_EMAIL = false;').replace("var NOTIFY_EMAIL = '';", "var NOTIFY_EMAIL = 'x@example.org';")
+            Path(folder, 'baked.js').write_text(baked, encoding='utf-8')
+            assert subprocess.run([node, '--check', str(Path(folder, 'baked.js'))], capture_output=True, text=True).returncode == 0, 'the code with the owner choices written in is valid'
+            panel_script = [s for s in re.findall(r'<script>(.*?)</script>', admin, re.S) if len(s) > 400][-1]
+            Path(folder, 'panel.js').write_text(panel_script, encoding='utf-8')
+            Path(folder, 'panel-check.js').write_text(OWNER_PANEL_SCRIPT, encoding='utf-8')
+            result = subprocess.run([node, str(Path(folder, 'panel-check.js')), str(Path(folder, 'panel.js'))], capture_output=True, text=True)
+            assert result.returncode == 0 and 'owner controls panel ok' in result.stdout, f'owner controls (panel): {(result.stderr or result.stdout)[:800]}'
+
+
 def main():
     builder = load_builder()
     check_consistency(builder)
@@ -886,6 +1040,7 @@ def main():
     check_photo_tools(builder)
     check_story_and_closing(builder)
     check_owner_feedback(builder)
+    check_owner_controls(builder)
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
     def full(work, site):

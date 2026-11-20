@@ -109,6 +109,25 @@ content:
   - name: notify_telegram
     label: 'Уведомления о заявках приходят в Telegram (ставится само, когда вы подключаете Telegram в панели /admin/, вкладка «Заявки»)'
     type: boolean
+  - name: contact_form_enabled
+    label: 'Показывать окно «Write to me» (форму) на сайте (переключается в панели /admin/, вкладка «Заявки»)'
+    type: boolean
+    default: true
+  - name: free_cta_enabled
+    label: 'Показывать кнопку «Write to me» внизу, в карточке «вводная беседа бесплатно» (переключается в панели /admin/, вкладка «Заявки»)'
+    type: boolean
+    default: true
+  - name: free_cta_email
+    label: 'Почта для нижней кнопки «Write to me» (кнопка открывает письмо в почтовой программе посетителя; задаётся в панели /admin/)'
+    type: string
+  - name: inbox_sheet
+    label: 'Заявки записываются в Google-таблицу (ставится само при подключении Google в панели /admin/)'
+    type: boolean
+    default: true
+  - name: inbox_email
+    label: 'Скрипт Google присылает заявки на почту (ставится само при подключении Google в панели /admin/)'
+    type: boolean
+    default: true
   - name: public_url
     label: Public site URL (optional, https://...)
     type: string

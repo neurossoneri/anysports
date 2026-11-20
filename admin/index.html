@@ -311,14 +311,14 @@ const readyChanged = () => !!S.site.publish_ready !== !!S.orig.site.publish_read
 
 /** Everything that differs from what is saved on GitHub, grouped for the UI and the commit message. */
 function changes() {
-  const out = { text: {}, textCount: 0, pageCount: pageChangeCount(), contacts: [], photos: [], ready: readyChanged(), qa: qaChanged() ? 1 : 0, hero: heroChanged() ? 1 : 0, privacy: privacyChanged() ? 1 : 0, notify: notifyFlagChanged() ? 1 : 0 };
+  const out = { text: {}, textCount: 0, pageCount: pageChangeCount(), contacts: [], photos: [], ready: readyChanged(), qa: qaChanged() ? 1 : 0, hero: heroChanged() ? 1 : 0, privacy: privacyChanged() ? 1 : 0, notify: notifyFlagChanged() ? 1 : 0, controls: controlsChanged() ? 1 : 0 };
   for (const lang of S.schema.langs) for (const sec of S.schema.groups) for (const f of sec.fields) {
     if (textChanged(lang, sec.name, f.name)) { out.text[lang] = (out.text[lang] || 0) + 1; out.textCount++; }
   }
   for (const f of S.schema.contacts) if (contactChanged(f.name)) out.contacts.push(f.name);
   for (const p of S.schema.photos) if (photoChanged(p.field)) out.photos.push(p.num);
   out.library = pendingKept().filter(([, p]) => p.lib && !p.saved).length + S.deleted.size;
-  out.total = out.textCount + out.pageCount + out.contacts.length + out.photos.length + out.library + (out.ready ? 1 : 0) + out.qa + out.hero + out.privacy + out.notify;
+  out.total = out.textCount + out.pageCount + out.contacts.length + out.photos.length + out.library + (out.ready ? 1 : 0) + out.qa + out.hero + out.privacy + out.notify + out.controls;
   return out;
 }
 
@@ -345,6 +345,11 @@ function validate() {
       promise(`Вопросы, категория ${gi + 1}`, g.title);
       g.items.forEach((it, ii) => { promise(`Вопрос ${gi + 1}.${ii + 1}`, it.q); promise(`Ответ ${gi + 1}.${ii + 1}`, it.a); });
     });
+  }
+  {
+    const typed = String(S.site.free_cta_email || '').trim();
+    if (typed && !EMAIL_RE.test(typed)) out.push('«Ваша почта для кнопки» (вкладка «Заявки»): адрес «' + typed + '» не похож на email.');
+    if (freeOn() && S.home.en && !String(getv(S.home.en, 'free', 'cta')).trim()) out.push('Кнопка «Write to me» внизу включена, но у неё нет текста. Впишите текст кнопки или выключите её (вкладка «Заявки»).');
   }
   if (privacyChanged()) {
     const p = S.privacy, text = p.body || '';
@@ -389,6 +394,7 @@ function commitMessage(c) {
   if (c.qa) parts.push('вопросы и ответы');
   if (c.privacy) parts.push('политика конфиденциальности');
   if (c.notify) parts.push(tgOn() ? 'уведомления в Telegram включены (строка в политике)' : 'уведомления в Telegram выключены (строка в политике)');
+  if (c.controls) parts.push('окно «Write to me» и кнопка внизу');
   if (c.hero) parts.push('кадрирование главного фото');
   if (c.photos.length) parts.push('фото ' + c.photos.join(', '));
   if (c.library) parts.push('библиотека фото');
@@ -401,7 +407,7 @@ function commitMessage(c) {
 async function commitChanges(step) {
   step = step || function () {};
   const c = changes();
-  if (S.notify.loaded && tgOn() !== !!S.site.notify_telegram) S.site.notify_telegram = tgOn();   // the privacy notice follows what the script really does
+  if (S.notify.loaded) for (const [k, v] of Object.entries(privacyFlags())) if (v !== flagNow(S.site, k)) S.site[k] = v;   // the privacy notice follows what the script really does
   const files = [];
   const add = (path, obj, orig) => { if (JSON.stringify(obj) !== JSON.stringify(orig)) files.push({ path, text: JSON.stringify(obj, null, 2) + '\n' }); };
   add('content/site.json', S.site, S.orig.site);
@@ -523,7 +529,8 @@ function genPassword() {
   LS.set(GEN_KEY, p);
   return p;
 }
-const scriptWithPassword = (text, password) => (/^[^'"\\\s]{12,200}$/.test(password || '') && String(text).split(PASSWORD_MARK).length === 2 ? String(text).replace(PASSWORD_MARK, () => "'" + password + "'") : String(text));
+const scriptWithPasswordOnly = (text, password) => (/^[^'"\\\s]{12,200}$/.test(password || '') && String(text).split(PASSWORD_MARK).length === 2 ? String(text).replace(PASSWORD_MARK, () => "'" + password + "'") : String(text));
+const scriptWithPassword = (text, password) => scriptWithOptions(scriptWithPasswordOnly(text, password), inboxOpts());
 const INBOX_MESSAGES = {
   key: 'Пароль не подошёл. Он виден в начале кода скрипта в Google (строка ADMIN_KEY).',
   nokey: 'В скрипте не задан пароль. Откройте скрипт в Google, замените ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ на свой пароль (12 символов и больше), сохраните и разверните заново («Новая версия»).',
@@ -536,6 +543,7 @@ const INBOX_MESSAGES = {
   off: 'Приём заявок приостановлен. Нажмите «Возобновить приём заявок» в блоке «Управление подключением и журнал».',
   timeout: 'Google не ответил за 45 секунд. Нажмите «Повторить»; если так каждый раз, откройте «Управление подключением и журнал» → «Проверить подключение».',
   bademail: 'Скрипт не принял адрес почты. Проверьте, что адреса написаны без ошибок и что их не больше трёх.',
+  nochannel: 'Нужно оставить включённым хотя бы одно: «на почту», «в таблицу» или Telegram, иначе заявкам будет некуда попасть.',
   badtoken: 'Токен бота выглядит неверно. Скопируйте его целиком из сообщения @BotFather, без пробелов.',
   badchat: 'Номер чата должен быть числом. Проще всего нажать «Найти мой чат».',
   tgtoken: 'Telegram не принял токен бота. Проверьте, что он скопирован целиком, без пробелов.',
@@ -644,12 +652,20 @@ const TG_CHAT_RE = /^-?\d{1,20}$/;
 const splitEmails = text => String(text || '').split(/[,;\s]+/).filter(Boolean);
 const tgOn = () => { const t = S.notify.data && S.notify.data.telegram; return !!(t && t.token && t.chat); };
 /** The site's privacy notice must mention Telegram exactly when the script forwards messages there. */
-const notifyFlagChanged = () => !!S.notify.loaded && tgOn() !== !!S.orig.site.notify_telegram;
-const draftFrom = data => ({ email: data.email || '', token: '', chat: (data.telegram && data.telegram.chat) || '' });
+/** What the privacy notice must say about the script: Telegram, the spreadsheet copy, the email notice. Scripts older than version 4 do not report the last two. */
+function privacyFlags() {
+  const d = S.notify.data, f = { notify_telegram: tgOn() };
+  if (d && (d.version || 0) >= 4) { f.inbox_sheet = d.saveSheet !== false; f.inbox_email = d.sendEmail !== false; }
+  return f;
+}
+const flagNow = (site, k) => (k === 'notify_telegram' ? !!site[k] : site[k] !== false);
+/** The site's privacy notice must mention Telegram, the spreadsheet and the email exactly when the script does that. */
+const notifyFlagChanged = () => !!S.notify.loaded && Object.entries(privacyFlags()).some(([k, v]) => v !== flagNow(S.orig.site, k));
+const draftFrom = data => ({ email: data.email || '', token: '', chat: (data.telegram && data.telegram.chat) || '', send: data.sendEmail !== false, save: data.saveSheet !== false });
 function notifyDirty() {
   const N = S.notify;
   if (!N.data || !N.draft) return false;
-  return splitEmails(N.draft.email).join(', ') !== (N.data.email || '') || !!N.draft.token.trim() || N.draft.chat.trim() !== N.data.telegram.chat;
+  return splitEmails(N.draft.email).join(', ') !== (N.data.email || '') || !!N.draft.token.trim() || N.draft.chat.trim() !== N.data.telegram.chat || N.draft.send !== (N.data.sendEmail !== false) || N.draft.save !== (N.data.saveSheet !== false);
 }
 /** A problem in what was typed (as a sentence), or '' when it can be saved. */
 function notifyProblem(d, data) {
@@ -662,6 +678,7 @@ function notifyProblem(d, data) {
   if (chat && !TG_CHAT_RE.test(chat)) return 'Номер чата — это число, например 123456789. Проще всего нажать «Найти мой чат».';
   const hasToken = !!token || !!(data && data.telegram && data.telegram.token);
   if (hasToken !== !!chat) return hasToken ? 'Для Telegram нужен ещё номер чата: нажмите «Найти мой чат».' : 'Номер чата указан, а токена бота нет. Вставьте токен или очистите номер чата.';
+  if (d.send === false && d.save === false && !(hasToken && chat)) return INBOX_MESSAGES.nochannel;
   return '';
 }
 async function notifyLoad() {
@@ -677,6 +694,7 @@ async function notifySave() {
   const problem = notifyProblem(d, N.data);
   if (problem) throw new Error(problem);
   const body = { email: splitEmails(d.email).join(', '), tgChat: d.chat.trim() };
+  if ((N.data.version || 0) >= 4) { body.sendEmail = d.send !== false; body.saveSheet = d.save !== false; }
   if (d.token.trim()) body.tgToken = d.token.trim();
   N.data = await inboxCall('save_settings', body);
   N.draft = draftFrom(N.data); N.chats = null;
@@ -696,6 +714,39 @@ async function notifyFind() {
   return N.chats;
 }
 const notifyTest = () => inboxCall('test_notify');
+
+/* ----- owner-controls-v1: окно «Write to me», нижняя кнопка и то, что скрипту Google велено делать с заявкой ----- */
+const SCRIPT_OPTS_KEY = 'si-admin-inbox-opts';
+function inboxOpts() {
+  let o = {};
+  try { o = JSON.parse(LS.get(SCRIPT_OPTS_KEY) || '{}') || {}; } catch (e) { o = {}; }
+  return { email: EMAIL_RE.test(String(o.email || '')) ? String(o.email) : '', send: o.send !== false, save: o.save !== false };
+}
+const setInboxOpts = o => LS.set(SCRIPT_OPTS_KEY, JSON.stringify({ email: o.email || '', send: o.send !== false, save: o.save !== false }));
+/** The first lines of the Google script with the owner's choices written in. Anything unexpected leaves the code as it was. */
+function scriptWithOptions(text, opts) {
+  let out = String(text); const o = opts || {};
+  const swap = (from, to) => { if (out.split(from).length === 2) out = out.replace(from, () => to); };
+  if (o.email && EMAIL_RE.test(o.email) && !/['"\\\s]/.test(o.email)) swap("var NOTIFY_EMAIL = '';", "var NOTIFY_EMAIL = '" + o.email + "';");
+  if (o.send === false) swap('var SEND_EMAIL = true;', 'var SEND_EMAIL = false;');
+  if (o.save === false) swap('var SAVE_TO_SHEET = true;', 'var SAVE_TO_SHEET = false;');
+  return out;
+}
+const formOn = () => S.site.contact_form_enabled !== false;
+const freeOn = () => S.site.free_cta_enabled !== false;
+const controlsChanged = () => (S.site.contact_form_enabled !== false) !== (S.orig.site.contact_form_enabled !== false)
+  || (S.site.free_cta_enabled !== false) !== (S.orig.site.free_cta_enabled !== false)
+  || String(S.site.free_cta_email || '').trim() !== String(S.orig.site.free_cta_email || '').trim();
+/** What the visitor will meet at the closing button, in words (the same rule as the site build). */
+function freeButtonOutcome() {
+  const typed = String(S.site.free_cta_email || '').trim(), main = String(S.site.email || '').trim();
+  if (typed && !EMAIL_RE.test(typed)) return { kind: 'bad', text: 'Адрес «' + typed + '» не похож на email. Проверьте, нет ли опечатки: пока он не исправлен, сохранить нельзя.' };
+  const mail = typed || (EMAIL_RE.test(main) ? main : '');
+  if (!freeOn()) return { kind: 'ok', text: 'Кнопки не будет. Заголовок и текст карточки «An introductory conversation costs you nothing» останутся.' };
+  if (mail) return { kind: 'ok', text: 'Кнопка откроет у посетителя почтовую программу с новым письмом на ' + mail + '.' };
+  if (formOn()) return { kind: 'warn', text: 'Почта не указана, поэтому кнопка пока ведёт к окну «Write to me» на этой же странице. Впишите почту, чтобы она открывала письмо.' };
+  return { kind: 'bad', text: 'Почта не указана, а окно «Write to me» выключено: кнопки не будет. Впишите почту ниже или включите окно.' };
+}
 
 /* ----- page structure: sections and blocks (pure functions, no DOM, so they can be tested) ----- */
 const blockSpec = type => ((S.schema.page && S.schema.page.blockTypes) || []).find(b => b.type === type);
@@ -792,7 +843,7 @@ function qaMoveItem(gi, ii, toGi, toIi) {
 }
 root.__dash = { S, newBlock, newSection, newSectionId, insertAt, moveItem, pageChangeCount, secChanged, slotUsage, blockPreview, gh, loadAll, changes, validate, commitChanges, photoPath, usedPending, watchDeploy, latestRun, setv, getv, explain, commitMessage,
                 inboxCall, inboxDiagnose, inboxScriptLog, inboxToggle, inboxDisconnect, inboxReset, logRead, logAdd, logClear, logText, diagText, newReq, INBOX_LIMITS, notifyLoad, notifySave, notifyFind, notifyTest, notifyDisableTelegram, notifyProblem, notifyDirty, notifyFlagChanged, splitEmails, tgOn,
-                requestCounts, contactAction, timeAgo, csvOf, INBOX_URL_RE, inboxUrlFrom, normalizeQa, qaChanged, heroChanged, qaMoveItem, qaAddGroup, qaAddItem };
+                requestCounts, contactAction, timeAgo, csvOf, INBOX_URL_RE, inboxUrlFrom, normalizeQa, qaChanged, heroChanged, qaMoveItem, qaAddGroup, qaAddItem, scriptWithOptions, scriptWithPassword, inboxOpts, setInboxOpts, controlsChanged, privacyFlags, freeButtonOutcome, formOn, freeOn };
 if (typeof document === 'undefined') { if (typeof module !== 'undefined') module.exports = root.__dash; return; }
 
 /* ================= interface ================= */
@@ -807,6 +858,12 @@ const el = (tag, props, ...kids) => {
   for (const c of kids.flat()) if (c != null && c !== false) n.append(c.nodeType ? c : document.createTextNode(c));
   return n;
 };
+function checkRow(id, checked, label, onchange) {   // owner-controls-v1
+  const box = el('input', { type: 'checkbox', id, style: 'margin-top:3px;flex:none;width:18px;height:18px' });
+  box.checked = !!checked;
+  box.addEventListener('change', () => onchange(box.checked));
+  return el('label', { for: id, style: 'display:flex;gap:10px;align-items:flex-start;margin:10px 0;cursor:pointer;line-height:1.45' }, box, el('span', {}, label));
+}
 const app = document.getElementById('app');
 let panel, saveBar, noticeBox, chip, tabsBar;
 
@@ -1545,20 +1602,32 @@ async function fetchRequests() {
   if (S.tab === 'requests') renderPanel();
 }
 function requestsSetup() {
-  const url = el('input', { type: 'text', id: 'inbox-url', placeholder: 'https://script.google.com/macros/s/…/exec', autocomplete: 'off', style: 'display:block;width:100%;box-sizing:border-box;margin:6px 0 16px;padding:11px 14px;border:1px solid var(--line);border-radius:8px;background:#fff' });
-  const key = el('input', { type: 'password', id: 'inbox-key', value: genPassword(), placeholder: 'пароль из скрипта', autocomplete: 'off', style: 'display:block;width:100%;box-sizing:border-box;margin:6px 0 16px;padding:11px 14px;border:1px solid var(--line);border-radius:8px;background:#fff' });
+  const wide = 'display:block;width:100%;box-sizing:border-box;margin:6px 0 16px;padding:11px 14px;border:1px solid var(--line);border-radius:8px;background:#fff';
+  const opts = inboxOpts();
+  const url = el('input', { type: 'text', id: 'inbox-url', placeholder: 'https://script.google.com/macros/s/…/exec', autocomplete: 'off', style: wide });
+  const key = el('input', { type: 'password', id: 'inbox-key', value: genPassword(), placeholder: 'пароль из скрипта', autocomplete: 'off', style: wide });
   const status = el('p', { class: 'muted', role: 'status' });
   const code = el('textarea', { readonly: true, rows: 10, style: 'width:100%;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--line);border-radius:12px;padding:10px', 'aria-label': 'Код скрипта' });
-  let loaded = '';
+  const optMail = el('input', { type: 'text', id: 'so-email', value: opts.email, placeholder: 'ваша-почта@example.com (пусто = почта вашего Google-аккаунта)', autocomplete: 'off', inputmode: 'email', style: wide });
+  const optNote = el('p', { class: 'muted', role: 'status', style: 'margin:0' });
+  let raw = '';
+  const problem = o => (o.email && !EMAIL_RE.test(o.email) ? 'Адрес почты написан с ошибкой: проверьте, нет ли опечатки.' : (!o.send && !o.save ? 'Оставьте включённым хотя бы одно: письма или запись в таблицу, иначе заявкам будет некуда попасть.' : ''));
   const loadCode = async () => {
-    if (loaded) return loaded;
-    try { loaded = scriptWithPassword(await (await fetch('inbox-script.txt', { cache: 'no-store' })).text(), genPassword()); } catch (e) { loaded = ''; }
-    code.value = loaded || 'Не удалось загрузить код. Он лежит в репозитории: admin/inbox-script.txt';
-    return loaded;
+    if (!raw) { try { raw = await (await fetch('inbox-script.txt', { cache: 'no-store' })).text(); } catch (e) { raw = ''; } }
+    code.value = raw ? scriptWithPassword(raw, genPassword()) : 'Не удалось загрузить код. Он лежит в репозитории: admin/inbox-script.txt';
+    return raw ? code.value : '';
   };
+  const readOpts = () => ({ email: optMail.value.trim(), send: sendRow.querySelector('input').checked, save: saveRow.querySelector('input').checked });
+  const remember = () => { const o = readOpts(), p = problem(o); optNote.textContent = p; if (!p) { setInboxOpts(o); if (raw) loadCode(); } };
+  const sendRow = checkRow('so-send', opts.send, 'Присылать каждую заявку на почту (Send each request by email)', remember);
+  const saveRow = checkRow('so-save', opts.save, 'Записывать каждую заявку в таблицу (Save each request to the spreadsheet)', remember);
+  optMail.addEventListener('input', remember);
   const copy = el('button', { class: 'btn small', type: 'button', onclick: async () => {
+    const o = readOpts(), p = problem(o);
+    if (p) { optNote.textContent = p; optMail.focus(); return; }
+    setInboxOpts(o);
     const text = await loadCode();
-    try { await navigator.clipboard.writeText(text); copy.textContent = 'Скопировано ✓'; }
+    try { if (!text) throw new Error('no code'); await navigator.clipboard.writeText(text); copy.textContent = 'Скопировано ✓'; }
     catch (e) { copy.textContent = 'Выделите код ниже и скопируйте'; code.select(); }
     setTimeout(() => { copy.textContent = 'Скопировать код скрипта'; }, 3000);
   } }, 'Скопировать код скрипта');
@@ -1579,19 +1648,35 @@ function requestsSetup() {
       status.textContent = e.message;
     }
   };
-  return el('div', { class: 'box' }, el('h2', {}, 'Подключить заявки (один раз, минут 5)'),
-    el('p', { class: 'muted' }, 'Сообщения из формы будут попадать в вашу собственную Google-таблицу и приходить вам на почту. А здесь вы увидите их списком и сможете отмечать, кому уже ответили. Платных сервисов не нужно. Когда подключите, здесь же настроите, куда присылать уведомления: на любую вашу почту и в Telegram.'),
+  const step = (ru, en, ...body) => el('li', {}, el('span', {}, el('b', {}, ru + ' (' + en + ')'), el('br'), ...body));
+  return el('div', { class: 'box' }, el('h2', {}, 'Подключить заявки (один раз, минут 10–15)'),
+    el('p', { class: 'muted' }, 'Сообщения из формы будут попадать в вашу собственную Google-таблицу и приходить вам на почту. Здесь вы увидите их списком и сможете отмечать, кому уже ответили. Платных сервисов не нужно. Всего 15 небольших шагов. Названия кнопок написаны по-русски, а в скобках по-английски: на экране Google ищите английское слово.'),
     el('ol', { class: 'steps' },
-      el('li', {}, el('span', {}, 'Откройте свою Google-таблицу для заявок (или создайте новую: ', el('a', { href: 'https://sheets.new', target: '_blank', rel: 'noopener' }, 'sheets.new ↗'), ').')),
-      el('li', {}, el('span', {}, 'В таблице выберите меню «Расширения» → «Apps Script». Откроется редактор кода: удалите всё, что в нём есть.')),
-      el('li', {}, el('span', {}, 'Вставьте код скрипта: кнопка копирует его сразу с готовым паролем, ничего править не нужно. ', copy, ' Нажмите значок дискеты («Сохранить»).')),
-      el('li', {}, el('span', {}, 'Справа вверху нажмите «Начать развёртывание» → «Новое развёртывание» → значок шестерёнки → «Веб-приложение». «Запуск от имени»: «Я». «У кого есть доступ»: «Все». Нажмите «Развернуть» и разрешите доступ (Google спросит один раз; если пишет «приложение не проверено», выберите «Дополнительно» → «Перейти»).')),
-      el('li', {}, el('span', {}, 'В окне после «Развернуть» скопируйте «URL веб-приложения» (длинная ссылка, заканчивается на /exec; это не «Идентификатор развёртывания» и не адрес из строки браузера) и вставьте сюда. Пароль подставлен сам:'))),
+      step('Откройте новую таблицу', 'Open a new spreadsheet', 'Нажмите ', el('a', { href: 'https://sheets.new', target: '_blank', rel: 'noopener' }, 'sheets.new ↗'), '. Откроется пустая Google-таблица. Войдите в тот Google-аккаунт, на котором хотите получать заявки. Вверху слева можно нажать на «Без названия» (Untitled spreadsheet) и назвать таблицу, например «Заявки Sport Intuitive».'),
+      step('Выберите, как получать заявки', 'Choose your settings', 'Эти два выбора и почта попадут прямо в код скрипта, который вы скопируете на следующем шаге. Позже их можно поменять здесь же, в панели.',
+        el('label', { for: 'so-email', style: 'display:block;margin-top:10px' }, el('strong', {}, 'Куда присылать письма')), optMail, sendRow, saveRow, optNote),
+      step('Скопируйте код', 'Copy the code', 'Нажмите кнопку: ', copy, ' Пароль уже вписан в код, ничего править не нужно.'),
+      step('Откройте редактор скриптов', 'Open the script editor', 'В своей таблице выберите в верхнем меню «Расширения» (Extensions) → «Apps Script». Откроется новая вкладка с редактором: в нём уже есть немного кода (function myFunction).'),
+      step('Замените код', 'Replace the code', 'Щёлкните мышкой внутри большого окна с кодом, нажмите Ctrl+A (на Mac ⌘A), потом Delete: окно опустеет. Нажмите Ctrl+V (на Mac ⌘V): вставится скопированный код. Затем нажмите значок дискеты «Сохранить проект» (Save project) или Ctrl+S.'),
+      step('Проверьте выбранную функцию', 'Check the selected function', 'В верхней панели рядом с кнопками «Выполнить» (Run) и «Отладка» (Debug) в списке должно быть написано «setup». Если там другое слово, откройте список и выберите «setup».'),
+      step('Запустите «setup»', 'Run setup', 'Нажмите «Выполнить» (Run). Появится окно «Требуется авторизация» (Authorization required): нажмите «Просмотреть разрешения» (Review permissions).'),
+      step('Дайте разрешения (один раз)', 'Allow access', 'Выберите свой Google-аккаунт. Откроется страница «Google не проверил это приложение» (Google hasn’t verified this app). Это нормально: скрипт ваш собственный. Нажмите «Дополнительные настройки» (Advanced), внизу «Перейти на страницу … (небезопасно)» (Go to … (unsafe)) и затем «Разрешить» (Allow). Скрипту нужны таблица (чтобы записывать заявки), почта (чтобы писать вам) и внешние сервисы (для Telegram, если подключите).'),
+      step('Дождитесь конца', 'Wait for it to finish', 'Внизу в «Журнале выполнения» (Execution log) появятся строки «Выполнение началось» (Execution started) и «Выполнение завершено» (Execution completed). Если почта включена, придёт письмо «Sport Intuitive: скрипт заявок подключён» (загляните и в «Спам»). Если появилась красная ошибка, скопируйте её текст и пришлите мне.'),
+      step('Создайте веб-приложение', 'Create the web app', 'Справа вверху нажмите синюю кнопку «Начать развёртывание» (Deploy) → «Новое развёртывание» (New deployment). В открывшемся окне нажмите значок шестерёнки рядом с «Выберите тип» (Select type) и выберите «Веб-приложение» (Web app).'),
+      step('Настройте доступ', 'Set access', '«Описание» (Description) можно не заполнять. «Запуск от имени» (Execute as): «Я» (Me). «У кого есть доступ» (Who has access): «Все» (Anyone). Не выбирайте «Все, у кого есть аккаунт Google» (Anyone with Google account): тогда форма на сайте не заработает. Нажмите «Развернуть» (Deploy).'),
+      step('Если Google снова просит разрешение', 'Authorize access', 'Иногда после «Развернуть» (Deploy) Google просит доступ ещё раз. Это нормально, повторите ту же цепочку: «Авторизовать доступ» (Authorize access) → аккаунт → «Дополнительные настройки» (Advanced) → «Перейти на страницу … (небезопасно)» (Go to … (unsafe)) → «Разрешить» (Allow). Если ничего не просит, пропустите этот шаг.'),
+      step('Скопируйте адрес', 'Copy the Web app URL', 'В окне появится «URL веб-приложения» (Web app URL): длинная ссылка, которая заканчивается на /exec. Нажмите «Копировать» (Copy) рядом с ней. Это не «Идентификатор развёртывания» (Deployment ID) и не адрес из строки браузера. Потом нажмите «Готово» (Done).'),
+      step('Вставьте адрес сюда', 'Paste it here', 'Пароль подставлен сам.',
+        el('label', { for: 'inbox-url', style: 'display:block;margin-top:10px' }, el('strong', {}, 'Адрес веб-приложения')), url,
+        el('label', { for: 'inbox-key', style: 'display:block' }, el('strong', {}, 'Пароль')), key,
+        el('div', { class: 'row', style: 'margin-top:0' }, el('button', { class: 'btn', type: 'button', onclick: connect }, 'Подключить'), status)),
+      step('Опубликуйте', 'Publish', 'Когда появится «Подключено!», нажмите «Сохранить и опубликовать» внизу страницы. Через 2–3 минуты отправьте с сайта тестовое сообщение: оно появится здесь, а письмо придёт на почту.')),
     el('details', { class: 'more', ontoggle: e => { if (e.target.open) loadCode(); } }, el('summary', {}, 'Показать код скрипта'), el('div', { class: 'inner' }, code)),
-    el('label', { for: 'inbox-url', style: 'display:block' }, el('strong', {}, 'Адрес веб-приложения')), url,
-    el('label', { for: 'inbox-key', style: 'display:block' }, el('strong', {}, 'Пароль')), key,
-    el('div', { class: 'row', style: 'margin-top:0' }, el('button', { class: 'btn', onclick: connect }, 'Подключить'), status),
-    el('p', { class: 'muted', style: 'margin-bottom:0' }, 'Сообщения посетителей будут храниться в вашей Google-таблице. Сайт сам добавит об этом строку на страницу о конфиденциальности. Пароль сохранён в этом браузере; на другом устройстве его можно посмотреть в начале кода скрипта в Google (строка ADMIN_KEY). Если вы позже измените скрипт, в Google нужно заново нажать «Управление развёртываниями» → «Изменить» → «Новая версия».'));
+    el('details', { class: 'more' }, el('summary', {}, 'Если что-то не получилось'), el('div', { class: 'inner' },
+      el('p', { class: 'muted', style: 'margin-top:0' }, 'Не видно «Дополнительных настроек» (Advanced): нажмите на маленькую серую надпись под большим текстом «Google не проверил это приложение», она не похожа на кнопку.'),
+      el('p', { class: 'muted' }, 'Панель пишет, что Google ответил страницей входа: в шаге «Настройте доступ» (Set access) выбрано не «Все» (Anyone). Откройте «Начать развёртывание» (Deploy) → «Управление развёртываниями» (Manage deployments) → значок карандаша, поставьте «Все» (Anyone), в «Версия» (Version) выберите «Новая версия» (New version) и нажмите «Развернуть» (Deploy). Адрес не изменится.'),
+      el('p', { class: 'muted', style: 'margin-bottom:0' }, 'Панель не принимает адрес: он должен начинаться с https://script.google.com/macros/s/ и заканчиваться на /exec. Если вы вставили что-то другое, панель скажет, что именно.'))),
+    el('p', { class: 'muted', style: 'margin-bottom:0' }, 'Сообщения посетителей будут храниться в вашей Google-таблице (если вы оставили галочку «в таблицу»). Сайт сам добавит об этом строку на страницу о конфиденциальности. Пароль сохранён в этом браузере; на другом устройстве его можно посмотреть в начале кода скрипта в Google (строка ADMIN_KEY). Если вы позже измените скрипт, в Google нужно заново нажать «Управление развёртываниями» → «Изменить» → «Новая версия».'));
 }
 function requestsKeyBox() {
   const key = el('input', { type: 'password', id: 'inbox-key2', value: LS.get(GEN_KEY), placeholder: 'пароль из скрипта', autocomplete: 'off' });
@@ -1789,12 +1874,17 @@ function notifyForm() {
   }));
   testBtn.addEventListener('click', () => run('test', async () => { N.status = testResult(await notifyTest()); }));
 
+  const hasV4 = (data.version || 0) >= 4;
+  const sendRow = checkRow('nt-send', d.send !== false, 'Присылать каждую заявку на почту (Send each request by email)', v => { d.send = v; touch(); });
+  const saveRow = checkRow('nt-save', d.save !== false, 'Записывать каждую заявку в таблицу (Save each request to the spreadsheet). Список на вкладке «Заявки» показывает только то, что записано в таблицу.', v => { d.save = v; touch(); });
+  const oldNote = el('p', { class: 'hint' }, 'Чтобы здесь появились галочки «на почту» и «в таблицу», обновите код скрипта в Google: «Управление подключением и журнал» → «Скопировать новый код скрипта».');
   const siteMail = String(S.site.email || '').trim();
   out.push(
     el('h3', { class: 'nsub' }, '1. Почта'),
     el('div', { class: 'fld' }, el('label', { for: 'nt-email' }, 'Куда присылать письма о новых заявках'), mail,
       el('p', { class: 'hint' }, 'Можно указать до трёх адресов через запятую (любой почтовый сервис). Если оставить пустым, письма придут на почту вашего Google-аккаунта' + (data.defaultEmail ? ' (' + data.defaultEmail + ')' : '') + '.')),
     EMAIL_RE.test(siteMail) ? el('div', { class: 'row', style: 'margin-top:0' }, el('button', { class: 'btn ghost small', type: 'button', onclick: () => { d.email = siteMail; mail.value = siteMail; touch(); } }, 'Подставить email с сайта (' + siteMail + ')')) : null,
+    hasV4 ? el('div', {}, sendRow, saveRow) : oldNote,
 
     el('h3', { class: 'nsub' }, '2. Telegram (по желанию)'),
     el('p', { class: 'muted', style: 'margin-top:0' }, 'Каждая новая заявка придёт вам личным сообщением от вашего собственного бота. Бот создаётся бесплатно, за минуту.'),
@@ -1837,9 +1927,43 @@ function panelNotify() {
   return el('details', { class: 'more nbox', open: isOpen, ontoggle: e => { N.open = e.target.open; } }, el('summary', {}, summary), inner);
 }
 
+/* ---------- owner-controls-v1: окно «Write to me» и нижняя кнопка ---------- */
+const CTL = { open: false };
+function panelSiteControls() {
+  const field = 'display:block;width:100%;box-sizing:border-box;margin:6px 0 4px;padding:11px 14px;border:1px solid var(--line);border-radius:8px;background:#fff';
+  const summary = el('summary', {});
+  const formHint = el('p', { class: 'hint', style: 'margin-top:0' });
+  const outcome = el('div', { class: 'note', role: 'status', style: 'margin:10px 0 0' });
+  const label = el('input', { type: 'text', id: 'fc-label', value: getv(S.home.en, 'free', 'cta'), maxlength: 60, autocomplete: 'off', style: field });
+  const mail = el('input', { type: 'text', id: 'fc-mail', value: String(S.site.free_cta_email || ''), placeholder: String(S.site.email || '') || 'ваша-почта@example.com', autocomplete: 'off', inputmode: 'email', style: field });
+  const freeFields = el('div', {},
+    el('div', { class: 'fld' }, el('label', { for: 'fc-label' }, 'Текст кнопки'), label),
+    el('div', { class: 'fld' }, el('label', { for: 'fc-mail' }, 'Ваша почта для кнопки'), mail,
+      el('p', { class: 'hint' }, 'Посетитель нажимает кнопку, и у него открывается его почтовая программа с новым письмом на этот адрес. Адрес будет виден в коде страницы, как любая ссылка «написать письмо». Если поле пустое, берётся email из настроек сайта.')));
+  const paint = () => {
+    summary.textContent = 'Окно «Write to me»: ' + (formOn() ? 'показано' : 'скрыто') + ' · кнопка внизу: ' + (freeOn() ? 'показана' : 'скрыта');
+    formHint.textContent = formOn()
+      ? 'Это блок с полями «Your name», «Best way to reach you back» и «Leave your message». Заявки из него приходят в раздел «Заявки» и на почту.'
+      : 'Блок целиком убран со страницы. Ссылки на него (в Q&A и в шапке статей) ведут на вашу почту, а если почты нет, ссылок не будет. Скрипт Google на сайте не используется.';
+    const o = freeButtonOutcome();
+    outcome.className = 'note ' + o.kind; outcome.textContent = o.text;
+    freeFields.hidden = !freeOn();
+    paintBar();
+  };
+  const formRow = checkRow('fc-form', formOn(), 'Показывать на сайте окно «Write to me»', v => { S.site.contact_form_enabled = v; paint(); });
+  const freeRow = checkRow('fc-free', freeOn(), 'Показывать кнопку «Write to me» внизу, в карточке «An introductory conversation costs you nothing»', v => { S.site.free_cta_enabled = v; paint(); });
+  label.addEventListener('input', () => { setv(S.home.en, 'free', 'cta', label.value); paint(); });
+  mail.addEventListener('input', () => { S.site.free_cta_email = mail.value.trim(); paint(); });
+  paint();
+  return el('details', { class: 'more', open: CTL.open, ontoggle: e => { CTL.open = e.target.open; } }, summary,
+    el('div', { class: 'inner' },
+      el('h3', { class: 'nsub' }, '1. Окно «Write to me» (форма)'), formRow, formHint,
+      el('h3', { class: 'nsub' }, '2. Кнопка «Write to me» внизу сайта'), freeRow, freeFields, outcome,
+      el('p', { class: 'muted', style: 'margin-bottom:0' }, 'Изменения попадают на сайт после «Сохранить и опубликовать» внизу, через 1–3 минуты. Фраза «An introductory conversation costs you nothing» и её текст остаются на сайте в любом случае.')));
+}
 function panelRequests() {
   const q = S.req;
-  const head = [el('h1', {}, 'Заявки'), el('p', { class: 'lead' }, 'Сообщения из формы на сайте. Заявки сохраняются сразу: нажимать «Сохранить и опубликовать» для них не нужно.')];
+  const head = [el('h1', {}, 'Заявки'), el('p', { class: 'lead' }, 'Сообщения из формы на сайте. Заявки сохраняются сразу: нажимать «Сохранить и опубликовать» для них не нужно.'), panelSiteControls()];
   if (!inboxUrl()) return el('div', {}, ...head, requestsSetup(), requestsTools('setup'));
   if (!inboxKey()) return el('div', {}, ...head, requestsKeyBox(), requestsTools('connected'));
   if (!q.loaded && !q.loading && !q.error) fetchRequests();
@@ -1860,7 +1984,7 @@ function panelRequests() {
     const needle = q.q.trim().toLowerCase();
     const items = q.items.filter(r => (q.filter === 'all' || r.status === q.filter) && (!needle || [r.name, r.contact, r.message, r.note].join(' ').toLowerCase().includes(needle)));
     list.replaceChildren(...(items.length ? items.map(r => requestCard(r, paintCounts)) : [el('div', { class: 'box muted' },
-      q.items.length ? 'В этой подборке заявок нет.' : 'Пока ни одной заявки. Когда кто-то отправит форму на сайте, сообщение появится здесь и придёт вам на почту.')]));
+      q.items.length ? 'В этой подборке заявок нет.' : (S.notify.data && S.notify.data.saveSheet === false ? 'Запись в таблицу выключена: заявки приходят только на почту или в Telegram, здесь их не будет. Включить запись можно в блоке «Уведомления о новых заявках».' : 'Пока ни одной заявки. Когда кто-то отправит форму на сайте, сообщение появится здесь и придёт вам на почту.'))]));
   };
   const paintCounts = () => { pills.querySelectorAll('button.pill').forEach((b, i) => { b.querySelector('b').textContent = String(counts()[i][2]); }); paintTabs(); };
   paintPills(); paintList();

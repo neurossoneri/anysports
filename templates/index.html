@@ -276,6 +276,7 @@
     .free p { color:rgba(255,255,255,.9); line-height:1.8; max-width:52ch; }
     .free .button { color:#fff; border-color:rgba(255,255,255,.62); background:rgba(255,255,255,.1); white-space:nowrap; }
     .free .button:hover { background:rgba(255,255,255,.2); }
+    .free.free-solo { grid-template-columns:minmax(0,1fr); }   /* owner-controls-v1: the card without its button */
 
     /* ---------- 7. Q&A: numbered accordion, three groups ---------- */
     .qa { --qa-pad:clamp(8px,1.6vw,20px); --qa-gap:clamp(14px,2.4vw,28px); --qa-num:2.2rem; interpolate-size:allow-keywords; }
@@ -751,7 +752,8 @@
       const link = $('#contact-' + key);
       if (link && url) { link.href = url; link.hidden = false; }
     });
-    $('.contact-links').hidden = !Object.values(links).some(Boolean);
+    const contactLinks = $('.contact-links');
+    if (contactLinks) contactLinks.hidden = !Object.values(links).some(Boolean);   // the form window can be switched off
 
     /* ---------- Contact form: delivered to the inbox by a form service ---------- */
     const form = $('#contact-form');
@@ -760,7 +762,7 @@
     const endpoint = /^https:\/\//i.test(SETTINGS.formEndpoint.trim()) ? SETTINGS.formEndpoint.trim() : '';
     const inbox = /^https:\/\/script\.google\.com\//i.test((SETTINGS.inboxEndpoint || '').trim()) ? SETTINGS.inboxEndpoint.trim() : '';   // the owner's own requests sheet
     function say(key, isError) { statusLine.textContent = key ? t(key) : ''; statusLine.classList.toggle('is-error', !!isError); }
-    form.addEventListener('submit', async event => {
+    if (form) form.addEventListener('submit', async event => {
       event.preventDefault();
       const data = new FormData(form);
       if (data.get('_gotcha')) return;                                  // honeypot: only bots fill it in

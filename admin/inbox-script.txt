@@ -19,8 +19,13 @@ var ADMIN_KEY = 'ЗАМЕНИТЕ-НА-ДЛИННЫЙ-ПАРОЛЬ';
 // Пусто = на почту вашего Google-аккаунта.
 var NOTIFY_EMAIL = '';
 
+// Что делать с заявкой. Панель /admin/ вписывает сюда ваш выбор сама, когда вы копируете код кнопкой.
+// Позже это меняется в панели (вкладка «Заявки» → «Уведомления о новых заявках»), код трогать не нужно.
+var SEND_EMAIL = true;      // присылать каждую заявку на почту
+var SAVE_TO_SHEET = true;   // записывать каждую заявку в таблицу (лист «Заявки»)
+
 // Версия скрипта. По ней панель понимает, что код в Google нужно обновить.
-var SCRIPT_VERSION = 3;
+var SCRIPT_VERSION = 4;
 
 var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 var TG_TOKEN_RE = /^\d{6,12}:[A-Za-z0-9_-]{30,60}$/;
@@ -35,6 +40,22 @@ var STATUSES = ['new', 'work', 'done'];
 var MAX = { name: 120, contact: 160, message: 4000, note: 2000 };
 var READ_ACTIONS = ['list', 'settings', 'diagnose', 'log'];                 // только читают: блокировка не нужна
 var WRITE_ACTIONS = ['update', 'delete', 'add', 'save_settings', 'tg_find', 'test_notify', 'set_enabled', 'clear_log'];
+
+/**
+ * Первый запуск. В редакторе выберите функцию «setup» и нажмите «Выполнить» (Run). Google один раз спросит разрешения
+ * (таблица, почта, внешние сервисы): после этого развёртывание пройдёт без лишних вопросов.
+ * Функция создаёт листы «Заявки» и «Журнал» и, если включена почта, присылает тестовое письмо.
+ */
+function setup() {
+  var cfg = config_(), to = recipients_(cfg), sent = false;
+  sheet_();
+  if (cfg.sendEmail && to) {
+    MailApp.sendEmail({ to: to, subject: 'Sport Intuitive: скрипт заявок подключён', body: 'Это письмо отправил ваш скрипт заявок. Так будут приходить новые заявки с сайта.\n\nТаблица: ' + SpreadsheetApp.getActiveSpreadsheet().getUrl() });
+    sent = true;
+  }
+  log_('info', 'setup', 'листы готовы, ' + (sent ? 'тестовое письмо отправлено' : 'письма выключены или адрес не найден'));
+  return sent;
+}
 
 function doGet() {
   return json_({ ok: true, service: 'sport-intuitive-inbox', version: SCRIPT_VERSION });
@@ -173,22 +194,24 @@ function submit_(req) {
     message: clean_(req.message, MAX.message)
   };
   if (!item.name || !item.contact) return { ok: false, error: 'bad' };
-  var sheet = sheet_();
-  if (recentCount_(sheet) >= 10) return { ok: false, error: 'busy' };   // защита от потока спама
+  var cfg = config_();
+  var save = cfg.saveSheet || !(cfg.sendEmail || (cfg.tgToken && cfg.tgChat));   // заявка не должна пропасть: если выключено всё, таблица всё равно работает
+  var sheet = save ? sheet_() : null;
+  if (save ? recentCount_(sheet) >= 10 : recentBurst_()) return { ok: false, error: 'busy' };   // защита от потока спама
   item.status = 'new';
   item.note = '';
   item.source = 'site';
   var t0 = Date.now();
-  append_(sheet, item);
+  if (save) append_(sheet, item);
   var saved = Date.now() - t0;
-  notify_(item);
+  notify_(item, cfg, save);
   log_('info', 'submit', 'запись в таблицу: ' + saved + ' мс, уведомления: ' + (Date.now() - t0 - saved) + ' мс');
   return { ok: true };
 }
 
-function notify_(item) {
-  var cfg = config_();
-  notifyEmail_(item, cfg);
+function notify_(item, cfg, saved) {
+  cfg = cfg || config_();
+  if (cfg.sendEmail) notifyEmail_(item, cfg, saved !== false);
   notifyTelegram_(item, cfg);
 }
 
@@ -196,7 +219,7 @@ function recipients_(cfg) {
   return cfg.email.length ? cfg.email.join(',') : (NOTIFY_EMAIL || Session.getEffectiveUser().getEmail() || '');
 }
 
-function notifyEmail_(item, cfg) {
+function notifyEmail_(item, cfg, saved) {
   try {
     var to = recipients_(cfg);
     if (!to) return;
@@ -206,7 +229,7 @@ function notifyEmail_(item, cfg) {
       '',
       item.message || '(без сообщения)',
       '',
-      'Все заявки: ' + SpreadsheetApp.getActiveSpreadsheet().getUrl()
+      saved ? 'Все заявки: ' + SpreadsheetApp.getActiveSpreadsheet().getUrl() : '(В таблицу эта заявка не записывалась: так выбрано в настройках скрипта.)'
     ].join('\n') };
     if (EMAIL_RE.test(item.contact)) options.replyTo = item.contact;
     MailApp.sendEmail(options);
@@ -247,8 +270,15 @@ function config_() {
   return {
     email: String(p.getProperty('notify_email') || '').split(/[,;\s]+/).filter(function (x) { return EMAIL_RE.test(x); }).slice(0, 3),
     tgToken: p.getProperty('tg_token') || '',
-    tgChat: p.getProperty('tg_chat') || ''
+    tgChat: p.getProperty('tg_chat') || '',
+    sendEmail: flag_(p.getProperty('send_email'), SEND_EMAIL),
+    saveSheet: flag_(p.getProperty('save_sheet'), SAVE_TO_SHEET)
   };
+}
+
+/** Переключатель из настроек скрипта: если в панели его не трогали, действует значение из начала кода. */
+function flag_(value, fallback) {
+  return value === null || value === undefined ? !!fallback : value !== '0';
 }
 
 function problem_(key, value) {
@@ -260,6 +290,7 @@ function settingsInfo_() {
   var p = props_(), cfg = config_();
   return {
     ok: true, version: SCRIPT_VERSION, enabled: p.getProperty('enabled') !== '0',
+    sendEmail: cfg.sendEmail, saveSheet: cfg.saveSheet,
     defaultEmail: NOTIFY_EMAIL || Session.getEffectiveUser().getEmail() || '',
     email: cfg.email.join(', '),
     telegram: { token: !!cfg.tgToken, hint: cfg.tgToken ? '…' + cfg.tgToken.slice(-4) : '', chat: cfg.tgChat },
@@ -268,7 +299,7 @@ function settingsInfo_() {
 }
 
 function saveSettings_(req) {
-  var p = props_(), email, token, chat;
+  var p = props_(), email, token, chat, sendEmail, saveSheet;
   if (req.email !== undefined) {                       // сначала проверяем всё, потом пишем: либо всё сохранено, либо ничего
     var list = String(req.email || '').split(/[,;\s]+/).filter(Boolean);
     if (list.length > 3) return { ok: false, error: 'bademail' };
@@ -283,6 +314,15 @@ function saveSettings_(req) {
     chat = String(req.tgChat || '').trim();
     if (chat && !TG_CHAT_RE.test(chat)) return { ok: false, error: 'badchat' };
   }
+  if (req.sendEmail !== undefined) sendEmail = !!req.sendEmail;
+  if (req.saveSheet !== undefined) saveSheet = !!req.saveSheet;
+  if (sendEmail !== undefined || saveSheet !== undefined) {         // хотя бы один путь для заявки должен остаться
+    var cur = config_();
+    var hasTg = token !== undefined ? !!(token && (chat !== undefined ? chat : cur.tgChat)) : !!(cur.tgToken && (chat !== undefined ? chat : cur.tgChat));
+    if (!(sendEmail !== undefined ? sendEmail : cur.sendEmail) && !(saveSheet !== undefined ? saveSheet : cur.saveSheet) && !hasTg) return { ok: false, error: 'nochannel' };
+  }
+  if (sendEmail !== undefined) p.setProperty('send_email', sendEmail ? '1' : '0');
+  if (saveSheet !== undefined) p.setProperty('save_sheet', saveSheet ? '1' : '0');
   if (email !== undefined) { if (email) p.setProperty('notify_email', email); else p.deleteProperty('notify_email'); p.deleteProperty('err_email'); }
   if (token !== undefined) {
     if (token) p.setProperty('tg_token', token); else { p.deleteProperty('tg_token'); p.deleteProperty('tg_chat'); }
@@ -426,6 +466,14 @@ function recentCount_(sheet) {
     if (t > limit) count++;
   }
   return count;
+}
+
+/** Защита от потока спама, когда заявки не пишутся в таблицу: не больше 10 за минуту. */
+function recentBurst_() {
+  var cache = CacheService.getScriptCache(), n = Number(cache.get('burst') || 0);
+  if (n >= 10) return true;
+  cache.put('burst', String(n + 1), 60);
+  return false;
 }
 
 function clean_(value, max) {

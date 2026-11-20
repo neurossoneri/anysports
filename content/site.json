@@ -15,5 +15,10 @@
   "story_photo_4": "media/photo-7-20261029-093038.webp",
   "email": "",
   "whatsapp": "",
-  "telegram": ""
+  "telegram": "",
+  "contact_form_enabled": true,
+  "free_cta_enabled": true,
+  "free_cta_email": "",
+  "inbox_sheet": true,
+  "inbox_email": true
 }

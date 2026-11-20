@@ -211,6 +211,69 @@ def inbox_endpoint_quiet(site):
     return value if INBOX_URL.fullmatch(value) else ''
 
 
+EMAIL_OK = re.compile(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+FREE_SUBJECT_QUERY = '?subject=An%20introductory%20conversation'
+ARTICLE_CONTACT = {'href': './#contact'}   # owner-controls-v1: where the "Contact" link of article pages leads
+
+
+def flag_on(site, key):
+    """A switch of content/site.json (owner-controls-v1): on unless it is explicitly false, so a missing key keeps the old behaviour."""
+    return site.get(key) is not False
+
+
+def _first_email(site, keys):
+    for key in keys:
+        value = str(site.get(key) or '').strip()
+        if EMAIL_OK.fullmatch(value):
+            return value
+    return ''
+
+
+def owner_email(site):
+    """The address behind the closing "Write to me" button: its own field first, then the public email."""
+    return _first_email(site, ('free_cta_email', 'email'))
+
+
+def public_email(site):
+    """The address named in the privacy notice: the public email first, then the one of the button."""
+    return _first_email(site, ('email', 'free_cta_email'))
+
+
+def free_button_href(site):
+    """Where the button of the introductory-conversation card leads; '' means there is no button."""
+    if not flag_on(site, 'free_cta_enabled'):
+        return ''
+    email = owner_email(site)
+    if email:
+        return f'mailto:{email}{FREE_SUBJECT_QUERY}'
+    return '#contact' if flag_on(site, 'contact_form_enabled') else ''
+
+
+def article_contact_link(lang):
+    href = ARTICLE_CONTACT['href']
+    return f'<a href="{esc(href)}">{esc(CONTACT_LABEL[lang])}</a>' if href else ''
+
+
+def owner_controls(template, site):
+    """The dashboard's switches (owner-controls-v1): the closing button of the introductory-conversation card and the links to the form."""
+    button = '<a class="button" href="#contact" data-i18n="free.cta"></a>'
+    if template.count(button) != 1:
+        raise RuntimeError('Template button of the free card not found exactly once')
+    href = free_button_href(site)
+    if href:
+        template = template.replace(button, f'<a class="button" href="{esc(href)}" data-i18n="free.cta"></a>')
+    else:
+        template = template.replace(button, '')
+        template = replace_required(template, '<div class="free" id="free">', '<div class="free free-solo" id="free">', 'free card')
+    if not flag_on(site, 'contact_form_enabled'):
+        ask = '<a class="qa-ask" href="#contact" data-i18n="qa.ask"></a>'
+        if template.count(ask) != 1:
+            raise RuntimeError('Template link of the Q&A block not found exactly once')
+        email = owner_email(site)
+        template = template.replace(ask, f'<a class="qa-ask" href="mailto:{esc(email)}" data-i18n="qa.ask"></a>' if email else '')
+    return template
+
+
 def parse_posts():
     posts = []
     seen = set()
@@ -815,6 +878,8 @@ def place_sections(template, sections, ctx):
         template, fixed[kind] = take_section(template, kind)
     parts, tone = [], 'deep'
     for index, section in enumerate(sections):
+        if section['type'] == 'contact' and not flag_on(ctx.site, 'contact_form_enabled'):
+            continue   # the owner switched the form off in the dashboard (owner-controls-v1)
         tone, number = TONE_CYCLE[index % len(TONE_CYCLE)], index + 1
         if section['type'] == 'text':
             if section_has_content(section):
@@ -948,6 +1013,7 @@ def build_home(site, posts, public_url, ready):
     template = replace_required(template, '<meta name="color-scheme"',
         ('<meta name="robots" content="index,follow">' if ready else '<meta name="robots" content="noindex,nofollow">') + '\n  <meta name="color-scheme"', 'robots')
 
+    template = owner_controls(template, site)   # owner-controls-v1: before the copy is baked in
     # Bake the English copy into static HTML: SEO, no-JS readers, no flash before the script runs.
     for key, value in copy.items():
         k = re.escape(key)
@@ -955,7 +1021,8 @@ def build_home(site, posts, public_url, ready):
         template = text_pat.sub(lambda m, v=value: m.group(1) + esc(v) + m.group(4), template)
         template = template.replace(f'data-i18n-alt="{key}" alt=""', f'data-i18n-alt="{key}" alt="{esc(value)}"')
         template = template.replace(f'data-i18n-aria="{key}"', f'data-i18n-aria="{key}" aria-label="{esc(value)}"')
-    template = replace_required(template, '<!--@@FORMNOTE@@-->', form_note_html(copy), 'form note marker')
+    if '<!--@@FORMNOTE@@-->' in template:   # the marker leaves together with the form when the form is switched off
+        template = replace_required(template, '<!--@@FORMNOTE@@-->', form_note_html(copy), 'form note marker')
     template = replace_required(template, '<!--@@PRIVACY@@-->', privacy_dialog(site), 'privacy marker')
     template = hero_settings(template, site)
 
@@ -1016,7 +1083,7 @@ def article_shell(*, title, description, lang, css_prefix, body, public_url, rea
 {canonical_html}{json_ld}<script>(function(){{try{{var t=localStorage.getItem('sport-site-theme');document.documentElement.dataset.theme=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}}catch(e){{}}}})()</script></head>
 <body><div class="scroll-progress" aria-hidden="true"></div><a class="skip" href="{css_prefix}/#content">{esc(SKIP_LABEL[lang])}</a><header class="site-header"><div class="container header-inner">
 <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">{brand_html}</span><span class="brand-name">{name}</span></a>
-<nav class="article-nav"><a href="./">{esc(BACK_LABEL[lang])}</a><a href="{lang}/articles/">{esc(BLOG_LABEL[lang])}</a><a href="./#contact">{esc(CONTACT_LABEL[lang])}</a></nav>
+<nav class="article-nav"><a href="./">{esc(BACK_LABEL[lang])}</a><a href="{lang}/articles/">{esc(BLOG_LABEL[lang])}</a>{article_contact_link(lang)}</nav>
 <button class="icon-button" type="button" id="article-theme" aria-label="Theme" aria-pressed="false">◐</button></div></header>
 <main id="content" class="article-layout"><div class="container article-wrap">{article_header}<h1>{esc(title)}</h1>
 <p class="article-intro">{desc}</p>{bg_img}<div class="article-body">{body}</div>
@@ -1105,14 +1172,14 @@ def privacy_content(site, warn=True):
     name = md_plain(site.get('name_en')) or md_plain(brand_name(site))
     role = md_plain(site.get('role_en'))
     address = md_plain(site.get('privacy_address'))
-    email = str(site.get('email') or '').strip()
+    email = public_email(site)
     lines = ['- **Name:** ' + name + (f', {role}' if role else '')]
     if address:
         lines.append(f'- **Address:** {address}')
     if re.fullmatch(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', email):
         lines.append(f'- **Email:** [{email}](mailto:{email})')
     else:
-        lines.append('- **Contact:** through the contact form on this website')
+        lines.append('- **Contact:** through the contact form on this website' if flag_on(site, 'contact_form_enabled') else '- **Contact:** through the channels named on this website')
         if warn:
             print('WARNING: no email in content/site.json; the privacy notice names the contact form as the way to reach you.', file=sys.stderr)
     endpoint = form_endpoint_quiet(site)
@@ -1123,10 +1190,12 @@ def privacy_content(site, warn=True):
     elif not inbox:
         service = 'The contact form opens your own email program, so no external form service is involved. Your message then travels through your email provider and mine.'
     else:
-        service = 'The contact form sends your message to a script in my own Google account (Google Apps Script), which notifies me by email.'
-    if inbox:
+        service = 'The contact form sends your message to a script in my own Google account (Google Apps Script), which notifies me by email.' if flag_on(site, 'inbox_email') else 'The contact form sends your message to a script in my own Google account (Google Apps Script).'
+    if inbox and flag_on(site, 'inbox_sheet'):
         service += ' A copy of your message is also saved in a private spreadsheet in my own Google account (Google Sheets), which I use to keep track of requests and replies. Google processes it on my behalf.'
-    if inbox and site.get('notify_telegram') is True:
+    if not flag_on(site, 'contact_form_enabled'):
+        service = 'This website has no contact form at the moment. If you write to me by email, your message travels through your email provider and mine.'
+    elif inbox and site.get('notify_telegram') is True:
         service += ' A notification with your name, contact details and message is also forwarded to a private chat of mine through a Telegram bot. Telegram processes it under its own privacy policy, partly on servers outside Switzerland.'
     updated = meta.get('updated')
     updated = f'{updated.day} {updated:%B %Y}' if isinstance(updated, (dt.date, dt.datetime)) else str(updated or '')
@@ -1202,7 +1271,7 @@ def admin_schema(site):
         groups.append({'name': group['name'], 'label': group.get('label', group['name']),
                        'anchor': SECTION_ANCHORS.get(group['name'], ''),
                        'fields': [leaf(f) for f in group['fields']]})
-    skip = set(PHOTO_FIELDS) | {'publish_ready', 'notify_telegram', 'portrait_crop', 'portrait_crop_m', 'hero_phone'}   # the first-screen crop and layout are set with the dashboard's own tool
+    skip = set(PHOTO_FIELDS) | {'publish_ready', 'notify_telegram', 'portrait_crop', 'portrait_crop_m', 'hero_phone', 'contact_form_enabled', 'free_cta_enabled', 'free_cta_email', 'inbox_sheet', 'inbox_email'}   # the first-screen crop and layout are set with the dashboard's own tool
     contacts = [leaf(f) for f in entries['site']['fields'] if f['name'] not in skip]
     return {
         'repo': os.environ.get('GITHUB_REPOSITORY', ''),
@@ -1234,6 +1303,7 @@ def main():
     ready = bool(site.get('publish_ready'))
     public_url = url_for_repo(site)
     posts = parse_posts()
+    ARTICLE_CONTACT['href'] = './#contact' if flag_on(site, 'contact_form_enabled') else (f'mailto:{owner_email(site)}' if owner_email(site) else '')
     if OUT.exists():
         shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
