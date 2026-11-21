@@ -142,7 +142,7 @@
     {
       "id": "change",
       "type": "text",
-      "title": "Presence sessions",
+      "title": "Reflection sessions",
       "layout": "rail-left",
       "blocks": [
         {
@@ -150,7 +150,7 @@
           "text": "\"Become who you are.\"\n— Fredrick Nietzsche, philosopher",
           "look": "panel",
           "photo": "",
-          "tint": "night",
+          "tint": "sea",
           "face": "book"
         },
         {
