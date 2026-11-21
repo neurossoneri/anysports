@@ -86,14 +86,9 @@
         {
           "type": "text",
           "heading": "Where we begin",
-          "body": "Our work begins with exploring what intuition means to you: how you naturally perceive it, how it shows up in different situations, and what helps you recognise its signals. You learn to notice, distinguish and interpret these messages, while developing the confidence to trust your own perceptions.",
+          "body": "Our work begins with exploring what intuition means to you: how you naturally perceive it, how it shows up in different situations, and what helps you recognise its signals. You learn to notice, distinguish and interpret these messages, while developing the confidence to trust your own perceptions.\nAs with any new experience, curiosity, courage, openness and trust are essential. Above all, a willingness to explore, to experience something new, yet familiar. ",
           "note": "",
           "look": "plain"
-        },
-        {
-          "type": "quote",
-          "text": "As with any new experience, curiosity, courage, openness and trust are essential. Above all, a willingness to explore, to experience something new, yet familiar. ",
-          "size": "auto"
         },
         {
           "type": "text",
@@ -104,8 +99,8 @@
         },
         {
           "type": "quote",
-          "text": "When we're doing what we love, we don't have to justify it to ourselves or others.  Not everything in life can be understood through logic, nor does everything need to be.",
-          "size": "auto"
+          "text": "When we are doing what we love, we don't have to justify it to ourselves or others. Not everything in life can be understood through logic, nor does everything need to be.",
+          "size": "large"
         },
         {
           "type": "text",
