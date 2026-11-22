@@ -252,7 +252,9 @@ def check_brand_and_dashboard(builder, destination):
     assert 'banned' in schema and schema['required'] == list(builder.REQUIRED_COPY)
     assert 'notify_telegram' not in [c['name'] for c in schema['contacts']], 'the Telegram flag is set by the dashboard itself, not typed into Settings'
     admin = (destination / 'admin/index.html').read_text(encoding='utf-8')
-    assert 'noindex' in admin and 'fonts.googleapis' not in admin and 'localStorage' in admin
+    # richtext-v1: the owner's own browser may fetch the extra fonts for the editor preview (once, and only when a font is looked at or used);
+    # the public pages never do (checked in check_fonts and check_rich_text)
+    assert 'noindex' in admin and admin.count('fonts.googleapis') == 1 and 'rtLoadFonts' in admin and 'localStorage' in admin
     assert 'takeMany' in admin and 'numberFromName' in admin and 'photo-row' in admin, 'dashboard: one row per numbered photo; several files can be dropped by number'
     for needed in ('moveSection', 'moveBlock', 'addBlock', 'deleteBlock', 'slotUsage', "content/sections.json"):
         assert needed in admin, f'dashboard lacks {needed}'
@@ -965,7 +967,8 @@ def check_owner_controls(builder):
     temporary, work = built(free_cta_enabled=False, free_cta_email='hi@example.com')
     with temporary:
         home = read(work, 'index.html')
-        assert 'data-i18n="free.cta"' not in home and 'class="free free-solo"' in home and 'An introductory conversation costs you nothing' in home
+        title = json.loads((work / 'content/home_en.json').read_text(encoding='utf-8'))['free']['title']   # the owner edits this text: the check reads it, it does not repeat it
+        assert 'data-i18n="free.cta"' not in home and 'class="free free-solo"' in home and builder.esc(title) in home, 'the heading and the text stay, the button goes'
 
     # form off, an address set: no form window, every link to it leads to the email
     temporary, work = built(posts=True, contact_form_enabled=False, free_cta_email='hi@example.com', email='',
@@ -1021,6 +1024,119 @@ def check_owner_controls(builder):
             assert result.returncode == 0 and 'owner controls panel ok' in result.stdout, f'owner controls (panel): {(result.stderr or result.stdout)[:800]}'
 
 
+RICH_EDITOR_SCRIPT = r"""
+const store = {};
+globalThis.localStorage = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); }, removeItem: k => { delete store[k]; } };
+const d = require(process.argv[2]), assert = require('assert');
+d.S.schema = { page: { rich: JSON.parse(require('fs').readFileSync(process.argv[3], 'utf8')) } };
+const rt = (t, mode) => d.modelToMarkup(d.markupToModel(t, mode));
+for (const t of ['Just words', 'Two\n\nparagraphs', 'a\nb']) assert.strictEqual(rt(t, t.includes('\n\n') ? 'full' : 'inline'), t, 'a plain text is saved exactly as it was');
+const text = 'Hi [b]bold [i]both[/i][/b] [size=lg]big[/size] [font=lora]Lora[/font]\n\n[align=center][indent=2][color=blue]blue[/color] tail';
+assert.strictEqual(rt(text, 'full'), text, 'a text with marks survives opening and saving');
+assert.ok(rt('x [color=zzz]y[/color]', 'inline').includes('\\[color=zzz]'), 'an unknown mark is kept as text');
+const m = d.markupToModel('abcdef', 'inline');
+d.rtApply(m, 1, 4, { kind: 'style', key: 'b' }); assert.strictEqual(d.modelToMarkup(m), 'a[b]bcd[/b]ef');
+d.rtApply(m, 1, 4, { kind: 'style', key: 'b' }); assert.strictEqual(d.modelToMarkup(m), 'abcdef', 'the same button takes bold off again');
+d.rtApply(m, 2, 2, { kind: 'style', key: 'f', value: 'base' }); assert.strictEqual(d.modelToMarkup(m), '[font=base]abcdef[/font]', 'no selection: the whole text');
+const p = d.markupToModel('one\n\ntwo\n\nthree', 'full');
+d.rtApply(p, 4, 9, { kind: 'align', value: 'center' }); d.rtApply(p, 0, 0, { kind: 'indent', delta: 1 });
+assert.strictEqual(d.modelToMarkup(p), '[indent=1]one\n\n[align=center]two\n\n[align=center]three');
+d.rtApply(p, 0, 20, { kind: 'clear' }); assert.strictEqual(d.modelToMarkup(p), 'one\n\ntwo\n\nthree');
+assert.ok(d.modelToHtml(d.markupToModel('[b]<img src=x onerror=1>[/b]', 'inline')).includes('&lt;img'), 'the editor never turns a text into html');
+assert.strictEqual(d.richPlain('[b]Hi[/b] [color=blue]you[/color]'), 'Hi you');
+assert.strictEqual(d.blockPreview({ type: 'text', body: '[b]Short[/b] words' }), 'Short words', 'previews show words, not marks');
+console.log('rich model ok');
+"""
+
+
+def check_rich_text(builder):
+    """richtext-v1: marks inside texts (bold, size, colour, font, alignment, indent). Safe HTML, no change for plain texts, fonts stored on the site."""
+    r = builder.rich_inline
+    assert r('Plain & simple <b>') == 'Plain &amp; simple &lt;b&gt;', 'a text without marks is only escaped, as before'
+    assert r('a [b]bold[/b] b') == 'a <span class="rc rc-b">bold</span> b'
+    assert r('[font=lora][size=lg]x[/size][/font]') == '<span class="rc rc-f-lora"><span class="rc rc-s-lg">x</span></span>'
+    assert r('[b]open [i]both[/b] only i[/i]') == '<span class="rc rc-b">open <span class="rc rc-i">both</span></span><span class="rc rc-i"> only i</span>', 'crossed marks are repaired'
+    assert r('[b]never closed') == '<span class="rc rc-b">never closed</span>' and r('stray [/b] close') == 'stray  close'
+    assert '<span' not in r('[color=zzz]x [size=huge]y [font=comic]z [b=1]w'), 'unknown names stay plain text: no free styles'
+    assert '<script' not in r('[b]<script>alert(1)</script>[/b]') and '&lt;script&gt;' in r('[b]<script>[/b]'), 'html in a text is always escaped'
+    assert r('\\[b] literal') == '[b] literal', 'an escaped bracket stays a bracket'
+    assert builder.rich_plain('[b]Hi[/b] [color=blue]you[/color]') == 'Hi you'
+    out = builder.para_html('[align=center][indent=2]Centered\n\nPlain', 'x')
+    assert out == '<p class="x rc-a-center rc-in-2">Centered</p><p class="x">Plain</p>', out
+    assert builder.para_html('One\n\nTwo') == '<p>One</p><p>Two</p>'
+    assert builder.quote_inner('Words\n[i]— Someone[/i]').endswith('<span class="q-by"><span class="rc rc-i">— Someone</span></span>'), 'a signature with marks is still a signature'
+    assert 'rc-a-left' not in builder.rich_css(':is(.b)') and 'border-radius' not in builder.rich_css(':is(.b)')
+
+    sections = lambda body: {'sections': [{'id': 'marks', 'type': 'text', 'title': 'T', 'layout': 'column', 'blocks': [
+        {'type': 'text', 'heading': '[color=blue]Head[/color]', 'body': body, 'note': '', 'look': 'plain'}]}, {'id': 'contact', 'type': 'contact'}, {'id': 'qa', 'type': 'qa'}]}
+    calls = []
+    sheet = ('/* latin-ext */\n@font-face { font-family: \'Lora\'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(https://fonts.gstatic.com/s/lora/v1/ext.woff2) format(\'woff2\'); unicode-range: U+0100-02AF; }\n'
+             '/* cyrillic */\n@font-face { font-family: \'Lora\'; font-style: normal; font-weight: 400 700; src: url(https://fonts.gstatic.com/s/lora/v1/cyr.woff2) format(\'woff2\'); unicode-range: U+0400-045F; }\n'
+             '/* latin */\n@font-face { font-family: \'Lora\'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(https://fonts.gstatic.com/s/lora/v1/lat.woff2) format(\'woff2\'); unicode-range: U+0000-00FF; }\n')
+
+    def fake(url):
+        calls.append(url)
+        return sheet.encode() if 'googleapis' in url else b'wOF2fake'
+
+    def build(body, getter):
+        def mutate(work, site):
+            (work / 'content/sections.json').write_text(json.dumps(sections(body), ensure_ascii=False), encoding='utf-8')
+        saved = builder.http_get
+        builder.http_get = getter
+        try:
+            return build_fixture(builder, mutate, posts=False)
+        finally:
+            builder.http_get = saved
+
+    def never(url):
+        raise AssertionError('nothing is downloaded when no font is chosen')
+
+    temporary, work = build('Just words, [b]bold[/b] and [size=xl]large[/size].', never)
+    with temporary:
+        home = (work / '_site/index.html').read_text(encoding='utf-8')
+        css = (work / '_site/assets/site.css').read_text(encoding='utf-8')
+        assert 'class="rc rc-b"' in home and 'rc-s-xl' in home and '<h3><span class="rc rc-c-blue">Head</span></h3>' in home
+        assert 'rich-fonts.css' not in home and not (work / '_site/assets/fonts/rich').exists(), 'no chosen font: nothing is added'
+        assert '.rc-c-blue' in css and '--rc-blue:#245f9c' in css and '.band-deep, .band-teal { --rc-blue:#8dbdf0' in css, 'colours have a light and a dark set'
+        assert '@@RICH-CSS@@' not in home
+        schema = json.loads((work / '_site/admin/schema.json').read_text(encoding='utf-8'))
+        rich = schema['page']['rich']
+        assert {f[0] for f in rich['fonts']} >= {'base', 'serif', 'hand', 'lora'} and len(rich['fonts']) >= 9 and rich['sizes'] and rich['colors'] and '.rt-surface' in rich['css']
+        body_field = [f for t in schema['page']['blockTypes'] if t['type'] == 'text' for f in t['fields'] if f['name'] == 'body'][0]
+        assert body_field['rich'] == 'full'
+        spec_file = work / 'rich-spec.json'
+        spec_file.write_text(json.dumps(rich), encoding='utf-8')
+        admin = (work / '_site/admin/index.html').read_text(encoding='utf-8')
+        assert 'contenteditable' in admin and 'function richEditor' in admin and 'innerHTML = ' in admin
+        node = shutil.which('node')
+        if node:
+            panel_script = [s for s in re.findall(r'<script>(.*?)</script>', admin, re.S) if len(s) > 400][-1]
+            module = work / 'panel.js'
+            module.write_text(panel_script, encoding='utf-8')
+            check = work / 'rich.js'
+            check.write_text(RICH_EDITOR_SCRIPT, encoding='utf-8')
+            result = subprocess.run([node, str(check), str(module), str(spec_file)], capture_output=True, text=True)
+            assert result.returncode == 0 and 'rich model ok' in result.stdout, f'rich text model: {(result.stderr or result.stdout)[:900]}'
+
+    temporary, work = build('Words in [font=lora]Lora[/font] and [font=serif]serif[/font].', fake)
+    with temporary:
+        home = (work / '_site/index.html').read_text(encoding='utf-8')
+        fonts_css = (work / '_site/assets/fonts/rich-fonts.css').read_text(encoding='utf-8')
+        assert 'href="assets/fonts/rich-fonts.css"' in home and 'fonts.googleapis' not in home and 'fonts.gstatic' not in home, 'visitors load the font from this site, not from Google'
+        assert (work / '_site/assets/fonts/rich/lora-normal-latin.woff2').exists() and (work / '_site/assets/fonts/rich/lora-normal-latin-ext.woff2').exists()
+        assert not list((work / '_site/assets/fonts/rich').glob('*cyrillic*')), 'only the subsets English text needs'
+        assert 'fonts.gstatic' not in fonts_css and 'url(rich/lora-normal-latin.woff2)' in fonts_css and fonts_css.count('@font-face') == 2
+        assert all(u.startswith('https://fonts.googleapis.com/') or u.startswith('https://fonts.gstatic.com/') for u in calls) and calls, 'downloads happen at build time only'
+
+    def broken(url):
+        raise OSError('no network')
+    temporary, work = build('A [font=lora]chosen font[/font].', broken)
+    with temporary:
+        home = (work / '_site/index.html').read_text(encoding='utf-8')
+        assert 'rc-f-lora' in home and 'rich-fonts.css' not in home, 'a failed download never stops the build: the text uses a similar system font'
+        assert 'font-family:"Lora",Georgia,serif' in (work / '_site/assets/site.css').read_text(encoding='utf-8')
+
+
 def main():
     builder = load_builder()
     check_consistency(builder)
@@ -1041,6 +1157,7 @@ def main():
     check_story_and_closing(builder)
     check_owner_feedback(builder)
     check_owner_controls(builder)
+    check_rich_text(builder)
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
     def full(work, site):

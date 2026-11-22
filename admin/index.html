@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../assets/fonts/fonts.css">
 <style>
 /* Панель: тихая, светлая, без украшений. Один акцент, тонкие линии, ничего не «парит». */
-:root{--bg:#f7f5f0;--card:#fff;--soft:#f1eee6;--ink:#14263a;--muted:#667a8c;--line:#e3ded2;--blue:#2f6fb3;--blue-d:#245f9c;--green:#1f7a67;--hi:#8dbdf0;--mint:#6fd2b8;--warn:#a85a00;--bad:#b3261e;--sun:#ffd23f;
+:root{--bg:#faf9f5;--card:#fff;--soft:#f0eee6;--ink:#1f1e1d;--muted:#6f6e69;--line:#e6e3d8;--blue:#c15f3c;--blue-d:#a94f30;--green:#4d7c5f;--hi:#d97757;--mint:#8fb9a0;--warn:#9a5b13;--bad:#b3261e;--sun:#e8b84f;--hand:"Caveat","Segoe Script",cursive;
   --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;--serif:"Source Serif 4",Georgia,"Times New Roman",serif}
 *{box-sizing:border-box}
 html{scroll-padding-top:110px}
@@ -210,6 +210,43 @@ code{background:var(--soft);padding:1px 6px;border-radius:6px;font-size:.9em}
 .save .msg{font-weight:600}.save .msg small{display:block;font-weight:400;color:var(--muted)}
 @media (max-width:620px){.phead .go{display:none}.pbody{padding:2px 12px 14px}.brand small{display:none}.photo-row{grid-template-columns:56px minmax(0,1fr)}.thumb{width:56px;height:70px}.photo-row .acts{grid-column:1/-1;justify-content:flex-start}.save .row{width:100%;margin:0}.save .btn{flex:1}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ---- richtext-v1: редактор текста ---- */
+.rt{border:1px solid var(--line);border-radius:12px;background:#fff;transition:border-color .15s,box-shadow .15s}
+.rt:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(193,95,60,.14)}
+.rt-bar{position:relative;display:flex;flex-wrap:wrap;gap:2px 4px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--line);background:#fbfaf6;border-radius:12px 12px 0 0}
+.rt-sep{width:1px;height:20px;background:var(--line);margin:0 4px}
+.rt-btn{min-width:32px;height:32px;padding:0 9px;border:1px solid transparent;border-radius:8px;background:none;cursor:pointer;font-weight:600;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:.86rem;white-space:nowrap}
+.rt-btn:hover{background:var(--soft)}
+.rt-btn[aria-pressed=true]{background:var(--ink);color:#fff}
+.rt-drop::after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px);opacity:.55;margin-left:2px}
+.rt-dot{display:block;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--muted);background:transparent}
+.rt-menu{position:absolute;z-index:40;top:100%;margin-top:4px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(31,30,29,.16);padding:6px;min-width:210px;max-height:340px;overflow:auto}
+.rt-item{display:block;width:100%;text-align:left;border:0;background:none;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:1rem;line-height:1.3;color:var(--ink)}
+.rt-item:hover,.rt-item[aria-checked=true]{background:var(--soft)}
+.rt-swatches{display:grid;grid-template-columns:repeat(6,32px);gap:8px;padding:10px;min-width:0;width:max-content;max-width:calc(100vw - 48px)}
+.rt-sw{width:32px;height:32px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0}
+.rt-sw:hover{box-shadow:0 0 0 2px var(--blue)}
+.rt-reset{grid-column:1/-1;font-size:.88rem;text-align:center;border:1px solid var(--line)}
+.rt-surface{padding:14px 16px;min-height:76px;outline:0;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:0 0 12px 12px;background:var(--rt-bg);color:var(--rt-text);--rt-bg:#efe7d4;--rt-text:#10243a;--rt-muted:#3d5870;font:400 1.05rem/1.8 var(--sans);caret-color:var(--blue)}
+.rt-surface.dark{--rt-bg:#08192a;--rt-text:#e8f0f7;--rt-muted:#a6bccf}
+.rt-surface p{margin:0}.rt-surface p+p{margin-top:.8em}
+.rt-surface[data-kind=heading]{font:500 1.6rem/1.3 var(--serif);min-height:56px}
+.rt-surface[data-kind=quote]{font:400 1.5rem/1.4 var(--serif);color:var(--rc-blue)}
+.rt-surface[data-kind=aside]{font:500 1.55rem/1.35 var(--serif)}
+.rt-surface[data-kind=note]{font:400 .92rem/1.7 var(--sans);color:var(--rt-muted);min-height:56px}
+.rt-surface[data-kind=small]{font:400 .98rem/1.7 var(--sans);color:var(--rt-muted);min-height:56px}
+@media (max-width:620px){.rt-btn{min-width:36px;height:36px}.rt-menu{position:fixed;left:12px!important;right:12px;top:auto;bottom:12px;max-height:50vh}.rt-swatches{width:auto;grid-template-columns:repeat(6,1fr)}}
+/* ---- оформление панели: бумажный фон, терракотовый акцент, тонкие тёплые линии (в духе интерфейса Claude) ---- */
+button.btn:hover,a.btn:hover,label.btn:hover{background:#3a3935;border-color:#3a3935}
+.tabs button[aria-selected=true]{box-shadow:inset 0 -2px 0 var(--blue)}
+.photo-row.drop{background:#fbf1ec}
+.fld input:focus,.fld textarea:focus,.fld input[type=password]:focus{box-shadow:0 0 0 3px rgba(193,95,60,.14);outline:0}
+.modal{background:rgba(31,30,29,.5)}
+.filters .pill b{background:rgba(31,30,29,.08)}
+.seg button[aria-pressed=true]{box-shadow:0 1px 2px rgba(31,30,29,.12)}
+.box,.pcard,.blk,.photo-row,.ltile,.rq,details.more,details.sec,.chk,.note{border-radius:12px}
+button.btn,a.btn,label.btn,.fld input[type=text],.fld select,.fld textarea,.fld input[type=search],.fld input[type=password],.pos,.bar2 input[type=search]{border-radius:10px}
+.mbox{border-radius:16px}
 </style>
 </head>
 <body>
@@ -807,7 +844,7 @@ const pageChangeCount = () => S.page.sections.filter(secChanged).length + (order
 const blockName = b => (blockSpec(b.type) ? blockSpec(b.type).label : String(b.type));
 function blockPreview(b) {
   const photos = [b.s1, b.s2, b.s3, b.photo].filter(Boolean).map(n => (/^\d+$/.test(n) ? 'Фото ' + n : String(n).replace(/^media\//, '').slice(0, 22))).join(', ');
-  const s = String(b.heading || b.body || b.text || b.title || photos || '').replace(/\s+/g, ' ').trim();
+  const s = String(richPlain(b.heading || b.body || b.text || b.title || '') || photos || '').replace(/\s+/g, ' ').trim();
   return s.length > 70 ? s.slice(0, 70) + '…' : s;
 }
 /** Where a numbered photo is shown right now (live: follows the unsaved page structure). */
@@ -841,7 +878,170 @@ function qaMoveItem(gi, ii, toGi, toIi) {
   insertAt(to.items, toIi === undefined ? to.items.length : toIi, item);
   return true;
 }
-root.__dash = { S, newBlock, newSection, newSectionId, insertAt, moveItem, pageChangeCount, secChanged, slotUsage, blockPreview, gh, loadAll, changes, validate, commitChanges, photoPath, usedPending, watchDeploy, latestRun, setv, getv, explain, commitMessage,
+/* ================= rich text (richtext-v1): a text with marks as a list of characters, no DOM here ================= */
+/* Marks inside a text: [b] [i] [size=lg] [color=blue] [font=lora] ... [/b]; at the start of a paragraph: [align=center] [indent=2].
+   The build (scripts/build.py) turns them into safe HTML; the names come from schema.json, so the site and the editor always agree. */
+const RT_TOKEN = /\\\[|\[(\/?)(b|i|size|color|font)(?:=([a-z0-9]+))?\]/g;
+const RT_DIR_HEAD = /^\s*((?:\[(?:align|indent)=[a-z0-9]+\])+)/;
+const RT_KEYS = { size: 's', color: 'k', font: 'f' };
+const rtSpec = () => (S.schema && S.schema.page && S.schema.page.rich) || { sizes: [], colors: [], fonts: [] };
+const rtKnown = (tag, v) => (tag === 'size' ? rtSpec().sizes : tag === 'color' ? rtSpec().colors : rtSpec().fonts).some(x => x[0] === v);
+const rtPlainStyle = () => ({ b: false, i: false, s: '', k: '', f: '' });
+/** The words of a text without its marks (previews, search). */
+function richPlain(text) {
+  return String(text == null ? '' : text).replace(RT_TOKEN, m => (m === '\\[' ? '[' : '')).replace(/\[(?:align|indent)=[a-z0-9]+\]/g, '');
+}
+function rtParsePara(p, directives) {
+  const para = { a: '', n: '', cs: [] };
+  if (directives) {
+    const h = RT_DIR_HEAD.exec(p);
+    if (h) {
+      for (const m of h[1].matchAll(/\[(align|indent)=([a-z0-9]+)\]/g)) {
+        if (m[1] === 'align' && (m[2] === 'center' || m[2] === 'right')) para.a = m[2];
+        if (m[1] === 'indent' && ['1', '2', '3'].includes(m[2])) para.n = m[2];
+      }
+      p = p.slice(h[0].length);
+    }
+  }
+  const stack = [];
+  const styleOf = () => { const st = rtPlainStyle(); for (const t of stack) { if (t.tag === 'b') st.b = true; else if (t.tag === 'i') st.i = true; else st[RT_KEYS[t.tag]] = t.v; } return st; };
+  let cur = rtPlainStyle(), pos = 0;
+  const put = s => { for (let k = 0; k < s.length; k++) para.cs.push({ c: s[k], st: cur }); };
+  for (const m of p.matchAll(RT_TOKEN)) {
+    put(p.slice(pos, m.index)); pos = m.index + m[0].length;
+    if (m[0] === '\\[') { put('['); continue; }
+    const closing = !!m[1], tag = m[2], v = m[3];
+    if (closing) {
+      if (v !== undefined) continue;
+      let k = -1;
+      for (let j = stack.length - 1; j >= 0; j--) if (stack[j].tag === tag) { k = j; break; }
+      if (k < 0) continue;
+      stack.splice(k, 1); cur = styleOf();
+    } else {
+      const ok = tag === 'b' || tag === 'i' ? v === undefined : v !== undefined && rtKnown(tag, v);
+      if (!ok) { put(m[0]); continue; }
+      stack.push({ tag, v }); cur = styleOf();
+    }
+  }
+  put(p.slice(pos));
+  return para;
+}
+/** mode 'full': paragraphs separated by an empty line, with alignment and indent; any other mode: one paragraph, line breaks allowed. */
+function markupToModel(text, mode) {
+  const src = String(text == null ? '' : text).replace(/\r/g, '');
+  let parts = mode === 'full' ? src.trim().split(/\n[ \t]*\n/).filter(p => p.trim()) : [src.replace(/^\n+|\n+$/g, '')];
+  if (!parts.length) parts = [''];
+  return { mode: mode === 'full' ? 'full' : 'inline', paras: parts.map(p => rtParsePara(p, mode === 'full')) };
+}
+const rtWant = st => [st.f && { tag: 'font', v: st.f }, st.s && { tag: 'size', v: st.s }, st.k && { tag: 'color', v: st.k }, st.b && { tag: 'b' }, st.i && { tag: 'i' }].filter(Boolean);
+const rtSameMark = (x, y) => x.tag === y.tag && x.v === y.v;
+const rtBracket = s => s.replace(/\[(?=\/?(?:b|i|size|color|font|align|indent)\b)/g, '\\[');
+const rtOpenText = w => (w.tag === 'b' || w.tag === 'i' ? '[' + w.tag + ']' : '[' + w.tag + '=' + w.v + ']');
+/** The text to store: marks only where they are needed, empty paragraphs dropped, spaces at the edges trimmed. */
+function modelToMarkup(model) {
+  const out = [];
+  for (const p of model.paras) {
+    let cs = p.cs.slice(), k = 0;
+    while (cs.length && /\s/.test(cs[cs.length - 1].c)) cs.pop();
+    while (k < cs.length && /\s/.test(cs[k].c)) k++;
+    cs = cs.slice(k);
+    if (!cs.length) continue;
+    let open = [], s = '', buf = '';
+    for (const { c, st } of cs) {
+      const want = rtWant(st);
+      let keep = 0;
+      while (keep < open.length && keep < want.length && rtSameMark(open[keep], want[keep])) keep++;
+      if (keep < open.length || keep < want.length) {
+        s += rtBracket(buf); buf = '';
+        for (let j = open.length - 1; j >= keep; j--) s += '[/' + open[j].tag + ']';
+        for (let j = keep; j < want.length; j++) s += rtOpenText(want[j]);
+        open = want;
+      }
+      buf += c;
+    }
+    s += rtBracket(buf);
+    for (let j = open.length - 1; j >= 0; j--) s += '[/' + open[j].tag + ']';
+    out.push((p.a && p.a !== 'left' ? '[align=' + p.a + ']' : '') + (p.n ? '[indent=' + p.n + ']' : '') + s);
+  }
+  return out.join('\n\n');
+}
+const rtEsc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const rtClass = w => (w.tag === 'b' ? 'rc-b' : w.tag === 'i' ? 'rc-i' : 'rc-' + w.tag[0] + '-' + w.v);
+/** The HTML the editor shows (the same classes as the site, so the styles are the same). */
+function modelToHtml(model) {
+  const one = p => {
+    let html = '', open = [], buf = '';
+    const flush = () => { html += rtEsc(buf).replace(/\n/g, '<br>'); buf = ''; };
+    for (const { c, st } of p.cs) {
+      const want = rtWant(st);
+      let keep = 0;
+      while (keep < open.length && keep < want.length && rtSameMark(open[keep], want[keep])) keep++;
+      if (keep < open.length || keep < want.length) {
+        flush();
+        html += '</span>'.repeat(open.length - keep);
+        for (let j = keep; j < want.length; j++) html += '<span class="rc ' + rtClass(want[j]) + '">';
+        open = want;
+      }
+      buf += c;
+    }
+    flush();
+    return html + '</span>'.repeat(open.length);
+  };
+  if (model.mode !== 'full') return one(model.paras[0]);
+  return model.paras.map(p => {
+    const cls = [p.a && p.a !== 'left' ? 'rc-a-' + p.a : '', p.n ? 'rc-in-' + p.n : ''].filter(Boolean).join(' ');
+    return '<p' + (cls ? ' class="' + cls + '"' : '') + '>' + (one(p) || '<br>') + '</p>';
+  }).join('');
+}
+/** The paragraphs a selection [s, e) touches, with the part of each. A caret (s = e) means the whole paragraph it is in. */
+function rtParaRanges(model, s, e) {
+  const out = [], full = model.mode === 'full';
+  let g = 0;
+  for (const p of model.paras) {
+    const len = p.cs.length, end = g + len;
+    if (s === e) { if (!full || (s >= g && s <= end)) { out.push({ p, from: 0, to: len }); break; } }
+    else if (len === 0 ? s <= g && e >= g : s < end && e > g) out.push({ p, from: Math.max(s - g, 0), to: Math.min(e - g, len) });
+    g = end + 1;
+  }
+  return out;
+}
+/** op: {kind:'style', key:'b'|'i'|'s'|'k'|'f', value}  ({key:'b'|'i'} toggles) · {kind:'align', value} · {kind:'indent', delta} · {kind:'clear'} */
+function rtApply(model, s, e, op) {
+  const ranges = rtParaRanges(model, s, e);
+  const eachChar = fn => { for (const r of ranges) for (let k = r.from; k < r.to; k++) r.p.cs[k] = { c: r.p.cs[k].c, st: fn(r.p.cs[k].st) }; };
+  if (op.kind === 'style') {
+    let value = op.value;
+    if (op.key === 'b' || op.key === 'i') {
+      const chars = ranges.flatMap(r => r.p.cs.slice(r.from, r.to));
+      value = !(chars.length && chars.every(x => x.st[op.key]));
+    }
+    eachChar(st => Object.assign({}, st, { [op.key]: value }));
+  } else if (op.kind === 'clear') {
+    eachChar(() => rtPlainStyle());
+    for (const r of ranges) { r.p.a = ''; r.p.n = ''; }
+  } else if (op.kind === 'align') {
+    for (const r of ranges) r.p.a = op.value === 'left' ? '' : op.value;
+  } else if (op.kind === 'indent') {
+    for (const r of ranges) { const n = Math.max(0, Math.min(3, Number(r.p.n || 0) + op.delta)); r.p.n = n ? String(n) : ''; }
+  }
+  return model;
+}
+/** What the toolbar shows for a selection: a value when every character has it, null when they differ. */
+function rtStateOf(model, s, e) {
+  const ranges = rtParaRanges(model, s, e);
+  let chars = ranges.flatMap(r => r.p.cs.slice(r.from, r.to));
+  if (s === e && ranges.length) {   // a caret: the character before it, or the one after it
+    let g = 0, local = 0;
+    for (const p of model.paras) { if (s <= g + p.cs.length) { local = s - g; break; } g += p.cs.length + 1; }
+    const p = ranges[0].p; chars = [p.cs[local - 1] || p.cs[local]].filter(Boolean);
+  }
+  const same = key => (chars.length && chars.every(x => x.st[key] === chars[0].st[key]) ? chars[0].st[key] : chars.length ? null : (key === 'b' || key === 'i' ? false : ''));
+  return { b: same('b') === true, i: same('i') === true, s: same('s'), k: same('k'), f: same('f'),
+           a: ranges.length && ranges.every(r => r.p.a === ranges[0].p.a) ? ranges[0].p.a || 'left' : null,
+           n: ranges.length && ranges.every(r => r.p.n === ranges[0].p.n) ? ranges[0].p.n : null };
+}
+
+root.__dash = { S, richPlain, markupToModel, modelToMarkup, modelToHtml, rtApply, rtStateOf, newBlock, newSection, newSectionId, insertAt, moveItem, pageChangeCount, secChanged, slotUsage, blockPreview, gh, loadAll, changes, validate, commitChanges, photoPath, usedPending, watchDeploy, latestRun, setv, getv, explain, commitMessage,
                 inboxCall, inboxDiagnose, inboxScriptLog, inboxToggle, inboxDisconnect, inboxReset, logRead, logAdd, logClear, logText, diagText, newReq, INBOX_LIMITS, notifyLoad, notifySave, notifyFind, notifyTest, notifyDisableTelegram, notifyProblem, notifyDirty, notifyFlagChanged, splitEmails, tgOn,
                 requestCounts, contactAction, timeAgo, csvOf, INBOX_URL_RE, inboxUrlFrom, normalizeQa, qaChanged, heroChanged, qaMoveItem, qaAddGroup, qaAddItem, scriptWithOptions, scriptWithPassword, inboxOpts, setInboxOpts, controlsChanged, privacyFlags, freeButtonOutcome, formOn, freeOn };
 if (typeof document === 'undefined') { if (typeof module !== 'undefined') module.exports = root.__dash; return; }
@@ -1215,21 +1415,222 @@ function photoWidget(sec, si, b, bi, f) {
         path ? el('button', { class: 'btn ghost small', type: 'button', onclick: () => { b[f.name] = ''; b.crop = ''; done(); } }, 'Убрать') : null)));
 }
 
+/* ---------- rich text editor (richtext-v1): a text box with a toolbar; what is shown is what the site will show ---------- */
+const rtLen = n => (n.nodeType === 3 ? n.nodeValue.length : n.tagName === 'BR' ? 1 : Array.from(n.childNodes).reduce((a, c) => a + rtLen(c), 0));
+function rtLocate(node, k) {
+  for (const ch of Array.from(node.childNodes)) {
+    if (ch.nodeType === 3) { if (k <= ch.nodeValue.length) return [ch, k]; k -= ch.nodeValue.length; }
+    else if (ch.tagName === 'BR') { if (k === 0) return [node, Array.prototype.indexOf.call(node.childNodes, ch)]; k -= 1; }
+    else { const n = rtLen(ch); if (k <= n) return rtLocate(ch, k); k -= n; }
+  }
+  return [node, node.childNodes.length];
+}
+/** Reads the editor's DOM (whatever the browser made of the typing) into the model, and remembers where every node starts. */
+function rtScan(root, mode) {
+  const full = mode === 'full', model = { mode: full ? 'full' : 'inline', paras: [] }, textAt = new Map(), kidAt = new Map();
+  let cur = null, g = 0;
+  const begin = box => {
+    if (!full && cur) return;
+    if (full && model.paras.length) g += 1;
+    cur = { a: '', n: '', cs: [] };
+    if (box) {
+      const cls = String(box.className || '');
+      const a = /rc-a-(center|right)/.exec(cls), n = /rc-in-([123])/.exec(cls);
+      if (a) cur.a = a[1]; if (n) cur.n = n[1];
+    }
+    model.paras.push(cur);
+  };
+  const styleOf = (node, st) => {
+    const x = Object.assign({}, st), tag = node.tagName, css = node.style || {};
+    if (tag === 'B' || tag === 'STRONG' || /^(bold|[6-9]00)$/.test(css.fontWeight || '')) x.b = true;
+    if (tag === 'I' || tag === 'EM' || css.fontStyle === 'italic') x.i = true;
+    for (const c of Array.from(node.classList || [])) {
+      if (c === 'rc-b') x.b = true; else if (c === 'rc-i') x.i = true;
+      else { const m = /^rc-([sc])-([a-z0-9]+)$/.exec(c); if (m && rtKnown(m[1] === 's' ? 'size' : 'color', m[2])) x[m[1] === 's' ? 's' : 'k'] = m[2]; }
+      const f = /^rc-f-([a-z0-9]+)$/.exec(c); if (f && rtKnown('font', f[1])) x.f = f[1];
+    }
+    return x;
+  };
+  const walk = (node, st) => {
+    const starts = []; kidAt.set(node, starts);
+    for (const ch of Array.from(node.childNodes)) {
+      if (ch.nodeType === 3) {
+        starts.push(g); textAt.set(ch, g);
+        const t = ch.nodeValue.replace(/[\u200b\r]/g, '').replace(/\u00a0/g, ' ');
+        if (t) { if (!cur) begin(null); for (let k = 0; k < t.length; k++) cur.cs.push({ c: t[k], st }); g += t.length; }
+      } else if (ch.nodeType === 1) {
+        const tag = ch.tagName;
+        if (tag === 'BR') { starts.push(g); if (!cur) begin(null); cur.cs.push({ c: '\n', st }); g += 1; }
+        else if (full && node === root && (tag === 'P' || tag === 'DIV')) { begin(ch); starts.push(g); walk(ch, st); cur = null; }
+        else {
+          starts.push(g);
+          if ((tag === 'P' || tag === 'DIV') && cur && cur.cs.length && cur.cs[cur.cs.length - 1].c !== '\n') { cur.cs.push({ c: '\n', st }); g += 1; }
+          walk(ch, styleOf(ch, st));
+        }
+      }
+    }
+    starts.push(g);
+  };
+  walk(root, rtPlainStyle());
+  if (!model.paras.length) begin(null);
+  return { model, textAt, kidAt, total: g };
+}
+function rtGetSel(root, scan) {
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount) return null;
+  const r = sel.getRangeAt(0);
+  if (!root.contains(r.startContainer) || !root.contains(r.endContainer)) return null;
+  const pos = (node, off) => {
+    if (node.nodeType === 3) { const base = scan.textAt.get(node); return base === undefined ? 0 : base + node.nodeValue.slice(0, off).replace(/[\u200b\r]/g, '').length; }
+    const arr = scan.kidAt.get(node);
+    return arr ? arr[Math.min(off, arr.length - 1)] : 0;
+  };
+  return { s: pos(r.startContainer, r.startOffset), e: pos(r.endContainer, r.endOffset) };
+}
+function rtSetSel(root, mode, s, e) {
+  const point = pos => {
+    if (mode !== 'full') return rtLocate(root, pos);
+    const ps = Array.from(root.children);
+    let g = 0;
+    for (let n = 0; n < ps.length; n++) {
+      const len = rtLen(ps[n]);
+      if (pos <= g + len || n === ps.length - 1) return rtLocate(ps[n], Math.max(0, Math.min(pos - g, len)));
+      g += len + 1;
+    }
+    return [root, 0];
+  };
+  const a = point(s), b = point(e), range = document.createRange();
+  range.setStart(a[0], a[1]); range.setEnd(b[0], b[1]);
+  const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+}
+const rtKind = (blockType, name) => (name === 'heading' ? 'heading' : name === 'note' ? 'note' : blockType === 'quote' ? 'quote' : blockType === 'aside' ? 'aside' : blockType === 'themes' ? 'small' : 'body');
+const rtSvg = (d, size) => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 16 16'); s.setAttribute('width', size || 16); s.setAttribute('height', size || 16); s.setAttribute('aria-hidden', 'true');
+  const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.setAttribute('stroke', 'currentColor'); p.setAttribute('stroke-width', '1.5'); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round'); s.append(p); return s; };
+const RT_ICONS = { left: 'M2 3.5h12M2 7h7M2 10.5h12M2 14h7', center: 'M2 3.5h12M4.5 7h7M2 10.5h12M4.5 14h7', right: 'M2 3.5h12M7 7h7M2 10.5h12M7 14h7',
+                   more: 'M2 3h12M7 7h7M7 11h7M2.5 6.2l2.8 1.8-2.8 1.8z', less: 'M2 3h12M7 7h7M7 11h7M5.3 6.2L2.5 8l2.8 1.8z', clear: 'M3 3l10 10M13 3L3 13', moon: 'M13 9.5A5.5 5.5 0 1 1 6.5 3a4.3 4.3 0 0 0 6.5 6.5z' };
+let rtMenu = null;
+/** The preview of the extra fonts is loaded in this browser only, and only once a font is looked at or used (the site stores its own copies: visitors never contact Google). */
+function rtLoadFonts() {
+  if (S.rtFonts) return;
+  S.rtFonts = true;
+  for (const f of rtSpec().fonts) if (f[3]) document.head.append(el('link', { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=' + f[3].replace(/ /g, '+') + ':ital,wght@0,400..700;1,400..700&display=swap' }));
+}
+function rtCloseMenu() { if (rtMenu) { rtMenu.remove(); rtMenu = null; } }
+function ensureRichAssets() {
+  if (S.rtReady) return;
+  S.rtReady = true;
+  const spec = rtSpec(), style = el('style', { id: 'rt-css' });
+  style.textContent = (spec.css || '') + (spec.vars || '');
+  document.head.append(style);
+  document.addEventListener('mousedown', e => { if (rtMenu && !rtMenu.contains(e.target) && !(e.target.closest && e.target.closest('.rt-drop'))) rtCloseMenu(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') rtCloseMenu(); });
+  document.addEventListener('selectionchange', () => { const a = document.activeElement; if (a && a.__rt) a.__rt.sync(); });
+  try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (e) {}
+}
+/** The editor of one text. Returns { box, surface }; onChange(markup) is called after every real change. */
+function richEditor({ id, value, mode, kind, label, onChange }) {
+  ensureRichAssets();
+  if (/\[font=(?!base\]|serif\]|hand\])/.test(String(value || ''))) rtLoadFonts();
+  const spec = rtSpec(), full = mode === 'full', mm = full ? 'full' : 'inline';
+  const surface = el('div', { id, class: 'rt-surface', contenteditable: 'true', role: 'textbox', 'aria-multiline': String(mode !== 'line'), 'aria-label': label, 'data-kind': kind, spellcheck: 'true' });
+  surface.innerHTML = modelToHtml(markupToModel(value, mm));
+  let current = String(value == null ? '' : value), last = null, ui = {};
+  const scan = () => rtScan(surface, mm);
+  const commit = () => { const m = modelToMarkup(scan().model); if (m !== current) { current = m; onChange(m); } };
+  const apply = op => {
+    rtCloseMenu();
+    const sc = scan(), sel = rtGetSel(surface, sc) || last || { s: 0, e: sc.total };
+    rtApply(sc.model, sel.s, sel.e, op);
+    surface.innerHTML = modelToHtml(sc.model);
+    surface.focus({ preventScroll: true });
+    rtSetSel(surface, mm, sel.s, sel.e);
+    last = sel; commit(); sync();
+  };
+  const sync = () => {
+    const sc = scan(), sel = rtGetSel(surface, sc);
+    if (sel) last = sel;
+    const use = sel || last || { s: 0, e: 0 }, st = rtStateOf(sc.model, use.s, use.e);
+    const name = (list, key) => (st[key] === null ? 'разный' : (list.find(x => x[0] === st[key]) || [])[1]);
+    ui.font.firstChild.textContent = (st.f === null ? 'разный' : st.f ? (spec.fonts.find(x => x[0] === st.f) || [, ''])[1].replace(/ \(.*\)/, '') : 'Шрифт');
+    ui.size.firstChild.textContent = st.s === null ? 'разный' : st.s ? name(spec.sizes, 's') : 'Размер';
+    ui.b.setAttribute('aria-pressed', String(st.b)); ui.i.setAttribute('aria-pressed', String(st.i));
+    const color = spec.colors.find(x => x[0] === st.k);
+    ui.color.querySelector('.rt-dot').style.background = color ? color[surface.classList.contains('dark') ? 3 : 2] : 'transparent';
+    for (const k of ['left', 'center', 'right']) if (ui[k]) ui[k].setAttribute('aria-pressed', String(st.a === k));
+  };
+  surface.__rt = { sync };
+  const btn = (title, child, onclick, extra) => el('button', { class: 'rt-btn' + (extra || ''), type: 'button', title, 'aria-label': title, onclick }, child);
+  const drop = (title, text, build) => {
+    const b = el('button', { class: 'rt-btn rt-drop', type: 'button', title, 'aria-label': title, 'aria-haspopup': 'true', onclick: () => {
+      const open = rtMenu && rtMenu.__for === b; rtCloseMenu(); if (open) return;
+      rtMenu = build(); rtMenu.__for = b; rtMenu.style.left = Math.min(b.offsetLeft, Math.max(0, bar.clientWidth - 240)) + 'px'; bar.append(rtMenu);
+    } }, el('span', { class: 'rt-lbl' }, text));
+    return b;
+  };
+  const item = (text, style, picked, pick) => el('button', { class: 'rt-item', type: 'button', role: 'menuitemradio', 'aria-checked': String(!!picked), style: style || null, onclick: pick }, text);
+  ui.font = drop('Шрифт', 'Шрифт', () => (rtLoadFonts(), el('div', { class: 'rt-menu', role: 'menu' },
+    item('Как в абзаце (по умолчанию)', '', false, () => apply({ kind: 'style', key: 'f', value: '' })),
+    spec.fonts.map(f => item(f[1], 'font-family:' + f[2], false, () => apply({ kind: 'style', key: 'f', value: f[0] }))))));
+  ui.size = drop('Размер текста', 'Размер', () => el('div', { class: 'rt-menu', role: 'menu' },
+    item('Обычный', '', false, () => apply({ kind: 'style', key: 's', value: '' })),
+    spec.sizes.map(s => item(s[1], 'font-size:' + (s[2] || '1em'), false, () => apply({ kind: 'style', key: 's', value: s[0] })))));
+  ui.b = btn('Жирный (Ctrl+B)', el('b', {}, 'B'), () => apply({ kind: 'style', key: 'b' }));
+  ui.i = btn('Курсив (Ctrl+I)', el('i', { style: 'font-family:var(--serif)' }, 'I'), () => apply({ kind: 'style', key: 'i' }));
+  ui.color = drop('Цвет текста', el('span', { class: 'rt-dot' }), () => {
+    const dark = surface.classList.contains('dark');
+    return el('div', { class: 'rt-menu rt-swatches', role: 'menu' },
+      spec.colors.map(c => el('button', { class: 'rt-sw', type: 'button', title: c[1], 'aria-label': c[1], style: 'background:' + c[dark ? 3 : 2], onclick: () => apply({ kind: 'style', key: 'k', value: c[0] }) })),
+      el('button', { class: 'rt-item rt-reset', type: 'button', onclick: () => apply({ kind: 'style', key: 'k', value: '' }) }, 'Обычный цвет'));
+  });
+  ui.color.classList.add('rt-colorbtn');
+  const bar = el('div', { class: 'rt-bar', role: 'toolbar', 'aria-label': 'Форматирование текста' }, ui.font, ui.size, el('span', { class: 'rt-sep' }), ui.b, ui.i, ui.color);
+  if (full) {
+    for (const k of ['left', 'center', 'right']) ui[k] = btn({ left: 'По левому краю', center: 'По центру', right: 'По правому краю' }[k], rtSvg(RT_ICONS[k]), () => apply({ kind: 'align', value: k }));
+    bar.append(el('span', { class: 'rt-sep' }), ui.left, ui.center, ui.right,
+      btn('Уменьшить отступ', rtSvg(RT_ICONS.less), () => apply({ kind: 'indent', delta: -1 })), btn('Увеличить отступ', rtSvg(RT_ICONS.more), () => apply({ kind: 'indent', delta: 1 })));
+  }
+  const dark = btn('Показать на тёмном фоне сайта', rtSvg(RT_ICONS.moon), () => { surface.classList.toggle('dark'); dark.setAttribute('aria-pressed', String(surface.classList.contains('dark'))); sync(); });
+  dark.setAttribute('aria-pressed', 'false');
+  bar.append(el('span', { class: 'rt-sep' }), btn('Сбросить форматирование', rtSvg(RT_ICONS.clear), () => apply({ kind: 'clear' })), dark);
+  bar.addEventListener('mousedown', e => e.preventDefault());   // a click on the toolbar must not take the selection away from the text
+  surface.addEventListener('input', () => { commit(); sync(); });
+  surface.addEventListener('blur', () => { const sel = rtGetSel(surface, scan()); if (sel) last = sel; });
+  surface.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && (e.key === 'b' || e.key === 'i')) { e.preventDefault(); apply({ kind: 'style', key: e.key }); }
+    else if (e.key === 'Enter' && mode !== 'full') { e.preventDefault(); if (mode === 'inline') document.execCommand('insertLineBreak'); }
+  });
+  surface.addEventListener('paste', e => {   // only the words are taken: no colours, fonts or sizes from other pages
+    e.preventDefault();
+    const text = String((e.clipboardData || window.clipboardData).getData('text/plain') || '').replace(/\r/g, '');
+    text.split('\n').forEach((line, k) => {
+      if (k) { if (mode === 'full') document.execCommand('insertParagraph'); else if (mode === 'inline') document.execCommand('insertLineBreak'); else document.execCommand('insertText', false, ' '); }
+      if (line) document.execCommand('insertText', false, line);
+    });
+  });
+  const box = el('div', { class: 'rt' }, bar, surface);
+  setTimeout(sync, 0);
+  return { box, surface };
+}
+
 /* ---------- texts: the page by sections and blocks, then the remaining texts ---------- */
 let focusAfter = null;
 const autoRows = v => Math.min(12, Math.max(2, Math.ceil(String(v).length / 72) + (String(v).match(/\n/g) || []).length));
 /** One labelled control. Typing never redraws the page (the cursor would jump); only a real change of a choice may. */
-function makeField({ label, value, type, options, hint, required, onSet, redraw, extra }) {
+function makeField({ label, value, type, options, hint, required, onSet, redraw, extra, rich, kind }) {
   const id = 'f' + (++S.uid), v = String(value == null ? '' : value);
-  let input;
+  let input, editor;
   if (type === 'select' || type === 'slot') {
     input = el('select', { id }, options.map(([val, text]) => el('option', { value: val }, text)));
     input.value = v;
+  } else if (rich && rtSpec().fonts.length) {   // richtext-v1: a text with formatting; the other fields stay plain
+    editor = richEditor({ id, value: v, mode: rich, kind: kind || 'body', label, onChange: m => { onSet(m); wrap.dataset.find = (label + ' ' + richPlain(m)).toLowerCase(); paintBar(); paintDots(); } });
+    input = editor.box;
   } else if (type === 'text' || v.length > 90 || v.includes('\n')) input = el('textarea', { id, rows: autoRows(v) }, v);
   else input = el('input', { id, type: 'text', value: v });
-  const wrap = el('div', { class: 'fld', 'data-find': (label + ' ' + v).toLowerCase() },
-    el('label', { for: id }, label, required ? el('span', { class: 'req' }, ' *') : null, extra || null), input, hint ? el('p', { class: 'hint' }, hint) : null);
-  input.addEventListener(input.tagName === 'SELECT' ? 'change' : 'input', () => {
+  const wrap = el('div', { class: 'fld', 'data-find': (label + ' ' + richPlain(v)).toLowerCase() },
+    el('label', { for: id }, label, required ? el('span', { class: 'req' }, ' *') : null, extra || null), input,
+    hint || editor ? el('p', { class: 'hint' }, [hint, editor ? 'Выделите слова и выберите формат. Без выделения формат применится ко ' + (rich === 'full' ? 'всему абзацу.' : 'всему тексту поля.') : ''].filter(Boolean).join(' ')) : null);
+  if (!editor) input.addEventListener(input.tagName === 'SELECT' ? 'change' : 'input', () => {
     onSet(input.value);
     wrap.dataset.find = (label + ' ' + input.value).toLowerCase();
     paintBar(); paintDots();
@@ -1361,7 +1762,7 @@ function deleteBlock(sec, si, bi) {
 function blockCard(sec, si, b, bi) {
   const spec = blockSpec(b.type), last = sec.blocks.length - 1, label = `${si + 1}.${bi + 1}`;
   const fields = spec.fields.filter(f => !f.showIf || Object.entries(f.showIf).every(([k, vals]) => vals.includes(b[k]))).map(f => f.type === 'crop' ? null : f.type === 'photo' ? photoWidget(sec, si, b, bi, f) : makeField({
-    label: f.label, value: b[f.name] ?? f.default, type: f.type, options: f.options, redraw: (f.name === 'look' && !!spec.fields.some(x => x.showIf)) || f.name === 'comp',
+    label: f.label, value: b[f.name] ?? f.default, type: f.type, options: f.options, rich: f.rich || '', kind: rtKind(b.type, f.name), redraw: (f.name === 'look' && !!spec.fields.some(x => x.showIf)) || f.name === 'comp',
     hint: f.name === 'text' && (b.type === 'aside' || b.type === 'quote') ? 'Подпись: начните новую строку с тире, например «— Рик Рубин, The Creative Act». Она станет мельче и встанет отдельной строкой.' : '', onSet: val => { b[f.name] = val; } }));
   const grip = gripButton(`Перетащить блок ${label}`);
   const pos = el('select', { class: 'pos', 'aria-label': `Положение блока ${label} в разделе`, onchange: e => moveBlock(sec, bi, Number(e.target.value)) },
@@ -1431,7 +1832,7 @@ function qaEditor() {
           el('button', { class: 'btn danger small', type: 'button', onclick: () => { if (!confirm('Удалить этот вопрос вместе с ответом?')) return; g.items.splice(ii, 1); after(); } }, 'Удалить')),
         el('div', { class: 'flds' },
           makeField({ label: 'Вопрос', value: it.q, type: 'string', onSet: v => { it.q = v; } }),
-          makeField({ label: 'Ответ', value: it.a, type: 'text', hint: 'Пустая строка между абзацами разделяет их.', onSet: v => { it.a = v; } })));
+          makeField({ label: 'Ответ', value: it.a, type: 'text', rich: 'full', kind: 'body', hint: 'Enter начинает новый абзац.', onSet: v => { it.a = v; } })));
     });
     return el('div', { class: 'blk' },
       el('div', { class: 'bhead' }, el('span', { class: 'bname' }, 'Категория ' + (gi + 1)), el('span', { class: 'bprev' }, g.items.length + ' вопр.'),
@@ -1568,7 +1969,7 @@ function runFocus() {
   let target = cardNode.querySelector('.ptitle');
   if (f.block != null) {
     const blk = cardNode.querySelector(`.blk[data-bi="${f.block}"]`);
-    if (blk) target = f.fresh ? (blk.querySelector('textarea, input, select') || blk) : (blk.querySelector('.bhead button:not([disabled])') || blk);
+    if (blk) target = f.fresh ? (blk.querySelector('textarea, input, select, .rt-surface') || blk) : (blk.querySelector('.bhead button:not([disabled])') || blk);
   }
   if (target) { target.focus({ preventScroll: true }); target.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
 }

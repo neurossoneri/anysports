@@ -486,9 +486,9 @@ BLOCK_TYPES = {
         'label': 'Текст', 'add': 'Текст',
         'hint': 'Абзацы разделяйте пустой строкой. Подзаголовок необязателен.',
         'fields': [
-            {'name': 'heading', 'label': 'Подзаголовок (необязательно)', 'type': 'string'},
-            {'name': 'body', 'label': 'Текст', 'type': 'text'},
-            {'name': 'note', 'label': 'Мелкая приписка под текстом (необязательно)', 'type': 'text'},
+            {'name': 'heading', 'label': 'Подзаголовок (необязательно)', 'type': 'string', 'rich': 'line'},
+            {'name': 'body', 'label': 'Текст', 'type': 'text', 'rich': 'full'},
+            {'name': 'note', 'label': 'Мелкая приписка под текстом (необязательно)', 'type': 'text', 'rich': 'inline'},
             {'name': 'look', 'label': 'Оформление', 'type': 'select', 'options': _opts(TEXT_LOOKS), 'default': 'plain'},
         ],
     },
@@ -496,7 +496,7 @@ BLOCK_TYPES = {
         'label': 'Цитата', 'add': 'Цитата',
         'hint': 'Выделенная мысль внутри текста: крупнее, цветом, без курсива и без линии, без отступа слева. Подпись: начните новую строку с тире. Для отдельного высказывания лучше блок «Фраза».',
         'fields': [
-            {'name': 'text', 'label': 'Цитата', 'type': 'text'},
+            {'name': 'text', 'label': 'Цитата', 'type': 'text', 'rich': 'inline'},
             {'name': 'size', 'label': 'Размер', 'type': 'select', 'options': _opts(QUOTE_SIZES), 'default': 'auto'},
         ],
     },
@@ -504,7 +504,7 @@ BLOCK_TYPES = {
         'label': 'Фраза', 'add': 'Фраза',
         'hint': 'Отдельное высказывание. «Тихая» по умолчанию, рукописью (Caveat) только когда это уместно. В разделе с боковой колонкой стоит сбоку, в остальных прямо в тексте. Перенос строки здесь это перенос строки во фразе. Подпись: начните новую строку с тире («— Рик Рубин, The Creative Act»), и она встанет мельче и отдельной строкой.',
         'fields': [
-            {'name': 'text', 'label': 'Фраза', 'type': 'text'},
+            {'name': 'text', 'label': 'Фраза', 'type': 'text', 'rich': 'inline'},
             {'name': 'look', 'label': 'Вид фразы', 'type': 'select', 'options': _opts(ASIDE_LOOKS), 'default': 'quiet'},
             {'name': 'photo', 'label': 'Фото за фразой (необязательно)', 'type': 'photo', 'default': '', 'showIf': {'look': ['panel']}},
             {'name': 'tint', 'label': 'Цвет плашки (когда за фразой нет фото)', 'type': 'select', 'options': _opts(ASIDE_TINTS), 'default': 'auto', 'showIf': {'look': ['panel']}},
@@ -543,12 +543,12 @@ BLOCK_TYPES = {
         'label': 'Список тем со значками', 'add': 'Список тем',
         'hint': 'Шесть тем со значками и седьмая тема по центру (её можно поставить перед шестью или после). Тему с пустым названием и пояснением сайт не показывает.',
         'fields': ([{'name': 'title', 'label': 'Заголовок', 'type': 'string'},
-                    {'name': 'intro', 'label': 'Вступление', 'type': 'text'}]
+                    {'name': 'intro', 'label': 'Вступление', 'type': 'text', 'rich': 'inline'}]
                    + [f for n in range(1, THEME_COUNT + 1) for f in (
                        {'name': f't{n}', 'label': f'Тема {n} · фраза', 'type': 'string'},
-                       {'name': f'd{n}', 'label': f'Тема {n} · пояснение', 'type': 'text'})]
+                       {'name': f'd{n}', 'label': f'Тема {n} · пояснение', 'type': 'text', 'rich': 'inline'})]
                    + [{'name': 'finalTitle', 'label': 'Седьмая тема · фраза (по центру, как у остальных тем)', 'type': 'string'},
-                      {'name': 'finalText', 'label': 'Седьмая тема · пояснение (по центру)', 'type': 'text'},
+                      {'name': 'finalText', 'label': 'Седьмая тема · пояснение (по центру)', 'type': 'text', 'rich': 'inline'},
                       {'name': 'finalPos', 'label': 'Седьмая тема · где стоит', 'type': 'select', 'options': _opts(FINAL_POSITIONS), 'default': 'after'}]),
     },
 }
@@ -642,13 +642,200 @@ def load_sections():
     return sections
 
 
+# ---------- rich text (richtext-v1): a few safe marks inside the texts, written by the dashboard's editor ----------
+# Marks: [b] [i] [size=lg] [color=blue] [font=lora] ... [/b]; at the start of a paragraph [align=center] [indent=2].
+# Only the names below exist: no free CSS, no HTML. Anything else stays plain text, so a text can never break the page.
+RICH_SIZES = (('sm', 'Мелкий', '.85em'), ('lg', 'Крупный', '1.3em'), ('xl', 'Очень крупный', '1.7em'), ('xxl', 'Огромный', '2.2em'))
+RICH_COLORS = (('blue', 'Синий', '#245f9c', '#8dbdf0'), ('green', 'Зелёный', '#1f7a67', '#6fd2b8'), ('gold', 'Золотой', '#8a5d00', '#f2c85b'),
+               ('rose', 'Терракотовый', '#b4533c', '#f0a08a'), ('plum', 'Сливовый', '#7a4a8c', '#c9a3e0'), ('gray', 'Серый', '#5d6b78', '#b4c2cf'))
+RICH_FONTS = (('base', 'Как обычный текст (Inter)', 'var(--sans)', ''), ('serif', 'Книжный (Source Serif)', 'var(--serif)', ''),
+              ('hand', 'Рукописный (Caveat)', 'var(--hand)', ''),
+              ('lora', 'Lora', '"Lora",Georgia,serif', 'Lora'), ('playfair', 'Playfair Display', '"Playfair Display",Georgia,serif', 'Playfair Display'),
+              ('merriweather', 'Merriweather', '"Merriweather",Georgia,serif', 'Merriweather'),
+              ('montserrat', 'Montserrat', '"Montserrat",Arial,sans-serif', 'Montserrat'), ('opensans', 'Open Sans', '"Open Sans",Arial,sans-serif', 'Open Sans'),
+              ('roboto', 'Roboto', '"Roboto",Arial,sans-serif', 'Roboto'), ('raleway', 'Raleway', '"Raleway",Arial,sans-serif', 'Raleway'),
+              ('nunito', 'Nunito', '"Nunito",Arial,sans-serif', 'Nunito'))
+RICH_ALIGNS = ('left', 'center', 'right')
+RICH_INDENTS = ('1', '2', '3')
+RICH_VALUES = {'size': {k for k, *_ in RICH_SIZES}, 'color': {k for k, *_ in RICH_COLORS}, 'font': {k for k, *_ in RICH_FONTS}}
+RICH_TOKEN = re.compile(r'\\\[|\[(/?)(b|i|size|color|font)(?:=([a-z0-9]+))?\]')
+RICH_DIRECTIVE_HEAD = re.compile(r'^\s*((?:\[(?:align|indent)=[a-z0-9]+\])+)')
+RICH_SITE_SCOPE = ':is(.b,.qa-a)'
+GOOGLE_FONT_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
+GOOGLE_FONT_SUBSETS = ('latin', 'latin-ext')
+
+
+def _rich_class(tag, value):
+    """The CSS class of one opening mark, or '' when the mark is not one of ours (it is then shown as plain text)."""
+    if tag in ('b', 'i'):
+        return f'rc-{tag}' if value is None else ''
+    return f'rc-{tag[0]}-{value}' if value in RICH_VALUES[tag] else ''
+
+
+def rich_inline(text):
+    """Escaped HTML of a text with marks. Marks that are not closed are closed at the end; a closing mark without an opening one is dropped."""
+    text = str(text or '')
+    out, stack, pos = [], [], 0
+    for m in RICH_TOKEN.finditer(text):
+        out.append(esc(text[pos:m.start()]))
+        pos = m.end()
+        if m.group(0) == '\\[':
+            out.append('[')
+            continue
+        closing, tag, value = m.group(1), m.group(2), m.group(3)
+        if closing:
+            if value is not None or not any(t == tag for t, _ in stack):
+                continue
+            reopen = []
+            while stack:
+                item = stack.pop()
+                out.append('</span>')
+                if item[0] == tag:
+                    break
+                reopen.append(item)
+            for item in reversed(reopen):
+                stack.append(item)
+                out.append(f'<span class="rc {item[1]}">')
+        else:
+            cls = _rich_class(tag, value)
+            if not cls:
+                out.append(esc(m.group(0)))
+                continue
+            stack.append((tag, cls))
+            out.append(f'<span class="rc {cls}">')
+    out.append(esc(text[pos:]))
+    out.extend('</span>' for _ in stack)
+    return ''.join(out)
+
+
+def rich_plain(text):
+    """The words of a text without its marks (for lengths and previews)."""
+    text = RICH_TOKEN.sub(lambda m: '[' if m.group(0) == '\\[' else '', str(text or ''))
+    return re.sub(r'\[(?:align|indent)=[a-z0-9]+\]', '', text)
+
+
+def rich_paragraph(paragraph):
+    """(css classes, inner html) of one paragraph: its leading [align=..] / [indent=..] marks become classes."""
+    classes = []
+    m = RICH_DIRECTIVE_HEAD.match(paragraph)
+    if m:
+        for kind, value in re.findall(r'\[(align|indent)=([a-z0-9]+)\]', m.group(1)):
+            if kind == 'align' and value in RICH_ALIGNS and value != 'left':
+                classes.append(f'rc-a-{value}')
+            elif kind == 'indent' and value in RICH_INDENTS:
+                classes.append(f'rc-in-{value}')
+        paragraph = paragraph[m.end():]
+    return classes, rich_inline(paragraph)
+
+
+def strip_directives(text):
+    """For places that are one line or one phrase: paragraph marks (alignment, indent) mean nothing there."""
+    text = str(text or '')
+    if '[align=' not in text and '[indent=' not in text:
+        return text
+    return '\n\n'.join(RICH_DIRECTIVE_HEAD.sub('', p) for p in paragraphs(text))
+
+
 def paragraphs(text):
     return [p.strip() for p in re.split(r'\n[ \t]*\n', str(text or '').strip()) if p.strip()]
 
 
 def para_html(text, cls=''):
-    attr = f' class="{cls}"' if cls else ''
-    return ''.join(f'<p{attr}>{esc(p)}</p>' for p in paragraphs(text))
+    out = ''
+    for p in paragraphs(text):
+        classes, inner = rich_paragraph(p)
+        names = ' '.join(([cls] if cls else []) + classes)
+        out += '<p' + (f' class="{names}"' if names else '') + f'>{inner}</p>'
+    return out
+
+
+def rich_css(scope):
+    """The styles of the marks. `scope` is the selector in front of them (the site: the blocks and the answers; the dashboard: its editor)."""
+    rules = [f'{scope} .rc {{ display:inline; margin:0; padding:0; max-width:none; color:inherit; font:inherit; letter-spacing:inherit; text-transform:none; }}',
+             f'{scope} .rc-b {{ font-weight:700; }}', f'{scope} .rc-i {{ font-style:italic; }}']
+    rules += [f'{scope} .rc-s-{key} {{ font-size:{size}; line-height:1.25; }}' for key, _, size in RICH_SIZES]
+    rules += [f'{scope} .rc-c-{key} {{ color:var(--rc-{key}); }}' for key, *_ in RICH_COLORS]
+    rules += [f'{scope} .rc-f-{key} {{ font-family:{stack}; }}' for key, _, stack, _g in RICH_FONTS]
+    rules += [f'{scope} p.rc-a-center {{ text-align:center; margin-inline:auto; }}', f'{scope} p.rc-a-right {{ text-align:right; margin-left:auto; }}']
+    rules += [f'{scope} p.rc-in-{n} {{ padding-left:{n * 1.5:g}em; }}' for n in (1, 2, 3)]
+    return '\n    '.join(rules)
+
+
+def rich_vars(light, dark):
+    """The colours of the marks: one set for light bands, a lighter set for dark ones (so a colour is readable on either)."""
+    pick = lambda i: ' '.join(f'--rc-{c[0]}:{c[i]};' for c in RICH_COLORS)
+    return f'\n    {light} {{ {pick(2)} }}\n    {dark} {{ {pick(3)} }}'
+
+
+def rich_schema():
+    """What the dashboard's editor needs: the same names and styles as the site (one source of truth)."""
+    return {'sizes': [[k, label] for k, label, _ in RICH_SIZES], 'colors': [[k, label, light, dark] for k, label, light, dark in RICH_COLORS],
+            'fonts': [[k, label, stack, google] for k, label, stack, google in RICH_FONTS],
+            'css': rich_css('.rt-surface'), 'vars': rich_vars('.rt-surface', '.rt-surface.dark')}
+
+
+def http_get(url):
+    """One download (replaced by the tests). Raises on any failure."""
+    import urllib.request
+    request = urllib.request.Request(url, headers={'User-Agent': GOOGLE_FONT_AGENT})
+    with urllib.request.urlopen(request, timeout=25) as response:
+        return response.read()
+
+
+def google_font_css(family):
+    """The stylesheet Google serves for one family (variable weights; with italics when the family has them)."""
+    name = family.replace(' ', '+')
+    last = None
+    for axes in (':ital,wght@0,400..700;1,400..700', ':wght@400..700', ''):
+        try:
+            return http_get(f'https://fonts.googleapis.com/css2?family={name}{axes}&display=swap').decode('utf-8')
+        except Exception as exc:   # a family without italics answers 400: the next form is tried
+            last = exc
+    raise last
+
+
+def build_rich_fonts(used):
+    """Fonts chosen in the texts are downloaded once at build time and stored on the site: visitors never contact Google.
+    Returns the stylesheet text ('' when nothing is used or nothing could be downloaded; the text then falls back to a similar system font)."""
+    wanted = [f for f in RICH_FONTS if f[0] in used and f[3]]
+    if not wanted:
+        return ''
+    folder = OUT / 'assets/fonts/rich'
+    css_parts = []
+    for key, _label, _stack, family in wanted:
+        try:
+            source = google_font_css(family)
+            faces = re.findall(r'/\*\s*([\w-]+)\s*\*/\s*(@font-face\s*\{[^}]*\})', source)
+            got = 0
+            for subset, face in faces:
+                if subset not in GOOGLE_FONT_SUBSETS:
+                    continue
+                url = re.search(r'url\((https://fonts\.gstatic\.com/[^)\s]+\.woff2)\)', face)
+                if not url:
+                    continue
+                style = (re.search(r'font-style:\s*(\w+)', face) or [None, 'normal'])[1]
+                weight = (re.search(r'font-weight:\s*([\d ]+)', face) or [None, '400'])[1].strip()
+                span = re.search(r'unicode-range:\s*([^;]+);', face)
+                folder.mkdir(parents=True, exist_ok=True)
+                name = f'{key}-{style}-{subset}.woff2'
+                (folder / name).write_bytes(http_get(url.group(1)))
+                css_parts.append(f'@font-face {{ font-family:"{family}"; font-style:{style}; font-weight:{weight}; font-display:swap; src:url(rich/{name}) format("woff2");'
+                                 + (f' unicode-range:{span.group(1).strip()};' if span else '') + ' }')
+                got += 1
+            if not got:
+                raise ValueError('no usable font files in the answer')
+        except Exception as exc:
+            _warn(f'font {family} could not be downloaded ({exc}); the text uses a similar system font instead')
+    if not css_parts:
+        return ''
+    (OUT / 'assets/fonts').mkdir(parents=True, exist_ok=True)
+    (OUT / 'assets/fonts/rich-fonts.css').write_text('\n'.join(css_parts) + '\n', encoding='utf-8')
+    return '<link rel="stylesheet" href="assets/fonts/rich-fonts.css">'
+
+
+def rich_fonts_link(rendered_html):
+    """Called with the page's HTML before the style rules of the marks are added to it."""
+    return build_rich_fonts(set(re.findall(r'class="rc rc-f-([a-z0-9]+)"', rendered_html)))
 
 
 def block_has_content(block):
@@ -709,7 +896,7 @@ class PageContext:
                 f'{PHOTO_PLACEHOLDER}</figure>')
 
 
-SIGNATURE_LINE = re.compile(r'^\s*(?:[—–―]|--)\s*(?=\S)')
+SIGNATURE_LINE = re.compile(r'^\s*(?:\[/?[a-z]+(?:=[a-z0-9]+)?\]\s*)*(?:[—–―]|--)\s*(?=\S)')
 
 
 def split_signature(text):
@@ -727,7 +914,7 @@ def split_signature(text):
 def quote_inner(text):
     """Escaped text of a quotation; the signature, if there is one, is a smaller line of its own."""
     main, by = split_signature(text)
-    return esc(main) + (f'<span class="q-by">{esc(chr(10).join(by))}</span>' if by else '')
+    return rich_inline(main) + (f'<span class="q-by">{rich_inline(chr(10).join(by))}</span>' if by else '')
 
 
 def render_block(block, label, ctx, in_rail):
@@ -736,8 +923,8 @@ def render_block(block, label, ctx, in_rail):
         return ''
     kind, number = block['type'], f'data-blk="{label}"'
     if kind == 'text':
-        heading = f'<h3>{esc(block["heading"].strip())}</h3>' if block['heading'].strip() else ''
-        note = f'<p class="b-note">{esc(block["note"].strip())}</p>' if block['note'].strip() else ''
+        heading = f'<h3>{rich_inline(block["heading"].strip())}</h3>' if block['heading'].strip() else ''
+        note = f'<p class="b-note">{rich_inline(block["note"].strip())}</p>' if block['note'].strip() else ''
         look = block['look']
         if look == 'lead':
             return f'<div class="b b-lead" {number} data-fade>{para_html(block["body"])}{note}</div>'
@@ -748,12 +935,12 @@ def render_block(block, label, ctx, in_rail):
                     f'{heading}{para_html(block["body"])}</div>')
         if look == 'hand':
             return (f'<div class="b b-hand finale finale-hand" {number}><span class="finale-line" aria-hidden="true"></span>'
-                    f'<p class="finale-note">{esc(block["body"].strip())}</p></div>')
+                    f'<p class="finale-note">{rich_inline(strip_directives(block["body"]).strip())}</p></div>')
         classes = 'b b-text' + (' has-h' if heading else '') + (' b-dropcap' if look == 'dropcap' else '')
         return f'<div class="{classes}" {number} data-fade>{heading}{para_html(block["body"])}{note}</div>'
     if kind == 'quote':
         text = block['text'].strip()
-        small = block['size'] == 'small' or (block['size'] == 'auto' and len(split_signature(text)[0]) > 70)
+        small = block['size'] == 'small' or (block['size'] == 'auto' and len(rich_plain(split_signature(text)[0])) > 70)
         return f'<blockquote class="b b-quote pull{" pull-long" if small else ""}" {number}>{quote_inner(text)}</blockquote>'
     if kind == 'aside':
         text = block['text'].strip()
@@ -792,15 +979,15 @@ def render_block(block, label, ctx, in_rail):
             title, detail = block[f't{n}'].strip(), block[f'd{n}'].strip()
             if title or detail:
                 items += (f'<li class="theme" data-fade><svg class="glyph" viewBox="0 0 32 32" aria-hidden="true">{THEME_GLYPHS[n - 1]}</svg>'
-                          f'<strong>{esc(title)}</strong><span>{esc(detail)}</span></li>')
+                          f'<strong>{esc(title)}</strong><span>{rich_inline(detail)}</span></li>')
         head = (f'<h3 class="themes-title" data-fade>{esc(block["title"].strip())}</h3>' if block['title'].strip() else '')
-        intro = f'<p class="lead" data-fade>{esc(block["intro"].strip())}</p>' if block['intro'].strip() else ''
+        intro = f'<p class="lead" data-fade>{rich_inline(block["intro"].strip())}</p>' if block['intro'].strip() else ''
         grid = f'<ul class="theme-grid">{items}</ul>' if items else ''
         final = ''
         if block['finalTitle'].strip() or block['finalText'].strip():
             final = ('<div class="theme theme-final" data-fade>' + COMPASS_GLYPH
                      + (f'<strong>{esc(block["finalTitle"].strip())}</strong>' if block['finalTitle'].strip() else '')
-                     + (f'<span>{esc(block["finalText"].strip())}</span>' if block['finalText'].strip() else '') + '</div>')
+                     + (f'<span>{rich_inline(block["finalText"].strip())}</span>' if block['finalText'].strip() else '') + '</div>')
         before, after = (final, '') if block['finalPos'] == 'before' else ('', final)
         return f'<div class="b b-themes themes" {number}>{head}{intro}{before}{grid}{after}</div>'
     return ''
@@ -917,7 +1104,7 @@ def qa_html(groups):
     out = ''
     for group in groups:
         rows = ''.join('<details name="qa"><summary><span class="qa-n" aria-hidden="true"></span>'
-                       f'<span class="qa-q">{esc(item["q"])}</span></summary><div class="qa-a"><p>{esc(item["a"])}</p></div></details>' for item in group['items'])
+                       f'<span class="qa-q">{esc(item["q"])}</span></summary><div class="qa-a">{para_html(item["a"])}</div></details>' for item in group['items'])
         out += f'<div class="qa-group"><h3 class="qa-group-title">{esc(group["title"])}</h3>{rows}</div>'
     return out
 
@@ -972,7 +1159,9 @@ def build_home(site, posts, public_url, ready):
     template, last_tone = place_sections(template, sections, context)
     notes_tone = NOTES_TONE[last_tone]
     template = replace_required(template, '<!--@@NOTES@@-->', notes_section(posts, notes_tone), 'notes marker')
-    template = replace_required(template, '<!--@@FONTS@@-->', HOME_FONT_LINKS, 'fonts marker')
+    rich_link = rich_fonts_link(template)   # richtext-v1: fonts used in the texts are stored on the site; then the styles of the marks are added
+    template = replace_required(template, '/*@@RICH-CSS@@*/', rich_css(RICH_SITE_SCOPE) + rich_vars(':root', '.band-deep, .band-teal'), 'rich text styles')
+    template = replace_required(template, '<!--@@FONTS@@-->', HOME_FONT_LINKS + rich_link, 'fonts marker')
     template = replace_required(template, '<span id="year">2026</span>', f'<span id="year">{dt.date.today().year}</span>', 'year marker')
     # the footer fades from the tone of the last band (the notes band when there are articles)
     template = replace_required(template, 'site-footer after-teal', f'site-footer after-{notes_tone if posts else last_tone}', 'footer tone')
@@ -1247,6 +1436,7 @@ def page_schema():
         'slots': list(PLACE_SLOTS),
         'comps': _opts(COMPS),
         'frames': {name: [list(f) for f in frames] for name, frames in FRAMES.items()},
+        'rich': rich_schema(),
     }
 
 
