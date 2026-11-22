@@ -10,7 +10,7 @@
   },
   "contact": {
     "title": "Write to me",
-    "lead": "A few words about you and what you’re looking for are enough. The details can wait for our conversation.",
+    "lead": "A few words about you and what you are looking for are enough. The details can wait for our conversation.",
     "formName": "Your name",
     "formReach": "Best way to reach you back (email, phone number @ WhatsApp / Telegram)",
     "formMessage": "Leave your message",
@@ -19,13 +19,13 @@
     "formNote": "Your information will be used solely to respond to your enquiry. For details on how your personal data is handled, please see our [Privacy Policy]."
   },
   "free": {
-    "title": "An introductory conversation costs you nothing",
-    "text": "We can simply meet, talk and listen.\n\nThere is no obligation to continue. We can both decide whether it feels right to work together.",
+    "title": "An introductory conversation is free",
+    "text": "It's simply an opportunity to meet, ask questions and explore whether this work feels right for you.\n\n",
     "cta": "Write to me"
   },
   "qa": {
     "title": "Q&A",
-    "lead": "The practical side, the boundaries of this work and who it is for — all in one place.",
+    "lead": "The practical side and who it is for — all in one place.",
     "ask": "Can’t find your question? Write to me"
   },
   "notes": {
