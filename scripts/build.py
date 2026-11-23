@@ -10,7 +10,9 @@ English copy is baked into the static HTML (SEO, no-JS readers).
 """
 from __future__ import annotations
 
+import base64
 import datetime as dt
+import hashlib
 import html
 import json
 import os
@@ -320,7 +322,7 @@ def render_markdown(source):
 
 
 def card(post, hidden=False):
-    cover = (f'<img src="{esc(post["cover"])}" alt="" loading="lazy" decoding="async">'
+    cover = (f'<img src="{esc(post["cover"])}"{size_attrs(post["cover"])} alt="" loading="lazy" decoding="async">'
              if post['cover'] else '<span class="blog-illustration" aria-hidden="true">✦</span>')
     return (f'<article class="blog-card" data-post-lang="{post["lang"]}"{" hidden" if hidden else ""}>'
             f'<div class="blog-cover">{cover}</div><div class="blog-body">'
@@ -336,7 +338,7 @@ def replace_required(text, old, new, name):
     return text.replace(old, new, 1)
 
 
-def seo_head(site, public_url):
+def seo_head(site, public_url, copy=None, cover=''):
     """Canonical, Open Graph and JSON-LD for the home page."""
     name = str(site.get('name_en') or '').strip()
     brand = brand_name(site)
@@ -344,10 +346,25 @@ def seo_head(site, public_url):
            f'  <meta property="og:url" content="{esc(public_url)}">\n'
            f'  <meta property="og:site_name" content="{esc(brand)}">\n')
     portrait = photo_path(site.get('portrait'))
-    if portrait:
-        out += f'  <meta property="og:image" content="{esc(public_url + portrait)}">\n'
+    copy = copy or {}
+    image = public_url + cover if cover else (public_url + portrait if portrait else '')
+    out += '  <meta property="og:locale" content="en_US">\n'
+    if image:
+        out += f'  <meta property="og:image" content="{esc(image)}">\n'
+        if cover:
+            out += ('  <meta property="og:image:type" content="image/jpeg">\n'
+                    f'  <meta property="og:image:width" content="{OG_SIZE[0]}">\n  <meta property="og:image:height" content="{OG_SIZE[1]}">\n')
+        if copy.get('hero.alt'):
+            out += f'  <meta property="og:image:alt" content="{esc(copy["hero.alt"])}">\n'
+    out += f'  <meta name="twitter:card" content="{"summary_large_image" if cover else "summary"}">\n'
+    if copy.get('meta.fullTitle'):
+        out += f'  <meta name="twitter:title" content="{esc(copy["meta.fullTitle"])}">\n'
+    if copy.get('meta.description'):
+        out += f'  <meta name="twitter:description" content="{esc(copy["meta.description"])}">\n'
+    if image:
+        out += f'  <meta name="twitter:image" content="{esc(image)}">\n'
     if name:
-        person = {'@context': 'https://schema.org', '@type': 'Person', 'name': name,
+        person = {'@context': 'https://schema.org', '@type': 'Person', '@id': public_url + '#person', 'name': name,
                   'jobTitle': str(site.get('role_en') or ''), 'url': public_url,
                   'brand': {'@type': 'Brand', 'name': brand}}
         if portrait:
@@ -422,6 +439,130 @@ def make_variants(out_root, rel):
         print(f'NOTE: no smaller copies for {rel} ({exc.__class__.__name__}); the original is used.', file=sys.stderr)
         return []
     return variants + [(rel, width)] if variants else []
+
+
+# seo-photos-v1 ------------------------------------------------------------------------------------------
+ROBOTS_INDEX = 'index,follow,max-image-preview:large,max-snippet:-1'   # robots meta of an indexable site
+OG_SIZE = (1200, 630)
+OG_FILE = 'assets/og-cover.jpg'
+SCRIPT_TAG = re.compile(r'<script(\s[^>]*)?>(.*?)</script>', re.S)
+
+
+def image_size(path):
+    """(width, height) of a photograph of the built site as a browser shows it (EXIF turn applied), or None."""
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+    try:
+        with Image.open(OUT / path) as opened:
+            width, height = opened.size
+            if opened.getexif().get(274, 1) in (5, 6, 7, 8):   # EXIF orientation: the browser shows the photograph turned
+                width, height = height, width
+        return (width, height) if width > 0 and height > 0 else None
+    except Exception:
+        return None
+
+
+def size_attrs(path):
+    """width/height of the original file: the browser reserves the space before the photograph loads (no layout jump). CSS still sets the real size."""
+    size = image_size(path)
+    return f' width="{size[0]}" height="{size[1]}"' if size else ''
+
+
+def make_og_cover(site):
+    """A 1200x630 JPEG of the first-screen photograph for link previews (social networks do not take WebP). Returns its path in the site, or ''.
+    A vertical photograph is shown whole, on a blurred and darkened copy of itself, so the face is never cut off; a landscape one is cut to shape."""
+    try:
+        from PIL import Image, ImageEnhance, ImageFilter, ImageOps
+    except ImportError:
+        return ''
+    try:
+        rel = photo_path(site.get('portrait'))
+        source = OUT / rel if rel else None
+        if not source or not source.is_file():
+            return ''
+        with Image.open(source) as opened:
+            image = ImageOps.exif_transpose(opened).convert('RGB')
+        width, height = OG_SIZE
+        if image.width / image.height >= 1.6:
+            x, y = (float(v) / 100 for v in (clean_crop(site.get('portrait_crop')) or '50,50,1').split(',')[:2])
+            scale = max(width / image.width, height / image.height)
+            scaled = image.resize((max(width, round(image.width * scale)), max(height, round(image.height * scale))), Image.LANCZOS)
+            left, top = round((scaled.width - width) * x), round((scaled.height - height) * y)
+            canvas = scaled.crop((left, top, left + width, top + height))
+        else:
+            canvas = ImageEnhance.Brightness(ImageOps.fit(image, OG_SIZE, Image.LANCZOS).filter(ImageFilter.GaussianBlur(26))).enhance(.55)
+            scale = min(width / image.width, height / image.height)
+            photo = image.resize((max(1, round(image.width * scale)), max(1, round(image.height * scale))), Image.LANCZOS)
+            canvas.paste(photo, ((width - photo.width) // 2, (height - photo.height) // 2))
+        target = OUT / OG_FILE
+        target.parent.mkdir(parents=True, exist_ok=True)
+        canvas.save(target, 'JPEG', quality=86, optimize=True, progressive=True)
+        return OG_FILE
+    except Exception as exc:   # the preview image must never break the build
+        print(f'NOTE: no preview image for link sharing ({exc.__class__.__name__}); the first-screen photograph is named instead.', file=sys.stderr)
+        return ''
+
+
+def csp_meta(page):
+    """Content-Security-Policy as a <meta> tag (GitHub Pages cannot send headers). Only scripts are restricted: the page's own file and its inline
+    scripts, each named by its hash, so a script injected by anything else does not run. The hashes are computed from the finished page."""
+    hashes = []
+    for attrs, body in SCRIPT_TAG.findall(page):
+        if re.search(r'\bsrc\s*=', attrs or ''):
+            continue
+        kind = re.search(r'\btype\s*=\s*["\']?([^"\'\s>]+)', attrs or '')
+        if kind and kind.group(1).lower() not in ('text/javascript', 'module'):
+            continue   # data blocks (JSON-LD) are never executed
+        token = "'sha256-" + base64.b64encode(hashlib.sha256(body.encode('utf-8')).digest()).decode('ascii') + "'"
+        if token not in hashes:
+            hashes.append(token)
+    policy = "script-src 'self' " + ' '.join(hashes) + "; object-src 'none'; base-uri 'self'"
+    return f'<meta http-equiv="Content-Security-Policy" content="{policy}">'
+
+
+def add_csp():
+    """The policy on every public page. The dashboard (admin/) is left alone: it has its own scripts and talks to GitHub."""
+    count = 0
+    for page in sorted(OUT.rglob('*.html')):
+        if page.relative_to(OUT).parts[0] == 'admin':
+            continue
+        text = page.read_text(encoding='utf-8')
+        marker = '<meta charset="utf-8">'
+        if 'Content-Security-Policy' in text:
+            continue
+        if marker not in text:
+            raise RuntimeError(f'{page.relative_to(OUT)}: no charset tag to put the security policy after')
+        page.write_text(text.replace(marker, marker + csp_meta(text), 1), encoding='utf-8')
+        count += 1
+    return count
+
+
+def llms_txt(site, public_url, has_privacy, has_posts):
+    """llms.txt: a short plain-text map of the site for AI search. Built from the site's own settings and section titles, nothing is invented."""
+    copy = collect_values(site)['en']
+    clean = lambda text: re.sub(r'[\[\]]', '', re.sub(r'\s+', ' ', rich_plain(text))).strip()
+    name, role = str(site.get('name_en') or '').strip(), str(site.get('role_en') or '').strip()
+    out = [f'# {brand_name(site)}', '']
+    if clean(copy.get('meta.description', '')):
+        out += [f'> {clean(copy["meta.description"])}', '']
+    if name:
+        out += ['## About', '', name + (f', {role}.' if role else '.'), '']
+    pages = [f'- [Home]({public_url})']
+    for section in load_sections():
+        if section['type'] == 'text' and section_has_content(section) and section['title'].strip():
+            pages.append(f'- [{clean(section["title"])}]({public_url}#{section["id"]})')
+        elif section['type'] == 'contact' and flag_on(site, 'contact_form_enabled'):
+            pages.append(f'- [{clean(copy.get("contact.title", "")) or "Contact"}]({public_url}#contact)')
+        elif section['type'] == 'qa' and load_qa():
+            pages.append(f'- [{clean(copy.get("qa.title", "")) or "Q&A"}]({public_url}#qa)')
+    out += ['## Home page', ''] + pages + ['']
+    other = ([f'- [Notes]({public_url}en/articles/)'] if has_posts else []) + ([f'- [Privacy notice]({public_url}privacy/)'] if has_privacy else [])
+    if other:
+        out += ['## Other pages', ''] + other + ['']
+    out += ['## Notes', '', '- Site language: English.', '']
+    return '\n'.join(out)
 
 
 def copy_media():
@@ -880,7 +1021,7 @@ class PageContext:
             return ''
         attributes = f'data-slot="{num}"' if num else ''
         if path:
-            attributes += f' src="{esc(path)}"'
+            attributes += f' src="{esc(path)}"' + size_attrs(path)
             if path not in self.cache:
                 self.cache[path] = make_variants(OUT, path)
             if self.cache[path]:
@@ -1172,10 +1313,15 @@ def build_home(site, posts, public_url, ready):
         path = photo_path(site.get(field))
         attributes = f'data-slot="{slot["num"]}"'
         if path:
-            attributes += f' src="{esc(path)}"'
+            attributes += f' src="{esc(path)}"' + size_attrs(path)
             variants = make_variants(OUT, path)
             if variants:
                 attributes += ' srcset="' + ', '.join(f'{esc(name)} {size}w' for name, size in variants) + '" sizes="50vw"'
+            # seo-photos-v1: the browser starts loading the first-screen photograph at once (the same copies as the <img> itself)
+            preload = f'<link rel="preload" as="image" href="{esc(path)}"'
+            if variants:
+                preload += ' imagesrcset="' + ', '.join(f'{esc(name)} {size}w' for name, size in variants) + '" imagesizes="50vw"'
+            template = replace_required(template, "<script>document.documentElement.classList.add('js')", preload + ' fetchpriority="high">\n  <script>document.documentElement.classList.add(\'js\')', 'hero preload')
             hero_css = hero_photo_style(site)
             if hero_css:
                 attributes += f' style="{esc(hero_css)}"'
@@ -1200,7 +1346,7 @@ def build_home(site, posts, public_url, ready):
                  f'    const CMS_VISIBLE_POSTS = {js_json(counts)};')
     template = replace_required(template, '    // @@CMS_INJECTION@@', injection, 'CMS injection')
     template = replace_required(template, '<meta name="color-scheme"',
-        ('<meta name="robots" content="index,follow">' if ready else '<meta name="robots" content="noindex,nofollow">') + '\n  <meta name="color-scheme"', 'robots')
+        ('<meta name="robots" content="' + ROBOTS_INDEX + '">' if ready else '<meta name="robots" content="noindex,nofollow">') + '\n  <meta name="referrer" content="strict-origin-when-cross-origin">\n  <meta name="color-scheme"', 'robots')
 
     template = owner_controls(template, site)   # owner-controls-v1: before the copy is baked in
     # Bake the English copy into static HTML: SEO, no-JS readers, no flash before the script runs.
@@ -1221,7 +1367,8 @@ def build_home(site, posts, public_url, ready):
     template = re.sub(r'(<meta property="og:title" content=")[^"]*', lambda m: m.group(1) + esc(doc_title), template, count=1)
     template = re.sub(r'(<meta property="og:description" content=")[^"]*', lambda m: m.group(1) + esc(copy['meta.description']), template, count=1)
     if public_url:
-        template = replace_required(template, '</head>', seo_head(site, public_url) + '</head>', 'head')
+        cover = make_og_cover(site)
+        template = replace_required(template, '</head>', seo_head(site, public_url, copy, cover) + '</head>', 'head')
     (OUT / 'index.html').write_text(template, encoding='utf-8')
     css = re.search(r'<style>(.*?)</style>', template, re.S).group(1)
     (OUT / 'assets').mkdir(parents=True, exist_ok=True)
@@ -1261,11 +1408,11 @@ def article_shell(*, title, description, lang, css_prefix, body, public_url, rea
         if image and public_url:
             schema['image'] = public_url + image
         json_ld = '<script type="application/ld+json">' + js_json(schema) + '</script>'
-    bg_img = f'<img class="post-hero-image" src="{esc(image)}" alt="" loading="eager">' if image else ''
+    bg_img = f'<img class="post-hero-image" src="{esc(image)}"{size_attrs(image)} alt="" loading="eager">' if image else ''
     article_header = f'<p class="post-meta">{esc(date)} · {esc(LANG_LABEL[lang])}</p>' if date else ''
     return f'''<!DOCTYPE html>
 <html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light dark"><meta name="theme-color" content="#06121e"><base href="{route}">{favicon_html}{FONT_LINKS}<meta name="robots" content="{'index,follow' if ready else 'noindex,nofollow'}">
+<meta name="referrer" content="strict-origin-when-cross-origin"><meta name="color-scheme" content="light dark"><meta name="theme-color" content="#06121e"><base href="{route}">{favicon_html}{FONT_LINKS}<meta name="robots" content="{ROBOTS_INDEX if ready else 'noindex,nofollow'}">
 <meta name="description" content="{desc}"><meta property="og:type" content="{'article' if kind == 'article' else 'website'}"><meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{desc}"><title>{esc(title)} — {name}</title>
 <link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/articles.css">
@@ -1515,6 +1662,9 @@ def main():
     else:
         robots += 'Disallow: /\n'
     (OUT / 'robots.txt').write_text(robots, encoding='utf-8')
+    if public_url and ready:
+        (OUT / 'llms.txt').write_text(llms_txt(site, public_url, has_privacy, bool(posts)), encoding='utf-8')
+    add_csp()   # seo-photos-v1: last, because the hashes are computed from the finished pages
     print(f'Built homepage, {len(posts)} published posts, 1 archive, privacy={has_privacy}, dashboard={has_admin} -> {OUT} | indexable={ready} | URL={public_url or "local"}')
 
 

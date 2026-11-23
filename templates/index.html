@@ -397,13 +397,13 @@
     @media (max-width:700px) {
       .b-photos[data-comp] .photo { aspect-ratio:var(--ar-m,var(--ar,4/5)); }
       .b-photos[data-comp="calm-pair"] .photo:nth-child(1) { grid-column:1 / -1; }
-      .b-photos[data-comp="calm-pair"] .photo:nth-child(2) { grid-column:6 / -1; margin-top:-9%; box-shadow:0 0 0 clamp(4px,1.2vw,8px) var(--c-bg,transparent); z-index:1; }
+      .b-photos[data-comp="calm-pair"] .photo:nth-child(2) { grid-column:6 / -1; margin-top:-9%; box-shadow:0 0 0 clamp(4px,1.2vw,8px) var(--c-bg,transparent),var(--photo-float); z-index:1; }
       .b-photos[data-comp="lead-small"] .photo:nth-child(1) { grid-column:1 / span 10; }
-      .b-photos[data-comp="lead-small"] .photo:nth-child(2) { grid-column:6 / -1; margin-top:-22%; box-shadow:0 0 0 clamp(4px,1.2vw,8px) var(--c-bg,transparent); z-index:1; }
+      .b-photos[data-comp="lead-small"] .photo:nth-child(2) { grid-column:6 / -1; margin-top:-22%; box-shadow:0 0 0 clamp(4px,1.2vw,8px) var(--c-bg,transparent),var(--photo-float); z-index:1; }
       .b-photos[data-comp="trio"] .photo:nth-child(1) { grid-column:1 / -1; grid-row:auto; }
       .b-photos[data-comp="trio"] .photo:nth-child(2) { grid-column:1 / span 6; grid-row:auto; }
       .b-photos[data-comp="trio"] .photo:nth-child(3) { grid-column:7 / -1; grid-row:auto; margin-top:10%; }
-      .rail .b-photos[data-comp] .photo:nth-child(n) { grid-column:auto; margin-top:0; box-shadow:none; }
+      .rail .b-photos[data-comp] .photo:nth-child(n) { grid-column:auto; margin-top:0; box-shadow:var(--photo-float); }
     }
     /* about-story-v1. Два этапа истории: спокойная пауза с фото прошлого и более личная асимметричная композиция с недавними фото. */
     .blocks > .b-photos[data-comp="calm-pair"] { margin-block:clamp(64px,10vw,140px); }
@@ -493,6 +493,11 @@
     #lightbox::backdrop { background:rgba(6,18,30,.93); }
     #lightbox img { position:absolute; inset:0; margin:auto; width:auto; height:auto; max-width:92vw; max-height:88vh; object-fit:contain; }
     .lb-close { position:fixed; top:14px; right:18px; z-index:2; width:44px; height:44px; border:1px solid rgba(255,255,255,.35); border-radius:var(--r-pill); background:rgba(6,18,30,.5); color:#fff; font:400 1.6rem/1 var(--sans); cursor:pointer; }
+    /* seo-photos-v1. Фото в блоках: мягкие углы и лёгкая тень, как у панелей цитат и кнопки «Send». Первый экран и широкая полоса растворяются в фон и остаются без рамки. */
+    :root { --photo-float:0 24px 44px -24px rgba(6,18,30,.62),0 8px 18px -10px rgba(6,18,30,.32); }
+    .band-deep, .band-teal { --photo-float:0 28px 50px -30px rgba(0,0,0,.85),0 8px 18px -10px rgba(0,0,0,.5); }
+    .b-photos .photo { border-radius:var(--r-panel); box-shadow:var(--photo-float); }
+    #lightbox img { border-radius:var(--r-panel); }
     @media (prefers-reduced-motion:reduce) {
       html { scroll-behavior:auto; }
       *, *::before, *::after { animation-duration:.01ms!important; animation-iteration-count:1!important; animation-delay:0s!important; transition-duration:.01ms!important; transition-delay:0s!important; }

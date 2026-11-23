@@ -271,10 +271,10 @@ def check_brand_and_dashboard(builder, destination):
 
 
 def check_soft_controls(destination):
-    """Rounded corners belong to buttons, fields and the quotation panels; photos, other panels and sections stay square. No "up" button."""
+    """Rounded corners belong to buttons, fields, the quotation panels and the photographs of the blocks (seo-photos-v1); the first-screen photograph, the wide strip, other panels and sections stay square. No "up" button."""
     css = (destination / 'assets/site.css').read_text(encoding='utf-8')
     articles_css = (destination / 'assets/articles.css').read_text(encoding='utf-8')
-    allowed = ('.button', '.icon-button', '.contact-links', 'summary::after', '.field', '.slot-badge', '.num-badge', '.skip', '.lb-close', '.quote-panel')
+    allowed = ('.button', '.icon-button', '.contact-links', 'summary::after', '.field', '.slot-badge', '.num-badge', '.skip', '.lb-close', '.quote-panel', '.b-photos .photo', '#lightbox img')
     for sheet in (css, articles_css):
         for selector, body in re.findall(r'([^{}]+)\{([^{}]*border-radius[^{}]*)\}', sheet):
             values = re.findall(r'border-radius\s*:\s*([^;}]+)', body)
@@ -284,7 +284,7 @@ def check_soft_controls(destination):
     for must in ('.button { display:inline-flex', '.qa summary::after {', '.contact-links a {'):
         rule = css[css.index(must):].split('}', 1)[0]
         assert 'border-radius' in rule, f'{must} should be soft'
-    for square in ('.photo {', '.free {', '.blog-card {', '.b-panel {', '.b-photos .photo {'):
+    for square in ('.photo {', '.free {', '.blog-card {', '.b-panel {'):
         rule = css[css.index(square):].split('}', 1)[0]
         assert 'border-radius' not in rule, f'{square} stays square'
     quote = css[css.index('.quote-panel {'):].split('}', 1)[0]
@@ -1137,6 +1137,104 @@ def check_rich_text(builder):
         assert 'font-family:"Lora",Georgia,serif' in (work / '_site/assets/site.css').read_text(encoding='utf-8')
 
 
+def check_seo_photos(builder):
+    """seo-photos-v1: address of the site, robots meta, preview image, twitter card, JSON-LD, photo sizes, preload, security policy, llms.txt, rounded photos.
+    Uses its own fixtures only: nothing here depends on the texts or photos the owner edits."""
+    import base64
+    import hashlib
+    if not importlib.util.find_spec('PIL'):
+        return
+
+    def live(work, site):
+        from PIL import Image
+        Image.new('RGB', (2400, 3000), (40, 90, 140)).save(work / 'media/big.jpg', quality=85)
+        Image.new('RGB', (900, 600), (140, 90, 40)).save(work / 'media/wide.jpg', quality=85)
+        site.update({'public_url': 'https://example.com', 'publish_ready': True, 'name_en': 'Test Person', 'portrait': 'media/big.jpg', 'story_photo_2': 'media/wide.jpg',
+                     'quote_photo': '', 'eyes_photo': '', 'story_photo_1': '', 'story_photo_3': '', 'story_photo_4': '', 'email': 'hello@example.com'})
+        (work / 'content/sections.json').write_text(json.dumps(sample_sections(builder), ensure_ascii=False), encoding='utf-8')
+    temporary, work = build_fixture(builder, live, posts=True)
+    with temporary:
+        from PIL import Image
+        site_dir = work / '_site'
+        home = (site_dir / 'index.html').read_text(encoding='utf-8')
+        assert '<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">' in home and 'noindex' not in home
+        assert '<link rel="canonical" href="https://example.com/">' in home and 'github.io' not in home, 'every address of the page is the owner\'s own'
+        assert '<meta property="og:image" content="https://example.com/assets/og-cover.jpg">' in home
+        assert 'og:image:width" content="1200"' in home and 'og:image:height" content="630"' in home and 'og:image:type" content="image/jpeg"' in home
+        assert '<meta name="twitter:card" content="summary_large_image">' in home and 'twitter:image" content="https://example.com/assets/og-cover.jpg"' in home
+        for pair in ('title', 'description'):
+            assert re.search(r'og:' + pair + r'" content="([^"]*)"', home).group(1) == re.search(r'twitter:' + pair + r'" content="([^"]*)"', home).group(1), f'twitter:{pair} equals og:{pair}'
+        with Image.open(site_dir / 'assets/og-cover.jpg') as cover:
+            assert cover.format == 'JPEG' and cover.size == (1200, 630), 'the preview image is a JPEG of 1200x630'
+        ld = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', home, re.S).group(1))
+        assert ld['@id'] == 'https://example.com/#person' and ld['url'] == 'https://example.com/' and ld['image'].startswith('https://example.com/media/')
+        assert 'name="referrer" content="strict-origin-when-cross-origin"' in home
+        # width and height of every photograph, taken from the file (EXIF turn included)
+        assert re.search(r'<img data-slot="1" src="media/big\.jpg" width="2400" height="3000" srcset=', home), 'the hero photograph carries its real size'
+        assert re.search(r'src="media/wide\.jpg" width="900" height="600"', home), 'block photographs carry their real size'
+        for tag in re.findall(r'<img [^>]*\bsrc="media/[^"]+"[^>]*>', home):
+            if 'test-cover' in tag:
+                continue   # the fixture's note cover is a file that cannot be read
+            assert ' width="' in tag and ' height="' in tag, f'photograph without width/height: {tag[:80]}'
+        preload = re.search(r'<link rel="preload" as="image"[^>]*>', home).group(0)
+        assert 'href="media/big.jpg"' in preload and 'imagesrcset="media/opt/media-big-jpg-640.webp 640w' in preload and 'fetchpriority="high"' in preload
+        assert home.index(preload) < home.index('<style>'), 'the preload comes before the style rules'
+        # the security policy names every inline script by its hash; the dashboard is not touched
+        for page in ('index.html', 'privacy/index.html', 'en/articles/index.html', 'en/articles/sample/index.html'):
+            text = (site_dir / page).read_text(encoding='utf-8')
+            policy = re.search(r'<meta http-equiv="Content-Security-Policy" content="([^"]+)">', text)
+            assert policy and text.index('charset') < policy.start() < text.index('<script'), f'{page}: policy comes first among the scripts'
+            assert "'unsafe-inline'" not in policy.group(1) and "'unsafe-eval'" not in policy.group(1) and "script-src 'self'" in policy.group(1)
+            scripts = [(a, b) for a, b in re.findall(r'<script(\s[^>]*)?>(.*?)</script>', text, re.S) if not (a or '').strip().startswith(('src', 'type="application/ld+json"'))]
+            assert scripts, f'{page}: inline scripts expected'
+            for _, body in scripts:
+                digest = base64.b64encode(hashlib.sha256(body.encode('utf-8')).digest()).decode('ascii')
+                assert f"'sha256-{digest}'" in policy.group(1), f'{page}: an inline script is not covered by the policy'
+        assert 'Content-Security-Policy' not in (site_dir / 'admin/index.html').read_text(encoding='utf-8'), 'the dashboard keeps its own rules'
+        llms = (site_dir / 'llms.txt').read_text(encoding='utf-8')
+        assert llms.startswith('# Sport Intuitive') and 'https://example.com/#contact' in llms and 'https://example.com/privacy/' in llms and 'github.io' not in llms
+        robots = (site_dir / 'robots.txt').read_text(encoding='utf-8')
+        assert 'Allow: /' in robots and 'Disallow: /admin/' in robots and 'Sitemap: https://example.com/sitemap.xml' in robots
+        assert 'https://example.com/' in (site_dir / 'sitemap.xml').read_text(encoding='utf-8')
+
+    # a landscape portrait is cut to shape, a missing or unreadable one gives no preview image (and no promise of one)
+    def landscape(work, site):
+        from PIL import Image
+        Image.new('RGB', (3000, 1500), (40, 90, 140)).save(work / 'media/land.jpg', quality=85)
+        site.update({'public_url': 'https://example.com', 'publish_ready': False, 'portrait': 'media/land.jpg', 'quote_photo': '', 'eyes_photo': '', 'story_photo_1': '',
+                     'story_photo_2': '', 'story_photo_3': '', 'story_photo_4': ''})
+        (work / 'content/sections.json').write_text(json.dumps(sample_sections(builder), ensure_ascii=False), encoding='utf-8')
+    temporary, work = build_fixture(builder, landscape, posts=False)
+    with temporary:
+        from PIL import Image
+        home = (work / '_site/index.html').read_text(encoding='utf-8')
+        with Image.open(work / '_site/assets/og-cover.jpg') as cover:
+            assert cover.size == (1200, 630)
+        assert 'noindex,nofollow' in home and not (work / '_site/llms.txt').exists() and not (work / '_site/sitemap.xml').exists(), 'before launch: closed, no llms.txt, no sitemap'
+        assert 'og:image" content="https://example.com/assets/og-cover.jpg"' in home, 'the addresses are right even before launch'
+
+    def broken(work, site):
+        site.update({'public_url': 'https://example.com', 'publish_ready': True, 'portrait': 'media/test-cover.webp', 'quote_photo': '', 'eyes_photo': '', 'story_photo_1': '',
+                     'story_photo_2': '', 'story_photo_3': '', 'story_photo_4': ''})
+        (work / 'content/sections.json').write_text(json.dumps(sample_sections(builder), ensure_ascii=False), encoding='utf-8')
+    temporary, work = build_fixture(builder, broken, posts=False)
+    with temporary:
+        home = (work / '_site/index.html').read_text(encoding='utf-8')
+        assert not (work / '_site/assets/og-cover.jpg').exists() and 'og:image:width' not in home and 'summary_large_image' not in home
+        assert 'og:image" content="https://example.com/media/test-cover.webp"' in home and 'name="twitter:card" content="summary"' in home, 'without a preview image the photograph itself is named'
+        assert ' width=' not in re.search(r'<img data-slot="1"[^>]*>', home).group(0), 'a file that cannot be read gets no invented size'
+
+    # photographs: soft corners and a light shadow (like the quotation panels), the first screen and the wide strip stay without a frame
+    css = (ROOT / '_site/assets/site.css').read_text(encoding='utf-8')
+    assert re.search(r'\.b-photos \.photo \{ border-radius:var\(--r-panel\); box-shadow:var\(--photo-float\); \}', css), 'block photographs: the corners of the quotation panels and a light shadow'
+    assert '#lightbox img { border-radius:var(--r-panel); }' in css
+    for plain in ('.hero-photo {', '.b-band .photo {'):
+        assert 'border-radius' not in css[css.index(plain):].split('}', 1)[0], f'{plain} dissolves into the page: no frame'
+    for ring in ('calm-pair', 'lead-small'):
+        rule = re.search(r'\.b-photos\[data-comp="' + ring + r'"\] \.photo:nth-child\(2\) \{ grid-column:6 / -1;[^}]*\}', css).group(0)
+        assert 'var(--c-bg,transparent),var(--photo-float)' in rule, f'{ring} on phones: the ring around the overlapping photograph and the shadow'
+
+
 def main():
     builder = load_builder()
     check_consistency(builder)
@@ -1158,6 +1256,7 @@ def main():
     check_owner_feedback(builder)
     check_owner_controls(builder)
     check_rich_text(builder)
+    check_seo_photos(builder)
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
     def full(work, site):
