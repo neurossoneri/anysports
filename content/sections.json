@@ -11,7 +11,7 @@
           "heading": "Because I believe that intuition is essential in sport.",
           "body": "[font=opensans]Throughout their careers, athletes often experience a powerful connection to their intuition. At least once, every competitive athlete has experienced moments when they instinctively know something that goes beyond the logical next step, their coach’s instructions or an agreed strategy.[/font]",
           "note": "",
-          "look": "plain"
+          "look": "dropcap"
         },
         {
           "type": "quote",
@@ -45,7 +45,7 @@
         {
           "type": "text",
           "heading": "",
-          "body": "[font=lora][size=sm]A space to develop the ability to connect with yourself, listen to your inner voice and recognise what it is saying.[/size][/font]",
+          "body": "[font=lora]A space to develop the ability to connect with yourself, listen to your inner voice and recognise what it is saying.[/font]",
           "note": "",
           "look": "lead"
         },
