@@ -65,34 +65,34 @@
         {
           "type": "text",
           "heading": "",
-          "body": "[font=raleway][size=sm]A space to develop the ability to connect with yourself, listen to your inner voice and recognise what it is saying.[/size][/font]",
+          "body": "[font=base][size=sm]A space to develop the ability to connect with yourself, listen to your inner voice and recognise what it is saying.[/size][/font]",
           "note": "",
           "look": "lead"
         },
         {
           "type": "text",
-          "heading": "Intuition speaks differently to everyone",
-          "body": "For some, intuition comes as a gut feeling or a sensation in the heart; for others, as a voice, an image, a sudden flash of insight, or even something that appears in a dream. Sometimes it arrives instantly and clearly; at other times it is subtle and needs silence, patience and attention to notice.",
+          "heading": "[font=opensans]Intuition speaks differently to everyone[/font]",
+          "body": "[font=opensans]For some, intuition comes as a gut feeling or a sensation in the heart; for others, as a voice, an image, a sudden flash of insight, or even something that appears in a dream. Sometimes it arrives instantly and clearly; at other times it is subtle and needs silence, patience and attention to notice.[/font]",
           "note": "",
           "look": "plain"
         },
         {
           "type": "text",
-          "heading": "Where we begin",
-          "body": "Our work begins with exploring what intuition means to you: how you naturally perceive it, how it shows up in different situations, and what helps you recognise its signals. You learn to notice, distinguish and interpret these messages, while developing the confidence to trust your own perceptions.\n\nAs with any new experience, curiosity, courage, openness and trust are essential. Above all, a willingness to explore, to experience something new, yet familiar. ",
+          "heading": "[font=opensans]Where we begin[/font]",
+          "body": "Our work begins with exploring what intuition means to you: how you naturally perceive it, how it shows up in different situations, and what helps you recognise its signals. You learn to notice, distinguish and interpret these messages, while developing the confidence to trust your own perceptions.\n\n[font=opensans]As with any new experience, curiosity, courage, openness and trust are essential. Above all, a willingness to explore something new, yet familiar.[/font]",
           "note": "",
           "look": "plain"
         },
         {
           "type": "text",
-          "heading": "Inner alignment and trust",
-          "body": "Intuition connects us with our inner knowledge, shaped by our experiences, perceptions, feelings and sensations. Yet this journey is not only about understanding and answers. It is also about learning to accept the unknown, the unpredictable and the uncontrollable. Letting go of any boundaries that stand in the way of your inner alignment and contentment is one of the key skills we practice.\n\nWhen we are doing what we love, we don't have to justify it to ourselves or others.",
+          "heading": "[font=opensans]Inner alignment and trust[/font]",
+          "body": "Intuition connects us with our inner knowledge, shaped by our experiences, perceptions, feelings and sensations. Yet this journey is not only about understanding and answers. It is also about learning to accept the unknown, the unpredictable and the uncontrollable. Letting go of any boundaries that stand in the way of your inner alignment and contentment is one of the key skills we practice.\n\n[font=opensans]When we are doing what we love, we don't have to justify it to ourselves or others.[/font]",
           "note": "",
           "look": "plain"
         },
         {
           "type": "quote",
-          "text": "Not everything in life can be understood through logic, nor does everything need to be.",
+          "text": "[font=opensans]Not everything in life can be understood through logic, nor does everything need to be.[/font]",
           "size": "auto"
         },
         {
