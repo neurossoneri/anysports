@@ -40,7 +40,7 @@
       "id": "sessions",
       "type": "text",
       "title": "Intuition sessions",
-      "layout": "rail-left",
+      "layout": "rail-right",
       "blocks": [
         {
           "type": "text",
