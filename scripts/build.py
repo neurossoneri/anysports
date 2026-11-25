@@ -622,6 +622,19 @@ def _opts(pairs):
 
 
 SLOT_OPTIONS = [['', '— нет —']] + [[n, f'Фото {n}'] for n in PLACE_SLOTS]
+# block-layout-v1: ширина, положение и выравнивание блоков «Текст» и «Цитата». Выбираются в панели; «auto» значит «как задано разделом».
+BLOCK_WIDTHS = (('auto', 'По умолчанию (как у раздела)'), ('narrow', 'Узкая: около трети экрана'), ('medium', 'Средняя: около 40% экрана'),
+                ('wide', 'Широкая: около половины экрана'), ('full', 'На всю колонку раздела'))
+BLOCK_POSITIONS = (('auto', 'По умолчанию'), ('left', 'У левого края колонки'), ('center', 'По центру колонки'), ('right', 'У правого края колонки'))
+BLOCK_ALIGNS = (('auto', 'По умолчанию'), ('left', 'По левому краю'), ('center', 'По центру'), ('right', 'По правому краю'))
+BLOCK_LAYOUT_ATTRS = (('width', 'data-w', BLOCK_WIDTHS), ('position', 'data-pos', BLOCK_POSITIONS), ('align', 'data-al', BLOCK_ALIGNS))
+BLOCK_LAYOUT_FIELDS = [
+    {'name': 'width', 'label': 'Ширина блока', 'type': 'select', 'options': _opts(BLOCK_WIDTHS), 'default': 'auto',
+     'hint': 'Размеры указаны для компьютера; на телефоне блок всегда на всю ширину экрана.'},
+    {'name': 'position', 'label': 'Где стоит блок в колонке раздела', 'type': 'select', 'options': _opts(BLOCK_POSITIONS), 'default': 'auto',
+     'hint': 'Заметно, когда блок уже колонки раздела: сначала выберите ширину.'},
+    {'name': 'align', 'label': 'Выравнивание текста', 'type': 'select', 'options': _opts(BLOCK_ALIGNS), 'default': 'auto'},
+]
 BLOCK_TYPES = {
     'text': {
         'label': 'Текст', 'add': 'Текст',
@@ -631,7 +644,7 @@ BLOCK_TYPES = {
             {'name': 'body', 'label': 'Текст', 'type': 'text', 'rich': 'full'},
             {'name': 'note', 'label': 'Мелкая приписка под текстом (необязательно)', 'type': 'text', 'rich': 'inline'},
             {'name': 'look', 'label': 'Оформление', 'type': 'select', 'options': _opts(TEXT_LOOKS), 'default': 'plain'},
-        ],
+        ] + BLOCK_LAYOUT_FIELDS,
     },
     'quote': {
         'label': 'Цитата', 'add': 'Цитата',
@@ -639,7 +652,7 @@ BLOCK_TYPES = {
         'fields': [
             {'name': 'text', 'label': 'Цитата', 'type': 'text', 'rich': 'inline'},
             {'name': 'size', 'label': 'Размер', 'type': 'select', 'options': _opts(QUOTE_SIZES), 'default': 'auto'},
-        ],
+        ] + BLOCK_LAYOUT_FIELDS,
     },
     'aside': {
         'label': 'Фраза', 'add': 'Фраза',
@@ -1058,11 +1071,22 @@ def quote_inner(text):
     return rich_inline(main) + (f'<span class="q-by">{rich_inline(chr(10).join(by))}</span>' if by else '')
 
 
+def layout_attrs(block):
+    """block-layout-v1: ширина, положение и выравнивание, выбранные для блока «Текст» или «Цитата», как атрибуты data-* (правила в templates/index.html). Без выбора ничего не пишется."""
+    out = ''
+    if block['type'] in ('text', 'quote'):
+        for key, attr, options in BLOCK_LAYOUT_ATTRS:
+            value = block.get(key, 'auto')
+            if value not in ('', 'auto') and value in [o[0] for o in options]:
+                out += f' {attr}="{value}"'
+    return out
+
+
 def render_block(block, label, ctx, in_rail):
     """HTML of one block, or '' when it is empty or has nothing to show. `label` is its number, like 4.2 (the same as in the dashboard)."""
     if not block or not block_has_content(block):
         return ''
-    kind, number = block['type'], f'data-blk="{label}"'
+    kind, number = block['type'], f'data-blk="{label}"' + layout_attrs(block)
     if kind == 'text':
         heading = f'<h3>{rich_inline(block["heading"].strip())}</h3>' if block['heading'].strip() else ''
         note = f'<p class="b-note">{rich_inline(block["note"].strip())}</p>' if block['note'].strip() else ''

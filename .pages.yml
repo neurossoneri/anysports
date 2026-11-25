@@ -334,6 +334,47 @@ content:
             label: Крупно
           - value: small
             label: Помельче
+      - name: width
+        label: Ширина блока (у Текста и Цитаты; на телефоне всегда во всю ширину)
+        type: select
+        options:
+          values:
+          - value: auto
+            label: По умолчанию (как у раздела)
+          - value: narrow
+            label: 'Узкая: около трети экрана'
+          - value: medium
+            label: 'Средняя: около 40% экрана'
+          - value: wide
+            label: 'Широкая: около половины экрана'
+          - value: full
+            label: На всю колонку раздела
+      - name: position
+        label: Где стоит блок в колонке раздела (заметно, когда блок уже колонки)
+        type: select
+        options:
+          values:
+          - value: auto
+            label: По умолчанию
+          - value: left
+            label: У левого края колонки
+          - value: center
+            label: По центру колонки
+          - value: right
+            label: У правого края колонки
+      - name: align
+        label: Выравнивание текста (у Текста и Цитаты)
+        type: select
+        options:
+          values:
+          - value: auto
+            label: По умолчанию
+          - value: left
+            label: По левому краю
+          - value: center
+            label: По центру
+          - value: right
+            label: По правому краю
       - name: photo
         label: Фото за фразой (необязательно) (номер 2–7 или файл media/…; удобнее выбирать в панели)
         type: string

@@ -1763,7 +1763,7 @@ function blockCard(sec, si, b, bi) {
   const spec = blockSpec(b.type), last = sec.blocks.length - 1, label = `${si + 1}.${bi + 1}`;
   const fields = spec.fields.filter(f => !f.showIf || Object.entries(f.showIf).every(([k, vals]) => vals.includes(b[k]))).map(f => f.type === 'crop' ? null : f.type === 'photo' ? photoWidget(sec, si, b, bi, f) : makeField({
     label: f.label, value: b[f.name] ?? f.default, type: f.type, options: f.options, rich: f.rich || '', kind: rtKind(b.type, f.name), redraw: (f.name === 'look' && !!spec.fields.some(x => x.showIf)) || f.name === 'comp',
-    hint: f.name === 'text' && (b.type === 'aside' || b.type === 'quote') ? 'Подпись: начните новую строку с тире, например «— Рик Рубин, The Creative Act». Она станет мельче и встанет отдельной строкой.' : '', onSet: val => { b[f.name] = val; } }));
+    hint: f.name === 'text' && (b.type === 'aside' || b.type === 'quote') ? 'Подпись: начните новую строку с тире, например «— Рик Рубин, The Creative Act». Она станет мельче и встанет отдельной строкой.' : (f.hint || ''), onSet: val => { b[f.name] = val; } }));
   const grip = gripButton(`Перетащить блок ${label}`);
   const pos = el('select', { class: 'pos', 'aria-label': `Положение блока ${label} в разделе`, onchange: e => moveBlock(sec, bi, Number(e.target.value)) },
     sec.blocks.map((_, k) => el('option', { value: String(k) }, '№ ' + (k + 1))));

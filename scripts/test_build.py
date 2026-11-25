@@ -1235,6 +1235,52 @@ def check_seo_photos(builder):
         assert 'var(--c-bg,transparent),var(--photo-float)' in rule, f'{ring} on phones: the ring around the overlapping photograph and the shadow'
 
 
+def check_block_layout(builder):
+    """block-layout-v1: ширина, положение и выравнивание блоков «Текст» и «Цитата» это настройки блока (панель); текст в разделе по центру той же ширины, что цитата.
+    Страница своя: проверка не зависит от того, что владелица написала в content/sections.json."""
+    expected = {'width': ['auto', 'narrow', 'medium', 'wide', 'full'], 'position': ['auto', 'left', 'center', 'right'], 'align': ['auto', 'left', 'center', 'right']}
+    for kind in ('text', 'quote'):
+        fields = {f['name']: f for f in builder.BLOCK_TYPES[kind]['fields']}
+        for name, values in expected.items():
+            assert name in fields and fields[name]['type'] == 'select' and fields[name]['default'] == 'auto', f'{kind}: setting {name} (default: as the section says)'
+            assert [o[0] for o in fields[name]['options']] == values, f'{kind}: the choices of {name}'
+        assert builder.default_block(kind)['width'] == 'auto', 'a new block starts with no width of its own'
+    for kind in ('aside', 'photos', 'band', 'themes'):
+        assert not set(expected) & {f['name'] for f in builder.BLOCK_TYPES[kind]['fields']}, f'{kind}: has its own layout, no text settings'
+
+    def text(**extra):
+        return {'type': 'text', 'heading': '', 'body': 'Words.', 'note': '', 'look': 'plain', **extra}
+    data = {'sections': [
+        {'id': 'story', 'type': 'text', 'title': 'Story', 'layout': 'centered', 'blocks': [
+            text(), text(width='narrow', position='center', align='center'),
+            {'type': 'quote', 'text': 'A quote.', 'size': 'auto', 'width': 'wide', 'align': 'right'},
+            text(width='huge', position='sideways', align='justify'), text(look='lead', width='full', position='left')]},
+        {'id': 'contact', 'type': 'contact'}, {'id': 'qa', 'type': 'qa'}]}
+
+    def mutate(work, site):
+        (work / 'content/sections.json').write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
+    temporary, work = build_fixture(builder, mutate, posts=False)
+    with temporary:
+        home = (work / '_site/index.html').read_text(encoding='utf-8')
+        css = (work / '_site/assets/site.css').read_text(encoding='utf-8')
+        schema = json.loads((work / '_site/admin/schema.json').read_text(encoding='utf-8'))
+        story = section_html(home, 'story')
+        tag = lambda n: re.search(r'<(?:div|blockquote) class="b [^"]*" data-blk="1\.' + str(n) + r'"[^>]*>', story).group(0)
+        assert not re.search(r'data-(?:w|pos|al)=', tag(1)), 'no choice, no attributes: the block is as the section sets it'
+        assert 'data-w="narrow" data-pos="center" data-al="center"' in tag(2), 'the three choices of a text block'
+        assert tag(3).startswith('<blockquote class="b b-quote pull"') and 'data-w="wide"' in tag(3) and 'data-al="right"' in tag(3) and 'data-pos' not in tag(3), 'the choices of a quote'
+        assert not re.search(r'data-(?:w|pos|al)=', tag(4)), 'a value the dashboard does not offer falls back to the default and never breaks the page'
+        assert 'data-w="full"' in tag(5) and 'data-pos="left"' in tag(5), 'a lead text takes the choices too'
+        assert 'block-layout-v1' in css and '.sec-centered .b-text p { max-width:none; }' in css, 'text in a centered section is as wide as the quote'
+        for rule in ('[data-w="narrow"]', '[data-w="medium"]', '[data-w="wide"]', '[data-w="full"]', '[data-pos="left"]', '[data-pos="center"]', '[data-pos="right"]', '[data-al="left"]', '[data-al="center"]', '[data-al="right"]'):
+            assert '.sec .blocks > .b' + rule in css, f'css for {rule}'
+        assert css.index('block-layout-v1') > css.index('.sec:not(.sec-centered) .b-text:not(.b-dropcap) p'), 'the layout rules come after the reading-text rules, so they win'
+        assert 'max-width:none' in re.search(r'\.pull \{([^}]*)\}', css).group(1), 'a quote has no limit of its own: the column is its width'
+        for kind in ('text', 'quote'):
+            fields = {f['name']: f for t in schema['page']['blockTypes'] if t['type'] == kind for f in t['fields']}
+            assert all(name in fields for name in expected), f'the dashboard form of {kind} has the three settings'
+
+
 def main():
     builder = load_builder()
     check_consistency(builder)
@@ -1257,6 +1303,7 @@ def main():
     check_owner_controls(builder)
     check_rich_text(builder)
     check_seo_photos(builder)
+    check_block_layout(builder)
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
     def full(work, site):

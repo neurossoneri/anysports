@@ -504,6 +504,20 @@
       .scroll-progress { animation:none!important; }
     }
       /* owner-feedback-v3 (маркер: патч уже применён) */
+    /* block-layout-v1 (маркер: патч уже применён). Ширина, положение и выравнивание блоков «Текст» и «Цитата» выбираются в панели (поля width, position, align). Без выбора блок выглядит как задано разделом. */
+    /* Обычный текст в разделе с одной колонкой по центру занимает всю колонку, как цитата рядом с ним: раньше его держал предел в 56 знаков, и он был вдвое уже цитаты. */
+    .sec-centered .b-text p { max-width:none; }
+    .sec .blocks > .b[data-w="narrow"] { max-width:min(28rem,100%); }
+    .sec .blocks > .b[data-w="medium"] { max-width:min(37rem,100%); }
+    .sec .blocks > .b[data-w="wide"] { max-width:min(46rem,100%); }
+    .sec .blocks > .b[data-w="full"] { max-width:100%; }
+    .sec .blocks > .b[data-w] p { max-width:none; }   /* когда ширину задал владелец, мерой служит сам блок, а не знаки в строке */
+    .sec .blocks > .b[data-pos="left"] { margin-inline:0 auto; }
+    .sec .blocks > .b[data-pos="center"] { margin-inline:auto; }
+    .sec .blocks > .b[data-pos="right"] { margin-inline:auto 0; }
+    .sec .blocks > .b[data-al="left"] { text-align:left; }
+    .sec .blocks > .b[data-al="center"] { text-align:center; }
+    .sec .blocks > .b[data-al="right"] { text-align:right; }
   /* richtext-v1: the styles of the text marks are put here by build.py */
     /*@@RICH-CSS@@*/
   </style>
