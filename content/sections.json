@@ -43,26 +43,6 @@
       "layout": "rail-left",
       "blocks": [
         {
-          "type": "photos",
-          "s1": "media/photo-20261107-125822-8.webp",
-          "s2": "",
-          "s3": "media/photo-2-20261029-092851.webp",
-          "place": "side",
-          "caption": "",
-          "alt": "Close-up portrait: part of a woman’s face, looking at the camera",
-          "f2": "",
-          "f3": "",
-          "zoom": "yes",
-          "comp": "single",
-          "f1": "50,68.7,1"
-        },
-        {
-          "type": "aside",
-          "text": "\"Faith is rewarded, perhaps, even more than talent or ability. ... We are required to believe in something that doesn't exist in order to allow it to come into being.\" \n— Rick Rubin, record producer",
-          "look": "panel",
-          "photo": ""
-        },
-        {
           "type": "text",
           "heading": "",
           "body": "[font=lora][size=sm]A space to develop the ability to connect with yourself, listen to your inner voice and recognise what it is saying.[/size][/font]",
@@ -85,7 +65,7 @@
         },
         {
           "type": "text",
-          "heading": "[font=opensans]Inner alignment and trust[/font]",
+          "heading": "[font=lora]Inner alignment and trust[/font]",
           "body": "[font=opensans]Intuition connects us with our inner knowledge, shaped by our experiences, perceptions, feelings and sensations. Yet this journey is not only about understanding and answers. It is also about learning to accept the unknown, the unpredictable and the uncontrollable. Letting go of any boundaries that stand in the way of your inner alignment and contentment is one of the key skills we practice.[/font]\n\n[font=opensans]When we are doing what we love, we don't have to justify it to ourselves or others.[/font]",
           "note": "",
           "look": "plain"
@@ -101,6 +81,26 @@
           "body": "These sessions are led intuitively and individually. There is no predefined programme designed for everyone. My approach is not based on scientific studies or established concepts, but neither does it seek to deny or exclude any particular perspective.\n\nIt is not psychological counselling or conventional mental training, though we may touch on some elements of those methods. Sessions normally unfold naturally, instinctively: your intuition will lead us to where your attention and awareness are most needed.",
           "note": "",
           "look": "panel"
+        },
+        {
+          "type": "photos",
+          "s1": "media/photo-20261107-125822-8.webp",
+          "s2": "",
+          "s3": "media/photo-2-20261029-092851.webp",
+          "place": "side",
+          "caption": "",
+          "alt": "Close-up portrait: part of a woman’s face, looking at the camera",
+          "f2": "",
+          "f3": "",
+          "zoom": "yes",
+          "comp": "single",
+          "f1": "50,68.7,1"
+        },
+        {
+          "type": "aside",
+          "text": "\"Faith is rewarded, perhaps, even more than talent or ability. ... We are required to believe in something that doesn't exist in order to allow it to come into being.\" \n— Rick Rubin, record producer",
+          "look": "panel",
+          "photo": ""
         },
         {
           "type": "themes",
