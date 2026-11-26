@@ -77,8 +77,8 @@
         },
         {
           "type": "text",
-          "heading": "How the sessions work",
-          "body": "These sessions are led intuitively and individually. There is no predefined programme designed for everyone. My approach is not based on scientific studies or established concepts, but neither does it seek to deny or exclude any particular perspective.\n\nIt is not psychological counselling or conventional mental training, though we may touch on some elements of those methods. Sessions normally unfold naturally, instinctively: your intuition will lead us to where your attention and awareness are most needed.",
+          "heading": "[font=lora]How the sessions work[/font]",
+          "body": "[font=montserrat]These sessions are led intuitively and individually. There is no predefined programme designed for everyone. My approach is not based on scientific studies or established concepts, but neither does it seek to deny or exclude any particular perspective.[/font]\n\n[font=montserrat]It is not psychological counselling or conventional mental training, though we may touch on some elements of those methods. Sessions normally unfold naturally, instinctively: your intuition will lead us to where your attention and awareness are most needed.[/font]",
           "note": "",
           "look": "panel"
         },
@@ -227,13 +227,13 @@
       "blocks": [
         {
           "type": "quote",
-          "text": "My name is Anna Manaeva. Although I am not an athlete myself, sport has always been part of my life.",
+          "text": "[font=base]My name is Anna Manaeva. Although I am not an athlete myself, sport has always been part of my life.[/font]",
           "size": "auto"
         },
         {
           "type": "text",
           "heading": "",
-          "body": "From joining grassroots sports clubs as a child to becoming a passionate sports fan and eventually working as a Competition Manager at one of the world’s largest sports organisations, my journey has taken me through many different sides of sport.\n\nDuring my ten years at FIFA, I contributed to the organisation of football World Cups, as well as numerous related events. Along the way, I met athletes at different stages of their careers, each with their own backgrounds, experiences, ambitions, and challenges. Through these encounters, I gradually developed a deeper interest in the person behind the athlete — their individual journey, their inner world, and the challenges that may remain unseen from the outside. Over time, I began to envision a space where athletes could find support beyond their sporting achievements.",
+          "body": "[font=base]From joining grassroots sports clubs as a child to becoming a passionate sports fan and eventually working as a Competition Manager at one of the world’s largest sports organisations, my journey has taken me through many different sides of sport.[/font]\n\n[font=base]During my ten years at FIFA, I contributed to the organisation of football World Cups, as well as numerous related events. Along the way, I met athletes at different stages of their careers, each with their own backgrounds, experiences, ambitions, and challenges. Through these encounters, I gradually developed a deeper interest in the person behind the athlete — their individual journey, their inner world, and the challenges that may remain unseen from the outside. Over time, I began to envision a space where athletes could find support beyond their sporting achievements.[/font]",
           "note": "",
           "look": "dropcap"
         },
@@ -253,16 +253,16 @@
         {
           "type": "text",
           "heading": "",
-          "body": "A few years ago, my own life took a turn that had been brewing within me for some time. I left what many would call a successful career without knowing what would come next. This gave me — or, honestly, pushed me into — the space to pause and look inward, to reflect on who I really am and what I truly want.\nI delved into psychology, body and energy practices, alternative medicine and healing approaches, as well as ancient philosophies. I explored my own perceptions and senses, experimented and gradually discovered new ways of understanding myself and the world around me.\nMost importantly, I started to embrace life as an exciting adventure to be experienced now, rather than a constant pursuit of security for tomorrow.\n\nI have always been intuitive. Unfortunately, my sensitivity wasn't appreciated and was often dismissed by family and teachers during my early years, so I never really learned to trust it.\nOver the past few years, however, I have managed to find my own voice beneath layers of outside noise. I have begun to trust myself more deeply, rely less on external validation and let go of the need for constant prediction and control.\n\n\n",
+          "body": "[font=base]A few years ago, my own life took a turn that had been brewing within me for some time. I left what many would call a successful career without knowing what would come next. This gave me — or, honestly, pushed me into — the space to pause and look inward, to reflect on who I really am and what I truly want.\nI delved into psychology, body and energy practices, alternative medicine and healing approaches, as well as ancient philosophies. I explored my own perceptions and senses, experimented and gradually discovered new ways of understanding myself and the world around me.\nMost importantly, I started to embrace life as an exciting adventure to be experienced now, rather than a constant pursuit of security for tomorrow.[/font]\n\n[font=base]I have always been intuitive. Unfortunately, my sensitivity wasn't appreciated and was often dismissed by family and teachers during my early years, so I never really learned to trust it.\nOver the past few years, however, I have managed to find my own voice beneath layers of outside noise. I have begun to trust myself more deeply, rely less on external validation and let go of the need for constant prediction and control.[/font]",
           "note": "",
           "look": "plain",
           "style": "1"
         },
         {
           "type": "quote",
-          "text": "Today, through the sessions I offer, I am bringing this idea of creating a supportive space for athletes to life. Guiding others in their search for self-trust, fulfilment, and happiness has become a meaningful part of my own journey.",
+          "text": "[font=base]Today, through the sessions I offer, I am bringing this idea of creating a supportive space for athletes to life. Guiding others in their search for self-trust, fulfilment, and happiness has become a meaningful part of my own journey.[/font]",
           "size": "auto",
-          "style": "1"
+          "style": "auto"
         },
         {
           "type": "photos",
