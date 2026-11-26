@@ -627,8 +627,16 @@ BLOCK_WIDTHS = (('auto', 'По умолчанию (как у раздела)'), 
                 ('wide', 'Широкая: около половины экрана'), ('full', 'На всю колонку раздела'))
 BLOCK_POSITIONS = (('auto', 'По умолчанию'), ('left', 'У левого края колонки'), ('center', 'По центру колонки'), ('right', 'У правого края колонки'))
 BLOCK_ALIGNS = (('auto', 'По умолчанию'), ('left', 'По левому краю'), ('center', 'По центру'), ('right', 'По правому краю'))
-BLOCK_LAYOUT_ATTRS = (('width', 'data-w', BLOCK_WIDTHS), ('position', 'data-pos', BLOCK_POSITIONS), ('align', 'data-al', BLOCK_ALIGNS))
+# text-styles-v1: готовые стили абзацев. «auto» = как задано разделом; 1–4 = один и тот же вид в любом разделе.
+BLOCK_STYLES = (('auto', 'По умолчанию (как задано разделом)'),
+                ('1', 'Стиль 1: основной текст (как в большей части сайта)'),
+                ('2', 'Стиль 2: книжный (с засечками, крупнее и ярче)'),
+                ('3', 'Стиль 3: акцентная цитата (с засечками, цветная)'),
+                ('4', 'Стиль 4: тихая заметка (мелкий, приглушённый)'))
+BLOCK_LAYOUT_ATTRS = (('style', 'data-st', BLOCK_STYLES), ('width', 'data-w', BLOCK_WIDTHS), ('position', 'data-pos', BLOCK_POSITIONS), ('align', 'data-al', BLOCK_ALIGNS))
 BLOCK_LAYOUT_FIELDS = [
+    {'name': 'style', 'label': 'Стиль абзацев', 'type': 'select', 'options': _opts(BLOCK_STYLES), 'default': 'auto',
+     'hint': 'Готовые варианты. «Стиль 1» это основной текст сайта: выберите его, чтобы блок не выделялся среди остального текста.'},
     {'name': 'width', 'label': 'Ширина блока', 'type': 'select', 'options': _opts(BLOCK_WIDTHS), 'default': 'auto',
      'hint': 'Размеры указаны для компьютера; на телефоне блок всегда на всю ширину экрана.'},
     {'name': 'position', 'label': 'Где стоит блок в колонке раздела', 'type': 'select', 'options': _opts(BLOCK_POSITIONS), 'default': 'auto',

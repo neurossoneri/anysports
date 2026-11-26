@@ -1281,6 +1281,50 @@ def check_block_layout(builder):
             assert all(name in fields for name in expected), f'the dashboard form of {kind} has the three settings'
 
 
+def check_text_styles(builder):
+    """text-styles-v1: «Стиль абзацев» это настройка блока «Текст» и «Цитата»; стили 1–4 одинаковы в любом разделе.
+    Страница своя: проверка не зависит от того, что владелица написала в content/sections.json."""
+    values = ['auto', '1', '2', '3', '4']
+    for kind in ('text', 'quote'):
+        fields = {f['name']: f for f in builder.BLOCK_TYPES[kind]['fields']}
+        assert 'style' in fields and fields['style']['type'] == 'select' and fields['style']['default'] == 'auto', f'{kind}: style setting'
+        assert [o[0] for o in fields['style']['options']] == values, f'{kind}: the presets'
+        assert builder.default_block(kind)['style'] == 'auto', 'a new block keeps the look of its section'
+    for kind in ('aside', 'photos', 'band', 'themes'):
+        assert 'style' not in {f['name'] for f in builder.BLOCK_TYPES[kind]['fields']}, f'{kind}: no text presets'
+
+    def text(**extra):
+        return {'type': 'text', 'heading': '', 'body': 'Words.', 'note': '', 'look': 'plain', **extra}
+    data = {'sections': [
+        {'id': 'story', 'type': 'text', 'title': 'Story', 'layout': 'centered', 'blocks': [
+            text(), text(style='1'), {'type': 'quote', 'text': 'A quote.', 'size': 'auto', 'style': '1'},
+            {'type': 'quote', 'text': 'Another.', 'size': 'auto', 'style': '3'}, text(style='9')]},
+        {'id': 'contact', 'type': 'contact'}, {'id': 'qa', 'type': 'qa'}]}
+
+    def mutate(work, site):
+        (work / 'content/sections.json').write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
+    temporary, work = build_fixture(builder, mutate, posts=False)
+    with temporary:
+        home = (work / '_site/index.html').read_text(encoding='utf-8')
+        css = (work / '_site/assets/site.css').read_text(encoding='utf-8')
+        schema = json.loads((work / '_site/admin/schema.json').read_text(encoding='utf-8'))
+        story = section_html(home, 'story')
+        tag = lambda n: re.search(r'<(?:div|blockquote) class="b [^"]*" data-blk="1\.' + str(n) + r'"[^>]*>', story).group(0)
+        assert 'data-st' not in tag(1), 'no choice, no attribute'
+        assert 'data-st="1"' in tag(2), 'a text block takes the preset'
+        assert tag(3).startswith('<blockquote class="b b-quote pull') and 'data-st="1"' in tag(3), 'a quote takes the preset too: it can look like the main text'
+        assert 'data-st="3"' in tag(4), 'preset 3'
+        assert 'data-st' not in tag(5), 'a preset the dashboard does not offer is ignored'
+        assert 'text-styles-v1' in css
+        for n in '1234':
+            assert f'.sec .blocks > .b[data-st="{n}"] p' in css, f'css of preset {n}'
+        assert '.sec .blocks > .b[data-st="1"], .sec .blocks > .b[data-st="1"] p { font:var(--type-read)' in css, 'style 1 is the main text of the site'
+        assert css.index('text-styles-v1') > css.index('.sec:not(.sec-centered) .b-text:not(.b-dropcap) p'), 'the presets come after the section rules, so they win'
+        for kind in ('text', 'quote'):
+            fields = {f['name']: f for t in schema['page']['blockTypes'] if t['type'] == kind for f in t['fields']}
+            assert 'style' in fields, f'the dashboard form of {kind} has the presets'
+
+
 def main():
     builder = load_builder()
     check_consistency(builder)
@@ -1304,6 +1348,7 @@ def main():
     check_rich_text(builder)
     check_seo_photos(builder)
     check_block_layout(builder)
+    check_text_styles(builder)
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
     def full(work, site):

@@ -518,6 +518,13 @@
     .sec .blocks > .b[data-al="left"] { text-align:left; }
     .sec .blocks > .b[data-al="center"] { text-align:center; }
     .sec .blocks > .b[data-al="right"] { text-align:right; }
+    /* text-styles-v1 (маркер: патч уже применён). Готовые стили абзацев для блоков «Текст» и «Цитата», выбираются в панели (поле style, атрибут data-st). Без выбора блок выглядит как задано разделом. */
+    /* Стиль 1 = основной текст сайта (--type-read: тот же вид, что у текста в «Intuition sessions»). */
+    .sec .blocks > .b[data-st="1"], .sec .blocks > .b[data-st="1"] p { font:var(--type-read); letter-spacing:0; color:var(--c-muted); }
+    .sec .blocks > .b[data-st="2"], .sec .blocks > .b[data-st="2"] p { font:var(--type-body); letter-spacing:0; color:var(--c-text); }
+    .sec .blocks > .b[data-st="3"], .sec .blocks > .b[data-st="3"] p { font:var(--type-quote-long); letter-spacing:-.012em; color:var(--c-a); }
+    .sec .blocks > .b[data-st="4"], .sec .blocks > .b[data-st="4"] p { font:400 clamp(.9rem,1.1vw,.98rem)/1.7 var(--sans); letter-spacing:0; color:var(--c-muted); opacity:.92; }
+    .sec .blocks > .pull[data-st="1"], .sec .blocks > .pull[data-st="2"], .sec .blocks > .pull[data-st="4"] { margin-top:clamp(16px,2vw,24px); margin-bottom:0; }   /* цитата в виде обычного текста стоит с теми же отступами, что текст */
   /* richtext-v1: the styles of the text marks are put here by build.py */
     /*@@RICH-CSS@@*/
   </style>
