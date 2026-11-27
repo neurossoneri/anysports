@@ -45,7 +45,7 @@
         {
           "type": "text",
           "heading": "",
-          "body": "[font=lora]A space to develop the ability to connect with yourself, listen to your inner voice and recognise what it is saying.[/font]",
+          "body": "[font=lora][size=lg]A space to reconnect with your inner guidance, recognise how intuition communicates with you and develop greater trust in your own perceptions.[/size][/font]",
           "note": "",
           "look": "lead"
         },
@@ -159,6 +159,17 @@
           "place": "side",
           "caption": "",
           "alt": ""
+        },
+        {
+          "type": "text",
+          "heading": "",
+          "body": "[font=lora][size=lg]A supportive space to step back, explore what is happening within you and reconnect with what feels meaningful and authentic.[/size][/font]",
+          "note": "",
+          "look": "plain",
+          "style": "auto",
+          "width": "auto",
+          "position": "auto",
+          "align": "auto"
         },
         {
           "type": "text",
