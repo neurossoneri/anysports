@@ -1325,6 +1325,20 @@ def check_text_styles(builder):
             assert 'style' in fields, f'the dashboard form of {kind} has the presets'
 
 
+def check_admin_look():
+    """docs-look-v1: панель в духе Google Docs / Drive 2026. Проверяем решения по дизайну, а не содержимое сайта."""
+    admin = (ROOT / 'admin/index.html').read_text(encoding='utf-8')
+    assert 'docs-look-v1' in admin and '--blue:#0b57d0' in admin and '--bg:#f9fbfd' in admin, 'palette: blue accent on a cool light background'
+    assert 'backdrop-filter' not in admin, 'dashboard: no blur effects'
+    assert '.tabs{display:flex' in admin and 'border-radius:999px' in admin, 'tabs: a pill bar, like the toolbar in Docs'
+    for tab in ('photos', 'texts', 'privacy', 'requests', 'settings'):
+        assert f'.tabs [data-tab={tab}]{{--ic:url(' in admin, f'tab icon: {tab}'
+    assert '.brand::before' in admin and 'rel="icon"' in admin and 'name="theme-color"' in admin, 'brand mark and favicon'
+    assert '.save{position:fixed' in admin and 'border-radius:28px' in admin, 'the save bar is a floating rounded bar'
+    assert 'button.btn{' in admin or 'button.btn,' in admin, 'filled pill buttons'
+    assert admin.count('fonts.googleapis') == 1, 'only the rich-text editor loads web fonts'
+
+
 def main():
     builder = load_builder()
     check_consistency(builder)
@@ -1349,6 +1363,7 @@ def main():
     check_seo_photos(builder)
     check_block_layout(builder)
     check_text_styles(builder)
+    check_admin_look()
 
     # Full-featured build: photos, contacts, form, published notes, a blank FAQ slot and hostile copy.
     def full(work, site):
