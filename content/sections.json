@@ -86,7 +86,7 @@
           "type": "photos",
           "s1": "media/photo-20261107-125822-8.webp",
           "s2": "",
-          "s3": "media/photo-2-20261029-092851.webp",
+          "s3": "",
           "place": "side",
           "caption": "",
           "alt": "Close-up portrait: part of a woman’s face, looking at the camera",
@@ -283,10 +283,10 @@
           "place": "inline",
           "caption": "",
           "alt": "Recent photographs",
-          "comp": "trio",
-          "f2": "50,79.5,1",
+          "comp": "auto",
+          "f2": "50,87.9,1",
           "f3": "50,100,1",
-          "f1": "27.3,44.2,1.3"
+          "f1": ""
         }
       ]
     },
